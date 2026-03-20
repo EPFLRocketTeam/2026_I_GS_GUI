@@ -7,55 +7,42 @@ const STATUS_BADGE = {
   waiting: { label: "waiting", cls: "badge-syncing" },
 };
 
-function RadioCard({ radio, index, readOnly = false, onChange, onPinChange, onAddPin, onRemovePin, onLoad, onRemove }) {
+function RadioCard({ radio, index, onConfigChange, onStructChange, onStructParse, onFieldChange, onRemove }) {
   const badge = STATUS_BADGE[radio.status] ?? STATUS_BADGE.offline;
-  const pins = radio.pins ?? [];
 
   return (
+    
     <div className="radio-card">
       <div className="card-header">
         <span className="card-title">Radio {radio.uid}</span>
         <span className={`badge ${badge.cls}`}>{badge.label}</span>
+        <button className="btn btn-danger" onClick={() => onRemove?.(index)}>✕</button>
       </div>
 
-      <div className="field">
-        <label>ID</label>
-        <input value={radio.idVal} onChange={e => onChange?.(index, "idVal", e.target.value)} readOnly={readOnly} />
+      <div className="section-title">Config Parameters</div>
+      {(radio.configParams?? []).map((param, pIdx) => (
+      <div className="field" key={param.key}>
+        <label>{param.label} <span className="type-tag">{param.type}</span></label>
+        <input 
+          value={param.value } 
+          onChange={e => onConfigChange?.(index, pIdx, e.target.value)} 
+          placeholder={param.type}/>
       </div>
-
-      {pins.map((pin, pinIdx) => (
-        <div className="field pin-row" key={pin.key + pinIdx}>
-          <div className="pin-labels">
-            <input className="pin-label-input" value={pin.label} onChange={e => onPinChange?.(index, pinIdx, "label", e.target.value)} placeholder="Label" readOnly={readOnly} />
-            <input className="pin-unit-input"  value={pin.unit}  onChange={e => onPinChange?.(index, pinIdx, "unit",  e.target.value)} placeholder="Unit" readOnly={readOnly} />
-            {pin.type && <span className="pin-type">({pin.type})</span>}
-          </div>
-          <div className="pin-value-row">
-            <input value={pin.value} onChange={e => onPinChange?.(index, pinIdx, "value", e.target.value)} placeholder="Value" readOnly={readOnly} />
-            {!readOnly && <button className="btn-remove-pin" onClick={() => onRemovePin?.(index, pinIdx)}>−</button>}
-          </div>
-        </div>
       ))}
 
-      {!readOnly && <button className="btn-add-pin" onClick={() => onAddPin?.(index)}>+ add pin</button>}
-
+      <div className="section-title">Data Structure</div>
+            <textarea
+              className="struct-textarea"
+              placeholder={"Paste your C struct body here, e.g.:\nuint32_t packet_nbr;\nuint16_t altitude;"}
+              value={radio.structText ?? ""}
+              onChange={e => onStructChange?.(index, e.target.value)}
+            />
+            <button className="btn btn-parse" onClick={() => onStructParse?.(index)}>
+              Parse struct
+            </button>
       {radio.errors?.map(err => (
-        <div className="warn-box" key={err}>▲ {err}</div>
-      ))}
-
-      {!readOnly && (
-        <div className="card-footer">
-          <button className="btn" onClick={() => onLoad?.(index)}>Load</button>
-          <button className="btn btn-danger" onClick={() => onRemove?.(index)}>✕</button>
-        </div>
-      )}
-
-      {radio.hex_data && (
-        <div className="field">
-          <label>HEX Data</label>
-          <textarea value={radio.hex_data} readOnly style={{ width: '100%', fontFamily: 'monospace', fontSize: '12px' }} />
-        </div>
-      )}
+              <div className="warn-box" key={err}>▲ {err}</div>
+            ))}
     </div>
   );
 }

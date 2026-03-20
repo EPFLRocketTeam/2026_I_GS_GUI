@@ -1,14 +1,25 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import "./radioConfig.css";
 import RadioCard from "../../components/radioCard/radioCard";
 import useRadioSocket from "../../sockets/radio/useRadioSocket";
-import { validate, DEFAULT_RADIOS, downloadConfig, loadConfig } from "./radioUtils";
-import { createNewRadio } from "./radioUtils";
+import RocketDataPanel from "../../components/rocketDataPanel/rocketDataPanel";
+import { 
+  validate, DEFAULT_RADIOS, downloadConfig, loadConfig, handleAdd,
+  handleConfigChange, handleStructChange, handleStructParse, handleRemove,
+  handleFieldChange
+} from "./radioUtils";
 
 function RadioBoard() {
   const [radios, setRadios] = useState(DEFAULT_RADIOS);
   const { lastUpdated, isConnected, lastReceived } = useRadioSocket("ws://127.0.0.1:8001/ws/radio/");
-  let nextId = useRef(DEFAULT_RADIOS.length + 1);
+  let nextId = { current: Math.max(...DEFAULT_RADIOS.map(r => r.uid)) + 1 };
+
+  // Context menu state
+  const [ctxMenu, setCtxMenu] = useState(null); // { x, y, radioUid }
+  // Panel state
+  const [panelRadioUid, setPanelRadioUid] = useState(null);
+
+  const panelRadio = radios.find(r => r.uid === panelRadioUid) ?? null;
 
   useEffect(() => {
     if (lastReceived && Array.isArray(lastReceived)) {
@@ -27,16 +38,16 @@ function RadioBoard() {
     }
   }, [lastReceived]);
 
-  const handleAdd = () => {
-    const newRadio = createNewRadio(nextId.current);
-    nextId.current += 1;
-    setRadios(prev => validate([...prev, newRadio]));
-  };
+  useEffect(() => {
+    const close = () => setCtxMenu(null);
+    window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
+  }, []);
 
-  const handleRemove = (uid) => {
-    setRadios(prev => validate(prev.filter(r => r.uid !== uid)));
+    const handleContextMenu = (e, radioUid) => {
+    e.preventDefault();
+    setCtxMenu({ x: e.clientX, y: e.clientY, radioUid });
   };
-
 
   return (
     <div className="radio-page">
@@ -53,18 +64,52 @@ function RadioBoard() {
       </div>
       <div className="cards-wrap">
         {radios.map((r, i) => (
-          <RadioCard
-            key={r.uid}
-            radio={r}
-            index={i}
-            readOnly={true}
-            onRemove={() => handleRemove(r.uid)}
-          />
+          <div key={r.uid} onContextMenu={e => handleContextMenu(e, r.uid)}>
+            <RadioCard
+              key={r.uid}
+              radio={r}
+              index={i}
+              onConfigChange={(index, paramIdx, value) => handleConfigChange(index, paramIdx, value, setRadios)}
+              onStructChange={(index, text) => handleStructChange(index, text, setRadios)}
+              onStructParse = {(index) => {handleStructParse(index, setRadios); setPanelRadioUid(radios[index].uid)}}
+              onFieldChange={(index, fieldIdx, value) => handleFieldChange(index, fieldIdx, value, setRadios)}
+              onRemove = {(index) => handleRemove(index, setRadios)}
+            />
+          </div>
         ))}
-        <button className="add-btn" onClick={handleAdd}>+</button>
+        <button className="add-btn" onClick={() => handleAdd(nextId, setRadios)}>+</button>
       </div>
+        {ctxMenu && (
+        <ul
+          className="ctx-menu"
+          style={{ top: ctxMenu.y, left: ctxMenu.x }}
+          onClick={e => e.stopPropagation()}
+        >
+          <li onClick={() => { setPanelRadioUid(ctxMenu.radioUid); setCtxMenu(null); }}>
+            👁 View Rocket Data
+          </li>
+        </ul>
+      )}
+
+      {/* ── Sliding panel ── */}
+      {panelRadio && (
+        <RocketDataPanel
+          radio={panelRadio}
+          onClose={() => setPanelRadioUid(null)}
+          onFieldChange={(fieldIdx, value) =>
+            handleFieldChange(
+              radios.findIndex(r => r.uid === panelRadioUid),
+              fieldIdx,
+              value,
+              setRadios
+            )
+          }
+        />
+      )}
+      
     </div>
   );
 }
+
 
 export default RadioBoard;
