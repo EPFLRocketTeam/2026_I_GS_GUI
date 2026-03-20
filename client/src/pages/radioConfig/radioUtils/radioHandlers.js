@@ -58,7 +58,7 @@ export const handleAddConfigParam = (radioIdx, setRadios) => {
     updated[radioIdx] = {
       ...updated[radioIdx],
       configParams: [
-        ...updated[radioIdx].configParams,
+        ...(updated[radioIdx].configParams ?? []),
         { key: Date.now().toString(), label: "", type: "", value: "" }
       ]
     };

@@ -3,8 +3,9 @@ export const validate = (radios) =>
 
 export const parseStruct = (structText) => {
   const lines = structText
-    .replace(/\/\/[^\n]*/g, "")
-    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/\/\/[^\n]*/g, "")     
+    .replace(/\/\*[\s\S]*?\*\//g, "") 
+    .replace(/[{}]/g, "")   
     .split(";")
     .map(s => s.trim())
     .filter(Boolean);

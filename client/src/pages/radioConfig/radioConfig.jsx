@@ -6,7 +6,8 @@ import RocketDataPanel from "../../components/rocketDataPanel/rocketDataPanel";
 import { 
   validate, DEFAULT_RADIOS, downloadConfig, loadConfig, handleAdd,
   handleConfigChange, handleStructChange, handleStructParse, handleRemove,
-  handleFieldChange
+  handleFieldChange, handleConfigLabelChange, handleConfigTypeChange, handleConfigKeyChange,
+  handleAddConfigParam, handleRemoveConfigParam,
 } from "./radioUtils";
 
 function RadioBoard() {
@@ -71,6 +72,11 @@ function RadioBoard() {
               onStructParse = {(index) => {handleStructParse(index, setRadios); setPanelRadioUid(radios[index].uid)}}
               onFieldChange={(index, fieldIdx, value) => handleFieldChange(index, fieldIdx, value, setRadios)}
               onRemove = {(index) => handleRemove(index, setRadios)}
+              onConfigLabelChange={(index, pIdx, value) => handleConfigLabelChange(index, pIdx, value, setRadios)}
+              onConfigTypeChange={(index, pIdx, value) => handleConfigTypeChange(index, pIdx, value, setRadios)}
+              onConfigKeyChange={(index, pIdx, value) => handleConfigKeyChange(index, pIdx, value, setRadios)}
+              onAddConfigParam={(index) => handleAddConfigParam(index, setRadios)}
+              onRemoveConfigParam={(index, pIdx) => handleRemoveConfigParam(index, pIdx, setRadios)}
             />
           </div>
         ))}

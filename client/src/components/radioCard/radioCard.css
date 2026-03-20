@@ -11,10 +11,6 @@
 .field input:focus { outline: none; border-color: #666; }
 .warn-box { background: #422006; border: 1px solid #854d0e; border-radius: 6px; padding: 6px 8px; font-size: 12px; color: #fbbf24; }
 .card-footer { display: flex; gap: 6px; margin-top: 4px; }
-.btn { padding: 5px 12px; font-size: 13px; border: 1px solid #444; border-radius: 6px; background: #222; color: #fff; cursor: pointer; flex: 1; }
-.btn:hover { background: #333; }
-.btn-danger { border-color: #7f1d1d; color: #f87171; flex: 0; }
-.btn-danger:hover { background: #450a0a; }
 .pin-row { gap: 4px; }
 .pin-labels { display: flex; gap: 4px; align-items: center; }
 .pin-label-input { flex: 2; }
@@ -22,7 +18,84 @@
 .pin-type { font-size: 10px; color: #666; font-weight: 500; }
 .pin-value-row { display: flex; gap: 4px; }
 .pin-value-row input { flex: 1; }
+.config-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.config-table th {
+  text-align: left;
+  padding: 3px 4px;
+  color: #666;
+  font-weight: 500;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.config-table td {
+  padding: 2px 3px;
+  vertical-align: middle;
+}
+
+.table-input {
+  width: 100%;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 4px;
+  color: #ccc;
+  padding: 2px 5px;
+  font-size: 11px;
+  box-sizing: border-box;
+}
+
+.table-input:focus {
+  outline: none;
+  border-color: #555;
+}
+
+.param-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.param-block {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.param-top-row {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.param-label-input {
+  flex: 2;
+}
+
+.param-type-input {
+  flex: 1;
+}
+
+.param-value-input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.btn { padding: 5px 12px; font-size: 13px; border: 1px solid #444; border-radius: 6px; background: #222; color: #fff; cursor: pointer; }
+.btn:hover { background: #333; }
+.btn-danger { border-color: #7f1d1d; color: #f87171; background: transparent; cursor: pointer; }
+.btn-danger:hover { background: #450a0a; }
 .btn-remove-pin { padding: 4px 8px; background: transparent; border: 1px solid #7f1d1d; color: #f87171; border-radius: 6px; cursor: pointer; font-size: 14px; }
 .btn-remove-pin:hover { background: #450a0a; }
 .btn-add-pin { background: transparent; border: 1px dashed #444; color: #888; border-radius: 6px; padding: 4px 8px; font-size: 12px; cursor: pointer; width: 100%; }
 .btn-add-pin:hover { border-color: #666; color: #fff; }
+.btn-remove-param { background: none; border: none; color: #555; cursor: pointer; font-size: 16px; padding: 0 2px; line-height: 1; }
+.btn-remove-param:hover { color: #f87171; }
+.btn-add-param { background: transparent; border: 1px dashed #444; color: #888; border-radius: 6px; padding: 4px 8px; font-size: 12px; cursor: pointer; width: 100%; }
+.btn-add-param:hover { border-color: #888; color: #fff; }
+.btn-parse { width: 100%; padding: 5px; font-size: 12px; border: 1px solid #444; border-radius: 6px; background: #222; color: #fff; cursor: pointer; }
+.btn-parse:hover { background: #333; }

@@ -7,7 +7,9 @@ const STATUS_BADGE = {
   waiting: { label: "waiting", cls: "badge-syncing" },
 };
 
-function RadioCard({ radio, index, onConfigChange, onStructChange, onStructParse, onFieldChange, onRemove }) {
+function RadioCard({ radio, index, onConfigChange, onStructChange, onStructParse, onFieldChange, onRemove,
+  onConfigKeyChange, onConfigLabelChange, onConfigTypeChange, onAddConfigParam, onRemoveConfigParam, onFieldLabelChange, onFieldTypeChange  
+ }) {
   const badge = STATUS_BADGE[radio.status] ?? STATUS_BADGE.offline;
 
   return (
@@ -20,15 +22,33 @@ function RadioCard({ radio, index, onConfigChange, onStructChange, onStructParse
       </div>
 
       <div className="section-title">Config Parameters</div>
-      {(radio.configParams?? []).map((param, pIdx) => (
-      <div className="field" key={param.key}>
-        <label>{param.label} <span className="type-tag">{param.type}</span></label>
-        <input 
-          value={param.value } 
-          onChange={e => onConfigChange?.(index, pIdx, e.target.value)} 
-          placeholder={param.type}/>
-      </div>
-      ))}
+
+        {(radio.configParams ?? []).map((param, pIdx) => (
+        <div className="param-block" key={param.key + pIdx}>
+          <div className="param-top-row">
+            <input
+              className="table-input param-label-input"
+              value={param.label}
+              onChange={e => onConfigLabelChange?.(index, pIdx, e.target.value)}
+              placeholder="name"
+            />
+            <input
+              className="table-input param-type-input"
+              value={param.type}
+              onChange={e => onConfigTypeChange?.(index, pIdx, e.target.value)}
+              placeholder="type"
+            />
+            <button className="btn-remove-param" onClick={() => onRemoveConfigParam?.(index, pIdx)}>−</button>
+          </div>
+          <input
+            className="table-input param-value-input"
+            value={param.value}
+            onChange={e => onConfigChange?.(index, pIdx, e.target.value)}
+            placeholder="value"
+          />
+        </div>
+        ))}
+      <button className="btn-add-param" onClick={() => onAddConfigParam?.(index)}>+ add parameter</button>
 
       <div className="section-title">Data Structure</div>
             <textarea
