@@ -14,11 +14,8 @@ function RadioBoard() {
   const { lastUpdated, isConnected, lastReceived } = useRadioSocket("ws://127.0.0.1:8001/ws/radio/");
   let nextId = { current: Math.max(...DEFAULT_RADIOS.map(r => r.uid)) + 1 };
 
-  // Context menu state
-  const [ctxMenu, setCtxMenu] = useState(null); // { x, y, radioUid }
-  // Panel state
+  const [ctxMenu, setCtxMenu] = useState(null); 
   const [panelRadioUid, setPanelRadioUid] = useState(null);
-
   const panelRadio = radios.find(r => r.uid === panelRadioUid) ?? null;
 
   useEffect(() => {
@@ -91,7 +88,6 @@ function RadioBoard() {
         </ul>
       )}
 
-      {/* ── Sliding panel ── */}
       {panelRadio && (
         <RocketDataPanel
           radio={panelRadio}
