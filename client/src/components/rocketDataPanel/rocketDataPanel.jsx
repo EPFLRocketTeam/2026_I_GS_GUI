@@ -1,32 +1,17 @@
 import { useRef, useState } from "react";
 import "./rocketDataPanel.css";
 
-function RocketDataPanel({ radio, onClose, onFieldChange }) {
+function RocketDataPanel({ radio, onClose, onFieldChange, onFieldLabelChange, onFieldTypeChange }) {
   const dragOffset = useRef({ x: 0, y: 0 });
   const panelRef = useRef(null);
   const [pos, setPos] = useState({ x: window.innerWidth - 380, y: 80 });
   const [dragging, setDragging] = useState(false);
 
   const onMouseDown = (e) => {
-    dragOffset.current = {
-      x: e.clientX - pos.x,
-      y: e.clientY - pos.y,
-    };
+    dragOffset.current = { x: e.clientX - pos.x, y: e.clientY - pos.y };
     setDragging(true);
-
-    const onMouseMove = (e) => {
-      setPos({
-        x: e.clientX - dragOffset.current.x,
-        y: e.clientY - dragOffset.current.y,
-      });
-    };
-
-    const onMouseUp = () => {
-      setDragging(false);
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
-    };
-
+    const onMouseMove = (e) => setPos({ x: e.clientX - dragOffset.current.x, y: e.clientY - dragOffset.current.y });
+    const onMouseUp = () => { setDragging(false); window.removeEventListener("mousemove", onMouseMove); window.removeEventListener("mouseup", onMouseUp); };
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
   };
@@ -51,6 +36,11 @@ function RocketDataPanel({ radio, onClose, onFieldChange }) {
           <p className="rdp-empty">No struct parsed yet. Paste and parse a struct first.</p>
         ) : (
           <table className="rdp-table">
+            <colgroup>
+                <col />
+                <col />
+                <col />
+            </colgroup>
             <thead>
               <tr>
                 <th>Field</th>
@@ -61,8 +51,22 @@ function RocketDataPanel({ radio, onClose, onFieldChange }) {
             <tbody>
               {radio.structFields.map((field, fIdx) => (
                 <tr key={field.key + fIdx}>
-                  <td>{field.label}</td>
-                  <td><span className="type-tag">{field.type}</span></td>
+                  <td>
+                    <input
+                      className="rdp-input"
+                      value={field.label}
+                      onChange={e => onFieldLabelChange?.(fIdx, e.target.value)}
+                      placeholder="field"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="rdp-input rdp-type-input"
+                      value={field.type}
+                      onChange={e => onFieldTypeChange?.(fIdx, e.target.value)}
+                      placeholder="type"
+                    />
+                  </td>
                   <td>
                     <input
                       className="rdp-input"

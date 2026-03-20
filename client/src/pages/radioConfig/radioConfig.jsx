@@ -7,7 +7,7 @@ import {
   validate, DEFAULT_RADIOS, downloadConfig, loadConfig, handleAdd,
   handleConfigChange, handleStructChange, handleStructParse, handleRemove,
   handleFieldChange, handleConfigLabelChange, handleConfigTypeChange, handleConfigKeyChange,
-  handleAddConfigParam, handleRemoveConfigParam,
+  handleAddConfigParam, handleRemoveConfigParam, handleFieldLabelChange, handleFieldTypeChange
 } from "./radioUtils";
 
 function RadioBoard() {
@@ -106,6 +106,10 @@ function RadioBoard() {
               setRadios
             )
           }
+          onFieldLabelChange={(fieldIdx, value) => 
+            handleFieldLabelChange(radios.findIndex(r => r.uid === panelRadioUid), fieldIdx, value, setRadios)}
+          onFieldTypeChange={(fieldIdx, value) => 
+            handleFieldTypeChange(radios.findIndex(r => r.uid === panelRadioUid), fieldIdx, value, setRadios)}
         />
       )}
       
