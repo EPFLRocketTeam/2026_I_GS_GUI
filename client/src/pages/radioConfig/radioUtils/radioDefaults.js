@@ -12,14 +12,18 @@ export const RADIO_CONFIG_PARAMS = [
   { key: "send_mode",    label: "Send Mode",       type: "bool",   value: "false" },
 ];
 
-export const createNewRadio = (nextId) => ({
-  uid: nextId,
-  status: "offline",
-  saved: false,
-  configParams: RADIO_CONFIG_PARAMS.map(p => ({ ...p })),
-  structText: "",
-  structFields: [],
-});
+export const createNewRadio = (nextIdRef) => {
+  const uid = nextIdRef.current;
+  nextIdRef.current += 1;
+  return {
+    uid,
+    status: "offline",
+    saved: false,
+    configParams: RADIO_CONFIG_PARAMS.map(p => ({ ...p })),
+    structText: "",
+    structFields: [],
+  }
+};
 
 export const DEFAULT_RADIOS = validate([
   {

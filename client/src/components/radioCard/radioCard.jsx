@@ -7,8 +7,9 @@ const STATUS_BADGE = {
   waiting: { label: "waiting", cls: "badge-syncing" },
 };
 
-function RadioCard({ radio, index, onConfigChange, onStructChange, onStructParse, onFieldChange, onRemove,
-  onConfigKeyChange, onConfigLabelChange, onConfigTypeChange, onAddConfigParam, onRemoveConfigParam, onFieldLabelChange, onFieldTypeChange  
+function RadioCard({ radio, index, onConfigChange, onStructChange, onStructParse,
+   onRemove, onConfigLabelChange, onConfigTypeChange, 
+   onAddConfigParam, onRemoveConfigParam, onUidChange, isDuplicateUid 
  }) {
   const badge = STATUS_BADGE[radio.status] ?? STATUS_BADGE.offline;
 
@@ -16,10 +17,18 @@ function RadioCard({ radio, index, onConfigChange, onStructChange, onStructParse
     
     <div className="radio-card">
       <div className="card-header">
-        <span className="card-title">Radio {radio.uid}</span>
+        <div className="uid-edit-row">
+          <span className="card-title">Radio</span>
+          <input
+            className={`table-input uid-input ${isDuplicateUid ? "uid-input--error" : ""}`}
+            value={radio.uid}
+            onChange={e => onUidChange?.(index, e.target.value)}
+          />
+        </div>
         <span className={`badge ${badge.cls}`}>{badge.label}</span>
         <button className="btn btn-danger" onClick={() => onRemove?.(index)}>✕</button>
       </div>
+      {isDuplicateUid && <div className="warn-box">▲ same id used twice</div>}
 
       <div className="section-title">Config Parameters</div>
 

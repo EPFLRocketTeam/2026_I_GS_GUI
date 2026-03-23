@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./radioConfig.css";
 import RadioCard from "../../components/radioCard/radioCard";
 import useRadioSocket from "../../sockets/radio/useRadioSocket";
@@ -7,17 +7,25 @@ import {
   validate, DEFAULT_RADIOS, downloadConfig, loadConfig, handleAdd,
   handleConfigChange, handleStructChange, handleStructParse, handleRemove,
   handleFieldChange, handleConfigLabelChange, handleConfigTypeChange, handleConfigKeyChange,
-  handleAddConfigParam, handleRemoveConfigParam, handleFieldLabelChange, handleFieldTypeChange
+  handleAddConfigParam, handleRemoveConfigParam, handleFieldLabelChange, handleFieldTypeChange,
+  handleUidChange
 } from "./radioUtils";
 
 function RadioBoard() {
   const [radios, setRadios] = useState(DEFAULT_RADIOS);
   const { lastUpdated, isConnected, lastReceived } = useRadioSocket("ws://127.0.0.1:8001/ws/radio/");
-  let nextId = { current: Math.max(...DEFAULT_RADIOS.map(r => r.uid)) + 1 };
+  const nextId = useRef(Math.max(...DEFAULT_RADIOS.map(r => r.uid)) + 1);
 
   const [ctxMenu, setCtxMenu] = useState(null); 
   const [panelRadioUid, setPanelRadioUid] = useState(null);
   const panelRadio = radios.find(r => r.uid === panelRadioUid) ?? null;
+
+  useEffect(() => {
+    const maxUid = Math.max(...radios.map(r => Number(r.uid)));
+    if (maxUid >= nextId.current) {
+      nextId.current = maxUid + 1;
+    }
+  }, [radios]);
 
   useEffect(() => {
     if (lastReceived && Array.isArray(lastReceived)) {
@@ -42,17 +50,22 @@ function RadioBoard() {
     return () => window.removeEventListener("click", close);
   }, []);
 
-    const handleContextMenu = (e, radioUid) => {
+  const handleContextMenu = (e, radioUid) => {
     e.preventDefault();
     setCtxMenu({ x: e.clientX, y: e.clientY, radioUid });
   };
+
+  const uidCounts = radios.reduce((acc, r) => {
+  acc[r.uid] = (acc[r.uid] ?? 0) + 1;
+  return acc;
+}, {});
 
   return (
     <div className="radio-page">
       <div className="topbar">
         <h2>Radio Config</h2>
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-            <button className="btn" onClick={() => loadConfig(loaded => { nextId = Math.max(...loaded.map(r => r.uid)) + 1; 
+            <button className="btn" onClick={() => loadConfig(loaded => { nextId.current = Math.max(...loaded.map(r => r.uid)) + 1; 
               setRadios(validate(loaded)); })}>Load radio config</button>
             <button className="btn" onClick={() => downloadConfig(radios)}>Download config</button>
           <div style={{ width: "12px", height: "12px", borderRadius: "50%", backgroundColor: isConnected ? "#4be34b" : "#ff6b6b" }} />
@@ -77,6 +90,8 @@ function RadioBoard() {
               onConfigKeyChange={(index, pIdx, value) => handleConfigKeyChange(index, pIdx, value, setRadios)}
               onAddConfigParam={(index) => handleAddConfigParam(index, setRadios)}
               onRemoveConfigParam={(index, pIdx) => handleRemoveConfigParam(index, pIdx, setRadios)}
+              isDuplicateUid={uidCounts[r.uid] > 1}
+              onUidChange={(index, value) => handleUidChange(index, value, setRadios)}
             />
           </div>
         ))}

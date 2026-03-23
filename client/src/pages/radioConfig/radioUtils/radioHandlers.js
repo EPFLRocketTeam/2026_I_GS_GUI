@@ -2,9 +2,8 @@ import { validate } from "./radioIO";
 import { parseStruct } from "./radioIO";
 import { createNewRadio } from "./radioDefaults";
 
-export const handleAdd = (nextId, setRadios) => {
-  const newRadio = createNewRadio(nextId.current);
-  nextId.current += 1;
+export const handleAdd = (nextIdRef, setRadios) => {
+  const newRadio = createNewRadio(nextIdRef);
   setRadios(prev => validate([...prev, newRadio]));
 };
 
@@ -120,6 +119,14 @@ export const handleFieldTypeChange = (radioIdx, fieldIdx, value, setRadios) => {
     const fields = [...updated[radioIdx].structFields];
     fields[fieldIdx] = { ...fields[fieldIdx], type: value };
     updated[radioIdx] = { ...updated[radioIdx], structFields: fields };
+    return validate(updated);
+  });
+};
+
+export const handleUidChange = (index, value, setRadios) => {
+  setRadios(prev => {
+    const updated = [...prev];
+    updated[index] = { ...updated[index], uid: value };
     return validate(updated);
   });
 };
