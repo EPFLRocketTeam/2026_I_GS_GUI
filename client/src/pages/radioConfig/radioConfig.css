@@ -17,7 +17,12 @@
   min-width: 180px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.4);
 }
-
+.cards-wrap--empty {
+  min-height: calc(100vh - 140px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .ctx-menu li {
   padding: 8px 16px;
   cursor: pointer;

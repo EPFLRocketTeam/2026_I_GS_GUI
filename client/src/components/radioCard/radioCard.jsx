@@ -8,53 +8,39 @@ const STATUS_BADGE = {
 };
 
 function RadioCard({ radio, index, onConfigChange, onStructChange, onStructParse,
-   onRemove, onConfigLabelChange, onConfigTypeChange, 
-   onAddConfigParam, onRemoveConfigParam, onUidChange, isDuplicateUid 
+   onRemove, 
+   onAddConfigParam, onRemoveConfigParam, isDuplicateUid 
  }) {
   const badge = STATUS_BADGE[radio.status] ?? STATUS_BADGE.offline;
 
   return (
     
     <div className="radio-card">
+        {isDuplicateUid && (
+          <div className="warn-inline">same id used twice</div>
+        )}
       <div className="card-header">
         <div className="uid-edit-row">
           <span className="card-title">Radio</span>
-          <input
-            className={`table-input uid-input ${isDuplicateUid ? "uid-input--error" : ""}`}
-            value={radio.uid}
-            onChange={e => onUidChange?.(index, e.target.value)}
-          />
         </div>
         <span className={`badge ${badge.cls}`}>{badge.label}</span>
         <button className="btn btn-danger" onClick={() => onRemove?.(index)}>✕</button>
       </div>
-      {isDuplicateUid && <div className="warn-box">▲ same id used twice</div>}
-
       <div className="section-title">Config Parameters</div>
-
         {(radio.configParams ?? []).map((param, pIdx) => (
         <div className="param-block" key={param.key + pIdx}>
-          <div className="param-top-row">
+            <div className="name-value-row">
+              <div className="param-label">
+                {param.label}
+              </div>
             <input
-              className="table-input param-label-input"
-              value={param.label}
-              onChange={e => onConfigLabelChange?.(index, pIdx, e.target.value)}
-              placeholder="name"
-            />
-            <input
-              className="table-input param-type-input"
-              value={param.type}
-              onChange={e => onConfigTypeChange?.(index, pIdx, e.target.value)}
-              placeholder="type"
+              className="table-input param-value-input"
+              value={param.value}
+              onChange={e => onConfigChange?.(index, pIdx, e.target.value)}
+              placeholder="value"
             />
             <button className="btn-remove-param" onClick={() => onRemoveConfigParam?.(index, pIdx)}>−</button>
-          </div>
-          <input
-            className="table-input param-value-input"
-            value={param.value}
-            onChange={e => onConfigChange?.(index, pIdx, e.target.value)}
-            placeholder="value"
-          />
+            </div>
         </div>
         ))}
       <button className="btn-add-param" onClick={() => onAddConfigParam?.(index)}>+ add parameter</button>

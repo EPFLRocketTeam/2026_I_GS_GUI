@@ -4,45 +4,33 @@ import RadioCard from "../../components/radioCard/radioCard";
 import useRadioSocket from "../../sockets/radio/useRadioSocket";
 import RocketDataPanel from "../../components/rocketDataPanel/rocketDataPanel";
 import { 
-  validate, DEFAULT_RADIOS, downloadConfig, loadConfig, handleAdd,
+  validate, downloadConfig, loadConfig, handleAdd,
   handleConfigChange, handleStructChange, handleStructParse, handleRemove,
-  handleFieldChange, handleConfigLabelChange, handleConfigTypeChange, handleConfigKeyChange,
+  handleFieldChange, handleConfigTypeChange, handleConfigKeyChange,
   handleAddConfigParam, handleRemoveConfigParam, handleFieldLabelChange, handleFieldTypeChange,
   handleUidChange
 } from "./radioUtils";
 
 function RadioBoard() {
-  const [radios, setRadios] = useState(DEFAULT_RADIOS);
-  const { lastUpdated, isConnected, lastReceived } = useRadioSocket("ws://127.0.0.1:8001/ws/radio/");
-  const nextId = useRef(Math.max(...DEFAULT_RADIOS.map(r => r.uid)) + 1);
+  const [radios, setRadios] = useState([]);
+  const { lastUpdated, isConnected } = useRadioSocket("ws://127.0.0.1:8001/ws/radio/");
+  const nextId = useRef(1);
 
   const [ctxMenu, setCtxMenu] = useState(null); 
   const [panelRadioUid, setPanelRadioUid] = useState(null);
   const panelRadio = radios.find(r => r.uid === panelRadioUid) ?? null;
 
   useEffect(() => {
-    const maxUid = Math.max(...radios.map(r => Number(r.uid)));
+    if (!radios.length) {
+      nextId.current = 1;
+      return;
+    }
+
+    const maxUid = Math.max(...radios.map((r) => Number(r.uid) || 0));
     if (maxUid >= nextId.current) {
       nextId.current = maxUid + 1;
     }
   }, [radios]);
-
-  useEffect(() => {
-    if (lastReceived && Array.isArray(lastReceived)) {
-      console.log("RadioBoard received backend data", lastReceived);
-      setRadios(prev => {
-        const byUid = Object.fromEntries(prev.map(r => [r.uid, r]));
-        lastReceived.forEach(serverRadio => {
-          byUid[serverRadio.uid] = {
-            ...byUid[serverRadio.uid],
-            ...serverRadio,
-            status: serverRadio.status ?? "online",
-          };
-        });
-        return validate(Object.values(byUid));
-      });
-    }
-  }, [lastReceived]);
 
   useEffect(() => {
     const close = () => setCtxMenu(null);
@@ -73,11 +61,10 @@ function RadioBoard() {
         </div>
         {lastUpdated && <span style={{ fontSize: "12px", color: "#888" }}>Last updated: {lastUpdated}</span>}
       </div>
-      <div className="cards-wrap">
+      <div className={`cards-wrap ${radios.length === 0 ? "cards-wrap--empty" : ""}`}>
         {radios.map((r, i) => (
           <div key={r.uid} onContextMenu={e => handleContextMenu(e, r.uid)}>
             <RadioCard
-              key={r.uid}
               radio={r}
               index={i}
               onConfigChange={(index, paramIdx, value) => handleConfigChange(index, paramIdx, value, setRadios)}
@@ -85,7 +72,6 @@ function RadioBoard() {
               onStructParse = {(index) => {handleStructParse(index, setRadios); setPanelRadioUid(radios[index].uid)}}
               onFieldChange={(index, fieldIdx, value) => handleFieldChange(index, fieldIdx, value, setRadios)}
               onRemove = {(index) => handleRemove(index, setRadios)}
-              onConfigLabelChange={(index, pIdx, value) => handleConfigLabelChange(index, pIdx, value, setRadios)}
               onConfigTypeChange={(index, pIdx, value) => handleConfigTypeChange(index, pIdx, value, setRadios)}
               onConfigKeyChange={(index, pIdx, value) => handleConfigKeyChange(index, pIdx, value, setRadios)}
               onAddConfigParam={(index) => handleAddConfigParam(index, setRadios)}

@@ -1,23 +1,22 @@
 import { validate } from "./radioIO";
 
 export const RADIO_CONFIG_PARAMS = [
-  { key: "frequency",    label: "Frequency",      type: "int32",  value: "864340000" },
-  { key: "power",        label: "TX Power",        type: "int8",   value: "14" },
-  { key: "bandwidth",    label: "Bandwidth",       type: "int8",   value: "7" },
-  { key: "sf",           label: "Spread Factor",   type: "int8",   value: "7" },
-  { key: "cr",           label: "Coding Rate",     type: "bool",   value: "false" },
-  { key: "preamble_len", label: "Preamble Length", type: "int16",  value: "8" },
-  { key: "crc",          label: "CRC",             type: "bool",   value: "true" },
-  { key: "inverse_iq",   label: "Inverse IQ",      type: "bool",   value: "false" },
-  { key: "send_mode",    label: "Send Mode",       type: "bool",   value: "false" },
+  { key: "uid",    label: "uid",      type: "uint32",  value: "1" },
+  { key: "frequency",    label: "Frequency",      type: "uint32",  value: "864340000" },
+  { key: "power",        label: "TX Power",        type: "uint32",   value: "14" },
+  { key: "bandwidth",    label: "Bandwidth",       type: "uint32",   value: "7" },
+  { key: "sf",           label: "Spread Factor",   type: "uint32",   value: "7" },
+  { key: "cr",           label: "Coding Rate",     type: "uint32",   value: "false" },
+  { key: "preamble_len", label: "Preamble Length", type: "uint32",  value: "8" },
+  { key: "crc",          label: "CRC",             type: "uint32",   value: "true" },
+  { key: "inverse_iq",   label: "Inverse IQ",      type: "uint32",   value: "false" },
+  { key: "send_mode",    label: "Send Mode",       type: "uint32",   value: "false" },
 ];
 
 export const createNewRadio = (nextIdRef) => {
-  const uid = nextIdRef.current;
   nextIdRef.current += 1;
   return {
-    uid,
-    status: "offline",
+    status: "online",
     saved: false,
     configParams: RADIO_CONFIG_PARAMS.map(p => ({ ...p })),
     structText: "",
@@ -27,8 +26,7 @@ export const createNewRadio = (nextIdRef) => {
 
 export const DEFAULT_RADIOS = validate([
   {
-    uid: 1,
-    status: "waiting",
+    status: "online",
     saved: false,
     configParams: RADIO_CONFIG_PARAMS.map(p => ({ ...p })),
     structText: "",

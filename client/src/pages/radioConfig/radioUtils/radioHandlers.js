@@ -12,11 +12,23 @@ export const handleRemove = (index, setRadios) => {
 };
 
 export const handleConfigChange = (radioIdx, paramIdx, value, setRadios) => {
-  setRadios(prev => {
-    const updated = [...prev];
-    const params = [...updated[radioIdx].configParams];
-    params[paramIdx] = { ...params[paramIdx], value };
-    updated[radioIdx] = { ...updated[radioIdx], configParams: params };
+  setRadios((prev) => {
+    const updated = prev.map((radio, rIdx) => {
+      if (rIdx !== radioIdx) return radio;
+
+      const configParams = (radio.configParams ?? []).map((param, pIdx) =>
+        pIdx !== paramIdx ? param : { ...param, value }
+      );
+
+      const changedParam = configParams[paramIdx];
+
+      return {
+        ...radio,
+        configParams,
+        ...(changedParam?.key === "uid" ? { uid: value } : {}),
+      };
+    });
+
     return validate(updated);
   });
 };
