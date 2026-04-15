@@ -21,12 +21,13 @@ export const handleConfigChange = (radioIdx, paramIdx, value, setRadios) => {
       );
 
       const changedParam = configParams[paramIdx];
+      const nextRadio = { ...radio, configParams };
 
-      return {
-        ...radio,
-        configParams,
-        ...(changedParam?.key === "uid" ? { uid: value } : {}),
-      };
+      if (changedParam?.key === "uid") {
+        nextRadio.uid = value;
+      }
+
+      return nextRadio;
     });
 
     return validate(updated);

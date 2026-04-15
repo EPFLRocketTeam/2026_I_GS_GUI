@@ -50,3 +50,17 @@ export const loadConfig = (onSuccess) => {
   };
   input.click();
 };
+
+export const getRadioUid = (radio) =>
+  String(
+    radio.uid ??
+    radio.configParams?.find((p) => p.key === "uid")?.value ??
+    ""
+  ).trim();
+
+export const uidCounts = (radios) => radios.reduce((acc, r) => {
+  const uid = getRadioUid(r);
+  if (!uid) return acc;
+  acc[uid] = (acc[uid] ?? 0) + 1;
+  return acc;
+}, {});

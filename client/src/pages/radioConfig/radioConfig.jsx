@@ -10,6 +10,8 @@ import {
   handleAddConfigParam, handleRemoveConfigParam, handleFieldLabelChange, handleFieldTypeChange,
   handleUidChange
 } from "./radioUtils";
+import { ensureRadioIds } from "./radioUtils/radioDefaults";
+import { getRadioUid, uidCounts } from "./radioUtils/radioIO";
 
 function RadioBoard() {
   const [radios, setRadios] = useState([]);
@@ -17,8 +19,8 @@ function RadioBoard() {
   const nextId = useRef(1);
 
   const [ctxMenu, setCtxMenu] = useState(null); 
-  const [panelRadioUid, setPanelRadioUid] = useState(null);
-  const panelRadio = radios.find(r => r.uid === panelRadioUid) ?? null;
+  const [panelRadioId, setPanelRadioId] = useState(null);
+  const panelRadio = radios.find(r => r.id === panelRadioId) ?? null;
 
   useEffect(() => {
     if (!radios.length) {
@@ -38,23 +40,23 @@ function RadioBoard() {
     return () => window.removeEventListener("click", close);
   }, []);
 
-  const handleContextMenu = (e, radioUid) => {
+  const handleContextMenu = (e, radioId) => {
     e.preventDefault();
-    setCtxMenu({ x: e.clientX, y: e.clientY, radioUid });
+    setCtxMenu({ x: e.clientX, y: e.clientY, radioId: radioId });
   };
 
-  const uidCounts = radios.reduce((acc, r) => {
-  acc[r.uid] = (acc[r.uid] ?? 0) + 1;
-  return acc;
-}, {});
+  const counts = uidCounts(radios);
 
   return (
     <div className="radio-page">
       <div className="topbar">
         <h2>Radio Config</h2>
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-            <button className="btn" onClick={() => loadConfig(loaded => { nextId.current = Math.max(...loaded.map(r => r.uid)) + 1; 
-              setRadios(validate(loaded)); })}>Load radio config</button>
+            <button className="btn" onClick={() => loadConfig(loaded => {
+              const normalized = ensureRadioIds(loaded);
+              nextId.current = Math.max(0, ...normalized.map(r => Number(r.uid) || 0)) + 1;
+              setRadios(validate(normalized));
+            })}>Load radio config</button>
             <button className="btn" onClick={() => downloadConfig(radios)}>Download config</button>
           <div style={{ width: "12px", height: "12px", borderRadius: "50%", backgroundColor: isConnected ? "#4be34b" : "#ff6b6b" }} />
           <span style={{ fontSize: "12px", color: "#888" }}>{isConnected ? "Connected" : "Disconnected"}</span>
@@ -63,20 +65,20 @@ function RadioBoard() {
       </div>
       <div className={`cards-wrap ${radios.length === 0 ? "cards-wrap--empty" : ""}`}>
         {radios.map((r, i) => (
-          <div key={r.uid} onContextMenu={e => handleContextMenu(e, r.uid)}>
+          <div key={r.id} onContextMenu={e => handleContextMenu(e, r.id)}>
             <RadioCard
               radio={r}
               index={i}
               onConfigChange={(index, paramIdx, value) => handleConfigChange(index, paramIdx, value, setRadios)}
               onStructChange={(index, text) => handleStructChange(index, text, setRadios)}
-              onStructParse = {(index) => {handleStructParse(index, setRadios); setPanelRadioUid(radios[index].uid)}}
+              onStructParse = {(index) => {handleStructParse(index, setRadios); setPanelRadioId(radios[index].id)}}
               onFieldChange={(index, fieldIdx, value) => handleFieldChange(index, fieldIdx, value, setRadios)}
               onRemove = {(index) => handleRemove(index, setRadios)}
               onConfigTypeChange={(index, pIdx, value) => handleConfigTypeChange(index, pIdx, value, setRadios)}
               onConfigKeyChange={(index, pIdx, value) => handleConfigKeyChange(index, pIdx, value, setRadios)}
               onAddConfigParam={(index) => handleAddConfigParam(index, setRadios)}
               onRemoveConfigParam={(index, pIdx) => handleRemoveConfigParam(index, pIdx, setRadios)}
-              isDuplicateUid={uidCounts[r.uid] > 1}
+              isDuplicateUid={counts[getRadioUid(r)] > 1}
               onUidChange={(index, value) => handleUidChange(index, value, setRadios)}
             />
           </div>
@@ -89,7 +91,7 @@ function RadioBoard() {
           style={{ top: ctxMenu.y, left: ctxMenu.x }}
           onClick={e => e.stopPropagation()}
         >
-          <li onClick={() => { setPanelRadioUid(ctxMenu.radioUid); setCtxMenu(null); }}>
+          <li onClick={() => { setPanelRadioId(ctxMenu.radioId); setCtxMenu(null); }}>
             👁 View Rocket Data
           </li>
         </ul>
@@ -98,19 +100,19 @@ function RadioBoard() {
       {panelRadio && (
         <RocketDataPanel
           radio={panelRadio}
-          onClose={() => setPanelRadioUid(null)}
+          onClose={() => setPanelRadioId(null)}
           onFieldChange={(fieldIdx, value) =>
             handleFieldChange(
-              radios.findIndex(r => r.uid === panelRadioUid),
+              radios.findIndex(r => r.id === panelRadioId),
               fieldIdx,
               value,
               setRadios
             )
           }
           onFieldLabelChange={(fieldIdx, value) => 
-            handleFieldLabelChange(radios.findIndex(r => r.uid === panelRadioUid), fieldIdx, value, setRadios)}
+            handleFieldLabelChange(radios.findIndex(r => r.id === panelRadioId), fieldIdx, value, setRadios)}
           onFieldTypeChange={(fieldIdx, value) => 
-            handleFieldTypeChange(radios.findIndex(r => r.uid === panelRadioUid), fieldIdx, value, setRadios)}
+            handleFieldTypeChange(radios.findIndex(r => r.id === panelRadioId), fieldIdx, value, setRadios)}
         />
       )}
       

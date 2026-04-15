@@ -14,11 +14,17 @@ export const RADIO_CONFIG_PARAMS = [
 ];
 
 export const createNewRadio = (nextIdRef) => {
+  const uid = String(nextIdRef.current);
   nextIdRef.current += 1;
+
   return {
+    id: crypto.randomUUID(),
     status: "online",
     saved: false,
-    configParams: RADIO_CONFIG_PARAMS.map(p => ({ ...p })),
+    configParams: RADIO_CONFIG_PARAMS.map(p => ({
+      ...p,
+      value: p.key === "uid" ? uid : p.value,
+    })),
     structText: "",
     structFields: [],
   }
@@ -26,6 +32,7 @@ export const createNewRadio = (nextIdRef) => {
 
 export const DEFAULT_RADIOS = validate([
   {
+    id: crypto.randomUUID(),
     status: "online",
     saved: false,
     configParams: RADIO_CONFIG_PARAMS.map(p => ({ ...p })),
@@ -33,3 +40,9 @@ export const DEFAULT_RADIOS = validate([
     structFields: [],
   }
 ]);
+
+export const ensureRadioIds = (radios) =>
+  radios.map(r => ({
+    ...r,
+    id: r.id ?? crypto.randomUUID(),
+  }));
