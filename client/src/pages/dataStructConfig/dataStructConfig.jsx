@@ -86,6 +86,18 @@ function DataStructConfig({ radios = [], setRadios }) {
   const selectedRadio = availableRadios.find((r) => r.id === selectedId);
   const totalBits = fields.reduce((sum, f) => sum + (Number.parseInt(f.bits) || 0), 0);
 
+  const selectedOperatingMode =
+    selectedRadio?.configParams?.find((p) => p.key === "operating_mode")?.value ?? null;
+
+  const isReceiverOnly = selectedOperatingMode === "receiver";
+
+  const warnReceiverOnly = () => {
+    dispatch({
+        type: "SET_FLASH",
+        value: "Receiver mode: this data structure is read-only.",
+    });
+  };
+
   const copyJSON = () => {
       navigator.clipboard.writeText(JSON.stringify(buildCopyJSON(selectedId, fields), null, 2));
       dispatch({ type: "SET_FLASH", value: "JSON copied" });
@@ -149,17 +161,32 @@ function DataStructConfig({ radios = [], setRadios }) {
           </div>
         </div>
 
+        {isReceiverOnly && (
+          <div className="dsc-warning-banner">
+            Receiver mode detected — the data structure should not be modified.
+          </div>
+        )}
+
         <DataStructTable
           fields={fields}
-          onUpdateField={(key, prop, value) =>
+          onUpdateField={(key, prop, value) => {
+            if (isReceiverOnly) {warnReceiverOnly(); }
             dispatch({ type: "UPDATE_FIELD", key, prop, value })
-          }
-          onRemoveField={(key) =>
+            }
+        }
+          onRemoveField={(key) =>{
+            if (isReceiverOnly) {warnReceiverOnly(); }
             dispatch({ type: "REMOVE_FIELD", key })
-          }
+            }
+        }
         />
 
-        <div className="dsc-add-row" onClick={() => dispatch({ type: "ADD_FIELD" })}>
+        <div className="dsc-add-row" onClick={() => {
+            if (isReceiverOnly) {warnReceiverOnly(); }
+            dispatch({ type: "ADD_FIELD" })
+            }
+        }
+        >
           <span className="dsc-add-icon">+</span>
           <span>Add field</span>
         </div>
@@ -180,11 +207,17 @@ function DataStructConfig({ radios = [], setRadios }) {
               <textarea
                 className="dsc-textarea"
                 value={state.ui.jsonInput}
-                onChange={e => dispatch({ type: "SET_JSON_INPUT", value: e.target.value })}
+                onChange={e => {
+                  if (isReceiverOnly) {
+                    warnReceiverOnly();
+                  }
+                  dispatch({ type: "SET_JSON_INPUT", value: e.target.value });
+                }}
                 placeholder='[{"name":"packet_nbr","type":"uint32_t","bits":32,"comment":""}]'
               />
               <div className="dsc-import-actions">
-                <button className="dsc-btn dsc-btn-primary" onClick={importJSON}>Import</button>
+                <button className="dsc-btn dsc-btn-primary" onClick={() => {if (isReceiverOnly) {warnReceiverOnly()}; importJSON()}}>       
+                Import</button>
                 {state.ui.importError && <span className="dsc-error">{state.ui.importError}</span>}
               </div>
             </div>

@@ -243,3 +243,28 @@
   font-size: 12px;
   color: #c0392b;
 }
+
+.dsc-warning-banner {
+  padding: 10px 16px;
+  border-bottom: 0.5px solid #f1c40f;
+  background: #fff8db;
+  color: #8a6d1d;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.dsc-editable-wrap {
+  position: relative;
+}
+
+.dsc-edit-lock {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.is-disabled {
+  opacity: 0.75;
+}
