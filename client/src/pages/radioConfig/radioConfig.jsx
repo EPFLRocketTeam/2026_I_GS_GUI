@@ -8,7 +8,6 @@ import {
   handleConfigChange, handleStructChange, handleStructParse, handleRemove,
   handleFieldChange, handleConfigTypeChange, handleConfigKeyChange,
   handleFieldLabelChange, handleFieldTypeChange,
-  handleUidChange
 } from "./radioUtils";
 import { ensureRadioIds } from "./radioUtils/radioDefaults";
 import { getRadioUid, uidCounts } from "./radioUtils/radioIO";
@@ -28,7 +27,7 @@ function RadioConfig({radios, setRadios}) {
       return;
     }
 
-    const maxUid = Math.max(...radios.map((r) => Number(r.uid) || 0));
+    const maxUid = Math.max(...radios.map((r) => Number(getRadioUid(r)) || 0));
     if (maxUid >= nextId.current) {
       nextId.current = maxUid + 1;
     }
@@ -53,7 +52,7 @@ function RadioConfig({radios, setRadios}) {
     navigate("/dataStructConfig", {
       state: {
         radioId: radio.id,
-        radioUid: radio.uid,
+        radioUid: getRadioUid(radio),
         fields: radio.structFields ?? radio.initialFields ?? [],
       },
     });
@@ -68,7 +67,7 @@ function RadioConfig({radios, setRadios}) {
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
             <button className="btn" onClick={() => loadConfig(loaded => {
               const normalized = ensureRadioIds(loaded);
-              nextId.current = Math.max(0, ...normalized.map(r => Number(r.uid) || 0)) + 1;
+              nextId.current = Math.max(0, ...normalized.map(r => Number(getRadioUid(r)) || 0)) + 1;
               setRadios(validate(normalized));
             })}>Load radio config</button>
             <button className="btn" onClick={() => downloadConfig(radios)}>Download config</button>
@@ -91,7 +90,6 @@ function RadioConfig({radios, setRadios}) {
               onConfigTypeChange={(index, pIdx, value) => handleConfigTypeChange(index, pIdx, value, setRadios)}
               onConfigKeyChange={(index, pIdx, value) => handleConfigKeyChange(index, pIdx, value, setRadios)}
               isDuplicateUid={counts[getRadioUid(r)] > 1}
-              onUidChange={(index, value) => handleUidChange(index, value, setRadios)}
               onConfigDataStruct={(index) => handleConfigDataStruct(index)} 
             />
           </div>

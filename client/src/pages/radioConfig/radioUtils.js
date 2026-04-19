@@ -6,5 +6,4 @@ export {
   handleAddConfigParam, handleRemoveConfigParam,
   handleStructChange, handleStructParse,
   handleFieldChange, handleFieldLabelChange, handleFieldTypeChange,
-  handleUidChange
 } from "./radioUtils/radioHandlers";

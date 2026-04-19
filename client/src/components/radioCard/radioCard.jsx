@@ -26,21 +26,39 @@ function RadioCard({ radio, index, onConfigChange, onStructChange, onStructParse
         <button className="btn btn-danger" onClick={() => onRemove?.(index)}>✕</button>
       </div>
       <div className="section-title">Config Parameters</div>
-        {(radio.configParams ?? []).map((param, pIdx) => (
+       {(radio.configParams ?? []).map((param, pIdx) => (
         <div className="param-block" key={param.key + pIdx}>
-            <div className="name-value-row">
-              <div className="param-label">
-                {param.label}
-              </div>
-            <input
-              className="table-input param-value-input"
-              value={param.value}
-              onChange={e => onConfigChange?.(index, pIdx, e.target.value)}
-              placeholder="value"
-            />
+          <div className="name-value-row">
+            <div className="param-label">
+              {param.label}
             </div>
+
+            {param.control === "select" ? (
+              <select
+                className="table-input param-value-input"
+                value={param.value}
+                onChange={(e) => onConfigChange?.(index, pIdx, e.target.value)}
+              >
+                {(param.options ?? []).map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                className="table-input param-value-input"
+                type={param.control === "number" ? "number" : "text"}
+                min={param.min}
+                max={param.max}
+                value={param.value}
+                onChange={(e) => onConfigChange?.(index, pIdx, e.target.value)}
+                placeholder="value"
+              />
+            )}
+          </div>
         </div>
-        ))}
+      ))}
         <button className="btn" onClick={() => onConfigDataStruct?.(index)}>Config Data Structure</button>
     </div>
   );

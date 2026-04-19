@@ -1,5 +1,5 @@
 import { validate, parseStruct } from "./radioIO";
-import { createNewRadio } from "./radioDefaults";
+import { createNewRadio, clampValue } from "./radioDefaults";
 
 export const handleAdd = (setRadios) => {
   setRadios(prev => {
@@ -13,27 +13,33 @@ export const handleRemove = (index, setRadios) => {
 };
 
 export const handleConfigChange = (radioIdx, paramIdx, value, setRadios) => {
-  setRadios((prev) => {
-    const updated = prev.map((radio, rIdx) => {
-      if (rIdx !== radioIdx) return radio;
+  setRadios(prev =>
+    prev.map((radio, i) => {
+      if (i !== radioIdx) return radio;
 
-      const configParams = (radio.configParams ?? []).map((param, pIdx) =>
-        pIdx !== paramIdx ? param : { ...param, value }
-      );
+      const configParams = radio.configParams.map((param, pIdx) => {
+        if (pIdx !== paramIdx) return param;
 
-      const changedParam = configParams[paramIdx];
-      const nextRadio = { ...radio, configParams };
+        let nextValue = value;
 
-      if (changedParam?.key === "uid") {
-        nextRadio.uid = value;
-      }
+        if (param.control === "number") {
+          nextValue = clampValue(value, param.min, param.max);
+        }
 
-      return nextRadio;
-    });
+        return {
+          ...param,
+          value: nextValue,
+        };
+      });
 
-    return validate(updated);
-  });
+      return {
+        ...radio,
+        configParams,
+      };
+    })
+  );
 };
+
 
 export const handleConfigLabelChange = (radioIdx, paramIdx, value, setRadios) => {
   setRadios(prev => {
@@ -133,14 +139,6 @@ export const handleFieldTypeChange = (radioIdx, fieldIdx, value, setRadios) => {
     const fields = [...updated[radioIdx].structFields];
     fields[fieldIdx] = { ...fields[fieldIdx], type: value };
     updated[radioIdx] = { ...updated[radioIdx], structFields: fields };
-    return validate(updated);
-  });
-};
-
-export const handleUidChange = (index, value, setRadios) => {
-  setRadios(prev => {
-    const updated = [...prev];
-    updated[index] = { ...updated[index], uid: value };
     return validate(updated);
   });
 };

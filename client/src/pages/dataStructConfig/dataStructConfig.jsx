@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useReducer } from "react";
 import { useLocation } from "react-router-dom";
 import "./dataStructConfig.css";
+import { getRadioUid } from "../radioConfig/radioUtils/radioIO";
 import {
   buildCopyJSON,
   buildCopyStruct,
@@ -131,12 +132,12 @@ function DataStructConfig({ radios = [], setRadios }) {
                   onClick={() => dispatch({ type: "SET_SELECTED", id: r.id })}
                 >
                   <span className="dsc-radio-dot" />
-                  Radio {r.uid ?? r.id}
+                  Radio {getRadioUid(r) ?? r.id}
                 </button>
               ))}
             </div>
             <span className="dsc-subtitle">
-                Data structure · Radio {selectedRadio?.uid ?? incomingRadioUid ?? selectedId}
+                Data structure · Radio {selectedRadio ? getRadioUid(selectedRadio) : (incomingRadioUid ?? selectedId)}
                             {" "}· {fields.length} field{fields.length !== 1 ? "s" : ""}
                             {" "}· {totalBits} bits
             </span>
