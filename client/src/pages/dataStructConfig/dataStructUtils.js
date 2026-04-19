@@ -97,3 +97,173 @@ export function parseImportRaw(raw) {
 
   return normalizeImportedFields(parsed);
 }
+
+export const createInitialState = ({ incomingRadioId, incomingFields, availableRadios }) => {
+  const fieldsByRadio = {};
+
+  if (incomingRadioId != null) {
+    fieldsByRadio[incomingRadioId] = incomingFields ?? [];
+  }
+
+  availableRadios.forEach((r) => {
+    if (!(r.id in fieldsByRadio)) {
+      fieldsByRadio[r.id] = r.structFields ?? r.initialFields ?? [];
+    }
+  });
+
+  return {
+    selectedId: incomingRadioId ?? availableRadios[0]?.id ?? null,
+    fieldsByRadio,
+    ui: {
+      jsonInput: "",
+      importOpen: false,
+      importError: "",
+      flashMsg: "",
+    },
+  };
+};
+
+export function dataStructReducer(state, action) {
+  switch (action.type) {
+    case "HYDRATE_RADIOS": {
+      const next = { ...state.fieldsByRadio };
+
+      action.radios.forEach((r) => {
+        if (!(r.id in next)) {
+          next[r.id] = r.structFields ?? r.initialFields ?? [];
+        }
+      });
+
+      return {
+        ...state,
+        fieldsByRadio: next,
+        selectedId: state.selectedId ?? action.selectedId ?? action.radios[0]?.id ?? null,
+      };
+    }
+
+    case "APPLY_ROUTE_SELECTION":
+      return {
+        ...state,
+        selectedId: action.radioId,
+        fieldsByRadio: {
+          ...state.fieldsByRadio,
+          [action.radioId]: action.fields ?? [],
+        },
+      };
+
+    case "SET_SELECTED":
+      return {
+        ...state,
+        selectedId: action.id,
+      };
+
+    case "SET_FIELDS": {
+      const current = state.fieldsByRadio[state.selectedId] ?? [];
+      const nextFields =
+        typeof action.updater === "function" ? action.updater(current) : action.updater;
+
+      return {
+        ...state,
+        fieldsByRadio: {
+          ...state.fieldsByRadio,
+          [state.selectedId]: nextFields,
+        },
+      };
+    }
+
+    case "ADD_FIELD": {
+      const current = state.fieldsByRadio[state.selectedId] ?? [];
+      return {
+        ...state,
+        fieldsByRadio: {
+          ...state.fieldsByRadio,
+          [state.selectedId]: [...current, createField()],
+        },
+      };
+    }
+
+    case "REMOVE_FIELD": {
+      const current = state.fieldsByRadio[state.selectedId] ?? [];
+      return {
+        ...state,
+        fieldsByRadio: {
+          ...state.fieldsByRadio,
+          [state.selectedId]: current.filter((f) => f.key !== action.key),
+        },
+      };
+    }
+
+    case "UPDATE_FIELD": {
+      const current = state.fieldsByRadio[state.selectedId] ?? [];
+      return {
+        ...state,
+        fieldsByRadio: {
+          ...state.fieldsByRadio,
+          [state.selectedId]: current.map((f) => {
+            if (f.key !== action.key) return f;
+            const updated = { ...f, [action.prop]: action.value };
+            if (action.prop === "type") {
+              updated.bits = TYPE_BITS[action.value] ?? f.bits;
+            }
+            return updated;
+          }),
+        },
+      };
+    }
+
+    case "SET_JSON_INPUT":
+      return {
+        ...state,
+        ui: {
+          ...state.ui,
+          jsonInput: action.value,
+        },
+      };
+
+    case "TOGGLE_IMPORT":
+      return {
+        ...state,
+        ui: {
+          ...state.ui,
+          importOpen: !state.ui.importOpen,
+        },
+      };
+
+    case "SET_IMPORT_ERROR":
+      return {
+        ...state,
+        ui: {
+          ...state.ui,
+          importError: action.value,
+        },
+      };
+
+    case "SET_FLASH":
+      return {
+        ...state,
+        ui: {
+          ...state.ui,
+          flashMsg: action.value,
+        },
+      };
+
+    case "IMPORT_FIELDS":
+      return {
+        ...state,
+        fieldsByRadio: {
+          ...state.fieldsByRadio,
+          [state.selectedId]: action.fields,
+        },
+        ui: {
+          ...state.ui,
+          jsonInput: "",
+          importOpen: false,
+          importError: "",
+          flashMsg: "Imported!",
+        },
+      };
+
+    default:
+      return state;
+  }
+}
