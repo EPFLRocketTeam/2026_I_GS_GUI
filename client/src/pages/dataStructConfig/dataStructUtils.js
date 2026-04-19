@@ -1,18 +1,59 @@
-export const TYPES = ["uint8_t","uint16_t","uint32_t","int8_t","int16_t","int32_t","float","bool"];
+export const TYPES = [
+  "bool",
+
+  "uint8_t",
+  "uint16_t",
+  "uint32_t",
+  "uint64_t",
+
+  "int8_t",
+  "int16_t",
+  "int32_t",
+  "int64_t",
+
+  "float8_t",
+  "float16_t",
+  "float32_t",
+  "float64_t",
+];
 
 export const TYPE_BITS = {
-  uint8_t: 8, uint16_t: 16, uint32_t: 32,
-  int8_t: 8,  int16_t: 16,  int32_t: 32,
-  float: 32,  bool: 8,
+  bool: 8,
+
+  uint8_t: 8,
+  uint16_t: 16,
+  uint32_t: 32,
+  uint64_t: 64,
+
+  int8_t: 8,
+  int16_t: 16,
+  int32_t: 32,
+  int64_t: 64,
+
+  float8_t: 8,
+  float16_t: 16,
+  float32_t: 32,
+  float64_t: 64,
 };
+
+export function clampAddress(value) {
+  if (value === "") return "";
+  const num = Number(value);
+  if (Number.isNaN(num)) return 0;
+  return Math.max(0, Math.min(255, num));
+}
 
 export function dotClass(type) {
   const b = TYPE_BITS[type];
-  return b === 8 ? "dot-8" : b === 16 ? "dot-16" : b === 32 ? "dot-32" : "dot-other";
+  if (b === 8) return "dot-8";
+  if (b === 16) return "dot-16";
+  if (b === 32) return "dot-32";
+  if (b === 64) return "dot-64";
+  return "dot-other";
 }
 
 export function createField() {
-  return { key: crypto.randomUUID(), name: "", type: "uint8_t", bits: 8, value: "", comment: "" };
+  return { key: crypto.randomUUID(), name: "", address: 0, type: "uint8_t", bits: 8, value: "", comment: "" };
 }
 
 export function parseStruct(raw) {
@@ -21,7 +62,7 @@ export function parseStruct(raw) {
     .replace(/\}[^}]*$/, "")
     .split("\n");
 
-  return lines
+  const parsed = lines
     .map(line => line.trim())
     .filter(line => line && !line.startsWith("//"))
     .map((line, idx) => {
@@ -29,18 +70,24 @@ export function parseStruct(raw) {
       const comment = commentMatch ? commentMatch[1].trim() : "";
       const clean = line.replace(/\/\/.*/, "").trim().replace(/;$/, "").trim();
       const parts = clean.split(/\s+/);
-      if (parts.length < 2) throw new Error(`Line ${idx + 1} could not be parsed: "${line}"`);
+
+      if (parts.length < 2) {
+        throw new Error(`Line ${idx + 1} could not be parsed: "${line}"`);
+      }
+
       const type = parts[0];
       const name = parts[1];
       return {
         key: crypto.randomUUID(),
         name,
+        address: 0,
         type,
         bits: TYPE_BITS[type] ?? 0,
         value: "",
         comment,
       };
     });
+    return withSequentialAddresses(parsed);
 }
 
 export function normalizeImportedFields(parsed) {
@@ -50,6 +97,7 @@ export function normalizeImportedFields(parsed) {
     return {
       key: crypto.randomUUID(),
       name: String(f.name),
+      address: clampAddress(f.address ?? 0),
       type: String(f.type),
       bits: Number.parseInt(f.bits) || TYPE_BITS[f.type] || 8,
       value: f.value ?? "",
@@ -61,8 +109,8 @@ export function normalizeImportedFields(parsed) {
 export function buildCopyJSON(radioId, fields) {
   return {
     radioId,
-    fields: fields.map(({ name, type, bits, value, comment }) => ({
-      name, type, bits: Number.parseInt(bits) || 0, value, comment
+    fields: fields.map(({ name, address, type, bits, value, comment }) => ({
+      name, address: clampAddress(address ?? 0), type, bits: Number.parseInt(bits) || 0, value, comment
     }))
   };
 }
@@ -177,7 +225,7 @@ export function dataStructReducer(state, action) {
         ...state,
         fieldsByRadio: {
           ...state.fieldsByRadio,
-          [state.selectedId]: [...current, createField()],
+          [state.selectedId]: withSequentialAddresses([...current, createField()]),
         },
       };
     }
@@ -266,4 +314,27 @@ export function dataStructReducer(state, action) {
     default:
       return state;
   }
+}
+
+export function getFieldByteSize(field) {
+  const bits = Number.parseInt(field.bits) || TYPE_BITS[field.type] || 0;
+  return Math.max(1, Math.ceil(bits / 8));
+}
+
+export function withSequentialAddresses(fields) {
+  let offset = 0;
+
+  return fields.map((field) => {
+    const normalizedBits =
+      Number.parseInt(field.bits) || TYPE_BITS[field.type] || 0;
+
+    const nextField = {
+      ...field,
+      bits: normalizedBits,
+      address: offset,
+    };
+
+    offset += getFieldByteSize(nextField);
+    return nextField;
+  });
 }

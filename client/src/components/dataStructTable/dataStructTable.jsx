@@ -1,13 +1,15 @@
 import "./dataStructTable.css";
-import { TYPES, dotClass } from "../../pages/dataStructConfig/dataStructUtils";
+import { TYPES, dotClass, clampAddress } from "../../pages/dataStructConfig/dataStructUtils";
 
 function DataStructTable({ fields, onUpdateField, onRemoveField }) {
+
   return (
     <table className="dsc-table">
       <thead>
         <tr>
           <th className="col-num">#</th>
           <th className="col-name">Field name</th>
+          <th className="col-address">Address</th>
           <th className="col-type">Type</th>
           <th className="col-bits">Bits</th>
           <th className="col-value">Value</th>
@@ -25,6 +27,18 @@ function DataStructTable({ fields, onUpdateField, onRemoveField }) {
                 value={f.name}
                 placeholder="field_name"
                 onChange={(e) => onUpdateField(f.key, "name", e.target.value)}
+              />
+            </td>
+            <td>
+              <input
+                className="dsc-input dsc-address"
+                type="number"
+                min="0"
+                max="255"
+                value={f.address ?? 0}
+                onChange={(e) =>
+                  onUpdateField(f.key, "address", clampAddress(e.target.value))
+                }
               />
             </td>
             <td>
@@ -79,7 +93,7 @@ function DataStructTable({ fields, onUpdateField, onRemoveField }) {
 
         {fields.length === 0 && (
           <tr>
-            <td colSpan={7} className="dsc-empty">
+            <td colSpan={8} className="dsc-empty">
               No fields yet — add one below
             </td>
           </tr>

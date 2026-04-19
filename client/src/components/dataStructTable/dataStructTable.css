@@ -22,7 +22,8 @@
 }
 
 .col-num  { width: 44px; text-align: center; }
-.col-name { width: 36%; }
+.col-name { width: 22%; }
+.col-address { width: 90px; }
 .col-type { width: 120px; }
 .col-bits { width: 70px; }
 .col-value { width: 90px; }

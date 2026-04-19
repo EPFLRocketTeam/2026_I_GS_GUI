@@ -69,6 +69,19 @@ function DataStructConfig({ radios = [], setRadios }) {
 
   const selectedId = state.selectedId;
   const fields = state.fieldsByRadio[selectedId] ?? [];
+
+  useEffect(() => {
+    if (!setRadios || selectedId == null) return;
+
+    setRadios(prev =>
+        prev.map(r =>
+        r.id === selectedId
+            ? { ...r, structFields: fields }
+            : r
+        )
+    );
+  }, [selectedId, fields, setRadios]);
+
   const selectedRadio = availableRadios.find((r) => r.id === selectedId);
   const totalBits = fields.reduce((sum, f) => sum + (Number.parseInt(f.bits) || 0), 0);
 
