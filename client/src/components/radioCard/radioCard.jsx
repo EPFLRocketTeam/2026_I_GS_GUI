@@ -8,8 +8,7 @@ const STATUS_BADGE = {
 };
 
 function RadioCard({ radio, index, onConfigChange, onStructChange, onStructParse,
-   onRemove, 
-   onAddConfigParam, onRemoveConfigParam, isDuplicateUid 
+   onRemove, isDuplicateUid, onConfigDataStruct
  }) {
   const badge = STATUS_BADGE[radio.status] ?? STATUS_BADGE.offline;
 
@@ -39,12 +38,10 @@ function RadioCard({ radio, index, onConfigChange, onStructChange, onStructParse
               onChange={e => onConfigChange?.(index, pIdx, e.target.value)}
               placeholder="value"
             />
-            <button className="btn-remove-param" onClick={() => onRemoveConfigParam?.(index, pIdx)}>−</button>
             </div>
         </div>
         ))}
-      <button className="btn-add-param" onClick={() => onAddConfigParam?.(index)}>+ add parameter</button>
-
+        <button className="btn" onClick={() => onConfigDataStruct?.(index)}>Config Data Structure</button>
       <div className="section-title">Data Structure</div>
             <textarea
               className="struct-textarea"

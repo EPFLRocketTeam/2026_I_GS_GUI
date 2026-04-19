@@ -7,13 +7,14 @@ import {
   validate, downloadConfig, loadConfig, handleAdd,
   handleConfigChange, handleStructChange, handleStructParse, handleRemove,
   handleFieldChange, handleConfigTypeChange, handleConfigKeyChange,
-  handleAddConfigParam, handleRemoveConfigParam, handleFieldLabelChange, handleFieldTypeChange,
+  handleFieldLabelChange, handleFieldTypeChange,
   handleUidChange
 } from "./radioUtils";
 import { ensureRadioIds } from "./radioUtils/radioDefaults";
 import { getRadioUid, uidCounts } from "./radioUtils/radioIO";
+import { useNavigate } from "react-router-dom";
 
-function RadioBoard() {
+function RadioConfig() {
   const [radios, setRadios] = useState([]);
   const { lastUpdated, isConnected } = useRadioSocket("ws://127.0.0.1:8001/ws/radio/");
   const nextId = useRef(1);
@@ -43,6 +44,12 @@ function RadioBoard() {
   const handleContextMenu = (e, radioId) => {
     e.preventDefault();
     setCtxMenu({ x: e.clientX, y: e.clientY, radioId: radioId });
+  };
+
+  const navigate = useNavigate();
+
+  const handleConfigDataStruct = (index) => {
+    navigate(`/dataStructConfig`);
   };
 
   const counts = uidCounts(radios);
@@ -76,10 +83,9 @@ function RadioBoard() {
               onRemove = {(index) => handleRemove(index, setRadios)}
               onConfigTypeChange={(index, pIdx, value) => handleConfigTypeChange(index, pIdx, value, setRadios)}
               onConfigKeyChange={(index, pIdx, value) => handleConfigKeyChange(index, pIdx, value, setRadios)}
-              onAddConfigParam={(index) => handleAddConfigParam(index, setRadios)}
-              onRemoveConfigParam={(index, pIdx) => handleRemoveConfigParam(index, pIdx, setRadios)}
               isDuplicateUid={counts[getRadioUid(r)] > 1}
               onUidChange={(index, value) => handleUidChange(index, value, setRadios)}
+              onConfigDataStruct={(index) => handleConfigDataStruct(index, setRadios)} 
             />
           </div>
         ))}
@@ -121,4 +127,4 @@ function RadioBoard() {
 }
 
 
-export default RadioBoard;
+export default RadioConfig;

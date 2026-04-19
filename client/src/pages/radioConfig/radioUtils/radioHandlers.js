@@ -1,5 +1,4 @@
-import { validate } from "./radioIO";
-import { parseStruct } from "./radioIO";
+import { validate, parseStruct } from "./radioIO";
 import { createNewRadio } from "./radioDefaults";
 
 export const handleAdd = (nextIdRef, setRadios) => {
