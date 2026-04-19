@@ -14,8 +14,7 @@ import { ensureRadioIds } from "./radioUtils/radioDefaults";
 import { getRadioUid, uidCounts } from "./radioUtils/radioIO";
 import { useNavigate } from "react-router-dom";
 
-function RadioConfig() {
-  const [radios, setRadios] = useState([]);
+function RadioConfig({radios, setRadios}) {
   const { lastUpdated, isConnected } = useRadioSocket("ws://127.0.0.1:8001/ws/radio/");
   const nextId = useRef(1);
 
@@ -49,7 +48,15 @@ function RadioConfig() {
   const navigate = useNavigate();
 
   const handleConfigDataStruct = (index) => {
-    navigate("/dataStructConfig", { state: { radioId: index, fields: radios[index].structFields } });
+    const radio = radios[index];
+
+    navigate("/dataStructConfig", {
+      state: {
+        radioId: radio.id,
+        radioUid: radio.uid,
+        fields: radio.structFields ?? radio.initialFields ?? [],
+      },
+    });
   };
 
   const counts = uidCounts(radios);

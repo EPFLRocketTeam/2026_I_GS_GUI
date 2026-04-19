@@ -22,3 +22,11 @@ class RadioConfig(models.Model):
 
     def __str__(self):
         return f"RadioConfig {self.radio_id} @ {self.timestamp}"
+    
+class DataStruct(models.Model):
+    timestamp = models.DateTimeField(auto_now=True)
+    radio_id = models.CharField(max_length=20)
+
+    def __str__(self):
+        return f"DataStruct {self.radio_id} @ {self.timestamp}"
+    

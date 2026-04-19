@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import "./dataStructConfig.css";
 import {
   TYPES,
@@ -10,14 +11,86 @@ import {
   parseImportRaw,
 } from "./dataStructUtils.js";
 
-function DataStructConfig({ radioId = 0, initialFields = [] }) {
-  const [fields, setFields] = useState(
-    initialFields.length > 0 ? initialFields : []
+function DataStructConfig({ radios = [], setRadios }) {
+  const location = useLocation();
+  const incomingRadioId = location.state?.radioId ?? null;
+  const incomingRadioUid = location.state?.radioUid ?? null;
+  const incomingFields = location.state?.fields ?? [];
+
+  const availableRadios = useMemo(() => {
+  if (radios.length > 0) return radios;
+
+  if (incomingRadioId != null) {
+    return [
+      {
+        id: incomingRadioId,
+        uid: incomingRadioUid,
+        structFields: incomingFields,
+      },
+    ];
+  }
+
+  return [];
+}, [radios, incomingRadioId, incomingRadioUid, incomingFields]);
+
+  const [fieldsByRadio, setFieldsByRadio] = useState(() => {
+    const map = {};
+    if (incomingRadioId != null) {
+        map[incomingRadioId] = incomingFields;
+    }
+    return map;
+  });
+
+  const [selectedId, setSelectedId] = useState(
+    incomingRadioId ?? availableRadios[0]?.id ?? null
   );
+
+  useEffect(() => {
+    if (!availableRadios.length) return;
+
+    setFieldsByRadio(prev => {
+        const next = { ...prev };
+
+        availableRadios.forEach(r => {
+        if (!(r.id in next)) {
+            next[r.id] = r.structFields ?? r.initialFields ?? [];
+        }
+        });
+
+        return next;
+    });
+
+    if (selectedId == null) {
+        setSelectedId(incomingRadioId ?? availableRadios[0]?.id ?? null);
+    }
+  }, [availableRadios, incomingRadioId, selectedId]);
+
+
+  useEffect(() => {
+    if (incomingRadioId == null) return;
+
+    setSelectedId(incomingRadioId);
+
+    setFieldsByRadio(prev => ({
+      ...prev,
+      [incomingRadioId]: incomingFields,
+    }));
+  }, [incomingRadioId, incomingFields]);
+
   const [jsonInput, setJsonInput] = useState("");
   const [importOpen, setImportOpen] = useState(false);
   const [importError, setImportError] = useState("");
   const [flashMsg, setFlashMsg] = useState("");
+
+  const fields = fieldsByRadio[selectedId] ?? [];
+  const selectedRadio = availableRadios.find(r => r.id === selectedId);
+
+  const setFields = (updater) => {
+    setFieldsByRadio(prev => ({
+      ...prev,
+      [selectedId]: typeof updater === "function" ? updater(prev[selectedId] ?? []) : updater,
+    }));
+  };
 
   const flash = (msg) => {
     setFlashMsg(msg);
@@ -37,18 +110,18 @@ function DataStructConfig({ radioId = 0, initialFields = [] }) {
 
   const totalBits = fields.reduce((s, f) => s + (Number.parseInt(f.bits) || 0), 0);
 
-    const copyJSON = () => {
-        navigator.clipboard.writeText(JSON.stringify(buildCopyJSON(radioId, fields), null, 2));
-        flash("JSON copied");
+  const copyJSON = () => {
+      navigator.clipboard.writeText(JSON.stringify(buildCopyJSON(selectedId, fields), null, 2));
+      flash("JSON copied");
     };
 
-    const copyStruct = () => {
-        navigator.clipboard.writeText(buildCopyStruct(radioId, fields));
-        flash("Struct copied");
+  const copyStruct = () => {
+      navigator.clipboard.writeText(buildCopyStruct(selectedId, fields));
+      flash("Struct copied");
     };
 
-    const importJSON = () => {
-        setImportError("");
+  const importJSON = () => {
+      setImportError("");
         try {
             setFields(parseImportRaw(jsonInput));
             setJsonInput("");
@@ -59,18 +132,40 @@ function DataStructConfig({ radioId = 0, initialFields = [] }) {
         }
     };
 
+    if (availableRadios.length === 0) {
+    return (
+      <div className="dsc-page">
+        <div className="dsc-card">
+          <div className="dsc-empty" style={{ padding: "2rem" }}>
+            No radios configured yet.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="dsc-page">
       <div className="dsc-card">
 
         <div className="dsc-header">
           <div className="dsc-header-left">
-            <div className="dsc-radio-badge">
-              <span className="dsc-radio-dot" />
-              <span className="dsc-radio-label">Radio {radioId}</span>
+            <div className="dsc-radio-selector">
+              {availableRadios.map(r => (
+                <button
+                  key={r.id}
+                  className={`dsc-radio-tab ${r.id === selectedId ? "active" : ""}`}
+                  onClick={() => setSelectedId(r.id)}
+                >
+                  <span className="dsc-radio-dot" />
+                  Radio {r.uid ?? r.id}
+                </button>
+              ))}
             </div>
             <span className="dsc-subtitle">
-              Data structure &middot; {fields.length} field{fields.length !== 1 ? "s" : ""} &middot; {totalBits} bits
+                Data structure · Radio {selectedRadio?.uid ?? incomingRadioUid ?? selectedId}
+                            {" "}· {fields.length} field{fields.length !== 1 ? "s" : ""}
+                            {" "}· {totalBits} bits
             </span>
           </div>
           <div className="dsc-header-actions">
@@ -149,7 +244,7 @@ function DataStructConfig({ radioId = 0, initialFields = [] }) {
             ))}
             {fields.length === 0 && (
               <tr>
-                <td colSpan={6} className="dsc-empty">No fields yet — add one below</td>
+                <td colSpan={7} className="dsc-empty">No fields yet — add one below</td>
               </tr>
             )}
           </tbody>
