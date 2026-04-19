@@ -1,9 +1,11 @@
 import { validate, parseStruct } from "./radioIO";
 import { createNewRadio } from "./radioDefaults";
 
-export const handleAdd = (nextIdRef, setRadios) => {
-  const newRadio = createNewRadio(nextIdRef);
-  setRadios(prev => validate([...prev, newRadio]));
+export const handleAdd = (setRadios) => {
+  setRadios(prev => {
+    const newRadio = createNewRadio(prev);
+    return validate([...prev, newRadio]);
+  });
 };
 
 export const handleRemove = (index, setRadios) => {

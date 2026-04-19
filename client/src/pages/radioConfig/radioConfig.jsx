@@ -49,7 +49,7 @@ function RadioConfig() {
   const navigate = useNavigate();
 
   const handleConfigDataStruct = (index) => {
-    navigate(`/dataStructConfig`);
+    navigate("/dataStructConfig", { state: { radioId: index, fields: radios[index].structFields } });
   };
 
   const counts = uidCounts(radios);
@@ -85,11 +85,11 @@ function RadioConfig() {
               onConfigKeyChange={(index, pIdx, value) => handleConfigKeyChange(index, pIdx, value, setRadios)}
               isDuplicateUid={counts[getRadioUid(r)] > 1}
               onUidChange={(index, value) => handleUidChange(index, value, setRadios)}
-              onConfigDataStruct={(index) => handleConfigDataStruct(index, setRadios)} 
+              onConfigDataStruct={(index) => handleConfigDataStruct(index)} 
             />
           </div>
         ))}
-        <button className="add-btn" onClick={() => handleAdd(nextId, setRadios)}>+</button>
+        <button className="add-btn" onClick={() => handleAdd(setRadios)}>+</button>
       </div>
         {ctxMenu && (
         <ul

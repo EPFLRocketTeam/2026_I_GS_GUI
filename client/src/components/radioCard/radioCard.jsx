@@ -42,19 +42,6 @@ function RadioCard({ radio, index, onConfigChange, onStructChange, onStructParse
         </div>
         ))}
         <button className="btn" onClick={() => onConfigDataStruct?.(index)}>Config Data Structure</button>
-      <div className="section-title">Data Structure</div>
-            <textarea
-              className="struct-textarea"
-              placeholder={"Paste your C struct body here, e.g.:\nuint32_t packet_nbr;\nuint16_t altitude;"}
-              value={radio.structText ?? ""}
-              onChange={e => onStructChange?.(index, e.target.value)}
-            />
-            <button className="btn btn-parse" onClick={() => onStructParse?.(index)}>
-              Parse struct
-            </button>
-      {radio.errors?.map(err => (
-              <div className="warn-box" key={err}>▲ {err}</div>
-            ))}
     </div>
   );
 }

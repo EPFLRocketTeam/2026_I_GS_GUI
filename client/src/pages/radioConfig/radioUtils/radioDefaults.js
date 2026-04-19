@@ -1,21 +1,28 @@
 import { validate } from "./radioIO";
 
 export const RADIO_CONFIG_PARAMS = [
-  { key: "uid",    label: "uid",      type: "uint32",  value: "1" },
-  { key: "frequency",    label: "Frequency",      type: "uint32",  value: "864340000" },
-  { key: "power",        label: "TX Power",        type: "uint32",   value: "14" },
-  { key: "bandwidth",    label: "Bandwidth",       type: "uint32",   value: "7" },
-  { key: "sf",           label: "Spread Factor",   type: "uint32",   value: "7" },
-  { key: "cr",           label: "Coding Rate",     type: "uint32",   value: "false" },
-  { key: "preamble_len", label: "Preamble Length", type: "uint32",  value: "8" },
-  { key: "crc",          label: "CRC",             type: "uint32",   value: "true" },
-  { key: "inverse_iq",   label: "Inverse IQ",      type: "uint32",   value: "false" },
-  { key: "send_mode",    label: "Send Mode",       type: "uint32",   value: "false" },
+  { key: "uid",    label: "uid",      type: "uint32",  value: "" },
+  { key: "frequency",    label: "Frequency",      type: "uint32",  value: "" },
+  { key: "power",        label: "TX Power",        type: "uint32",   value: "" },
+  { key: "bandwidth",    label: "Bandwidth",       type: "uint32",   value: "" },
+  { key: "sf",           label: "Spread Factor",   type: "uint32",   value: "" },
+  { key: "cr",           label: "Coding Rate",     type: "uint32",   value: "" },
+  { key: "preamble_len", label: "Preamble Length", type: "uint32",  value: "" },
+  { key: "crc",          label: "CRC",             type: "uint32",   value: "" },
+  { key: "inverse_iq",   label: "Inverse IQ",      type: "uint32",   value: "" },
+  { key: "send_mode",    label: "Send Mode",       type: "uint32",   value: "" },
 ];
 
-export const createNewRadio = (nextIdRef) => {
-  const uid = String(nextIdRef.current);
-  nextIdRef.current += 1;
+export const createNewRadio = (radios) => {
+  const usedUids = new Set(
+    radios.map(r => {
+      const uidParam = r.configParams?.find(p => p.key === "uid");
+      return Number(uidParam?.value);
+    }).filter(n => !Number.isNaN(n))
+  );
+
+  let uid = 0;
+  while (usedUids.has(uid)) uid++;
 
   return {
     id: crypto.randomUUID(),
@@ -23,7 +30,7 @@ export const createNewRadio = (nextIdRef) => {
     saved: false,
     configParams: RADIO_CONFIG_PARAMS.map(p => ({
       ...p,
-      value: p.key === "uid" ? uid : p.value,
+      value: p.key === "uid" ? String(uid) : p.value,
     })),
     structText: "",
     structFields: [],
