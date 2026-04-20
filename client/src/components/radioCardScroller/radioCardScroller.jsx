@@ -55,7 +55,9 @@ function RadioCardScroller({ children, empty = false, itemWidth = 360, scrollRat
         aria-label="Scroll left"
         type="button"
       >
-        ‹
+        <svg className="hcs-arrow-icon" viewBox="0 0 20 20" aria-hidden="true">
+          <path d="M12.5 4.5L7 10l5.5 5.5" />
+        </svg>
       </button>
 
       <div className="hcs-fade hcs-fade--left" />
@@ -72,7 +74,9 @@ function RadioCardScroller({ children, empty = false, itemWidth = 360, scrollRat
         aria-label="Scroll right"
         type="button"
       >
-        ›
+        <svg className="hcs-arrow-icon" viewBox="0 0 20 20" aria-hidden="true">
+          <path d="M7.5 4.5L13 10l-5.5 5.5" />
+        </svg>
       </button>
     </div>
   );

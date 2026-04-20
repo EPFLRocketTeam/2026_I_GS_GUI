@@ -1,6 +1,9 @@
-.card-header { display: flex; align-items: center; justify-content: space-between; }
-.card-title { font-size: 14px; font-weight: 500; }
-.badge { font-size: 11px; padding: 2px 8px; border-radius: 6px; font-weight: 500; }
+.card-header { display: flex; flex-direction: column; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid #2a2a2a; }
+.card-title-row { display: flex; justify-content: center; align-items: center; text-align: center; }
+.card-title { font-size: 16px; font-weight: 600; color: #fff; line-height: 1.2; letter-spacing: 0.01em; }
+.card-header-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; }
+.btn-delete-radio { min-width: 84px; justify-content: center; margin-left: auto; }
+.badge { font-size: 11px; padding: 4px 9px; border-radius: 999px; font-weight: 600; line-height: 1; text-transform: capitalize; }
 .badge-online  { background: #14532d; color: #4ade80; }
 .badge-syncing { background: #713f12; color: #fbbf24; }
 .badge-offline { background: #450a0a; color: #f87171; }
@@ -16,6 +19,12 @@
 .pin-type { font-size: 10px; color: #666; font-weight: 500; }
 .pin-value-row { display: flex; gap: 4px; }
 .pin-value-row input { flex: 1; }
+.radio-card { position: relative; background: #1a1a1a; border: 1px solid #333; border-radius: 14px; padding: 1rem; width: 210px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.18); }
+.section-title { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #777; margin-top: 2px; }
+.btn-struct { width: 100%; justify-content: center; margin-top: 4px; }
+.warn-inline { position: absolute; top: 8px; left: 12px; font-size: 10px; color: #ef4444; line-height: 1; pointer-events: none; }
+.radio-card { position: relative; background: #1a1a1a; border: 1px solid #333; border-radius: 14px; padding: 1rem; width: 210px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.18); }
+.warn-inline { position: absolute; top: 8px; left: 12px; font-size: 10px; color: #ef4444; line-height: 1; pointer-events: none; }
 .config-table {
   width: 100%;
   border-collapse: collapse;
@@ -33,28 +42,6 @@
   display: flex;
   align-items: center;
   box-sizing: border-box;
-}
-
-.radio-card {
-  position: relative;
-  background: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 10px;
-  padding: 1rem;
-  width: 210px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.warn-inline {
-  position: absolute;
-  top: 6px;
-  left: 12px;
-  font-size: 10px;
-  color: #ef4444;
-  line-height: 1;
-  pointer-events: none;
 }
 
 .config-table th {
@@ -116,8 +103,8 @@
 
 .btn { padding: 5px 12px; font-size: 13px; border: 1px solid #444; border-radius: 6px; background: #222; color: #fff; cursor: pointer; }
 .btn:hover { background: #333; }
-.btn-danger { border-color: #7f1d1d; color: #f87171; background: transparent; cursor: pointer; }
-.btn-danger:hover { background: #450a0a; }
+.btn-danger { border-color: #5a1f1f; color: #f38b8b; background: transparent; cursor: pointer; }
+.btn-danger:hover { background: #3a1515; color: #fff; }
 .btn-remove-pin { padding: 4px 8px; background: transparent; border: 1px solid #7f1d1d; color: #f87171; border-radius: 6px; cursor: pointer; font-size: 14px; }
 .btn-remove-pin:hover { background: #450a0a; }
 .btn-add-pin { background: transparent; border: 1px dashed #444; color: #888; border-radius: 6px; padding: 4px 8px; font-size: 12px; cursor: pointer; width: 100%; }

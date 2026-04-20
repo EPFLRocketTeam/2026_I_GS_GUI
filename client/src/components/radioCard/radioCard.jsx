@@ -1,4 +1,5 @@
 import "./radioCard.css";
+import { getRadioUid } from "../../pages/radioConfig/radioUtils/radioIO";
 
 const STATUS_BADGE = {
   online:  { label: "online",  cls: "badge-online" },
@@ -11,6 +12,7 @@ function RadioCard({ radio, index, onConfigChange, onStructChange, onStructParse
    onRemove, isDuplicateUid, onConfigDataStruct
  }) {
   const badge = STATUS_BADGE[radio.status] ?? STATUS_BADGE.offline;
+  const uid = getRadioUid(radio) ?? "—";
 
   return (
     
@@ -19,11 +21,22 @@ function RadioCard({ radio, index, onConfigChange, onStructChange, onStructParse
           <div className="warn-inline">same id used twice</div>
         )}
       <div className="card-header">
-        <div className="uid-edit-row">
-          <span className="card-title">Radio</span>
+        <div className="card-title-row">
+          <span className="card-title">Radio {uid}</span>
         </div>
-        <span className={`badge ${badge.cls}`}>{badge.label}</span>
-        <button className="btn btn-danger" onClick={(e) => { e.stopPropagation(); onRemove?.(index); }}>Delete Radio</button>
+
+        <div className="card-header-actions">
+          <span className={`badge ${badge.cls}`}>{badge.label}</span>
+          <button
+            className="btn btn-danger btn-delete-radio"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove?.(index);
+            }}
+          >
+            Delete
+          </button>
+        </div>
       </div>
       <div className="section-title">Config Parameters</div>
        {(radio.configParams ?? []).map((param, pIdx) => (
