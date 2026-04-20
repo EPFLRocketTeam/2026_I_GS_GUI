@@ -13,6 +13,7 @@ import {
 import { ensureRadioIds } from "./radioUtils/radioDefaults";
 import { getRadioUid, uidCounts } from "./radioUtils/radioIO";
 import { useNavigate } from "react-router-dom";
+import useRadioDrag from "./radioUtils/radioDragUtils";
 
 function RadioConfig({radios, setRadios}) {
   const { lastUpdated, isConnected } = useRadioSocket("ws://127.0.0.1:8001/ws/radio/");
@@ -20,9 +21,31 @@ function RadioConfig({radios, setRadios}) {
 
   const [ctxMenu, setCtxMenu] = useState(null); 
   const [panelRadioId, setPanelRadioId] = useState(null);
-  const panelRadio = radios.find(r => r.id === panelRadioId) ?? null;
-
   const [selectedRadioId, setSelectedRadioId] = useState(null);
+
+  const panelRadio = radios.find(r => r.id === panelRadioId) ?? null;
+  const { draggedRadioId, dragOverRadioId, handleDragStart, handleDragEnter, handleDrop, handleDragEnd } = useRadioDrag(setRadios);
+
+  const handleContextMenu = (e, radioId) => {
+    e.preventDefault();
+    setCtxMenu({ x: e.clientX, y: e.clientY, radioId: radioId });
+  };
+
+  const navigate = useNavigate();
+
+  const handleConfigDataStruct = (index) => {
+    const radio = radios[index];
+
+    navigate("/dataStructConfig", {
+      state: {
+        radioId: radio.id,
+        radioUid: getRadioUid(radio),
+        fields: radio.structFields ?? radio.initialFields ?? [],
+      },
+    });
+  };
+
+  const counts = uidCounts(radios);
 
   const selectRadioCard = (radioId) => {
     setSelectedRadioId(radioId);
@@ -45,27 +68,6 @@ function RadioConfig({radios, setRadios}) {
     window.addEventListener("click", close);
     return () => window.removeEventListener("click", close);
   }, []);
-
-  const handleContextMenu = (e, radioId) => {
-    e.preventDefault();
-    setCtxMenu({ x: e.clientX, y: e.clientY, radioId: radioId });
-  };
-
-  const navigate = useNavigate();
-
-  const handleConfigDataStruct = (index) => {
-    const radio = radios[index];
-
-    navigate("/dataStructConfig", {
-      state: {
-        radioId: radio.id,
-        radioUid: getRadioUid(radio),
-        fields: radio.structFields ?? radio.initialFields ?? [],
-      },
-    });
-  };
-
-  const counts = uidCounts(radios);
 
   return (
     <div className="radio-page">
@@ -90,7 +92,18 @@ function RadioConfig({radios, setRadios}) {
       <div className={`cards-wrap ${radios.length === 0 ? "cards-wrap--empty" : ""}`}>
         <RadioCardScroller empty={radios.length === 0}>
           {radios.map((r, i) => (
-            <div key={r.id} class= {`cards-item ${selectedRadioId === r.id ? "cards-item--selected" : ""}`} onContextMenu={e => handleContextMenu(e, r.id)} onClick={() => selectRadioCard(r.id)}>
+            <div
+              key={r.id}
+              draggable
+              className={`cards-item ${selectedRadioId === r.id ? "cards-item--selected" : ""} ${draggedRadioId === r.id ? "cards-item--dragging" : ""} ${dragOverRadioId === r.id ? "cards-item--drag-over" : ""}`}
+              onClick={() => selectRadioCard(r.id)}
+              onContextMenu={(e) => handleContextMenu(e, r.id)}
+              onDragStart={() => handleDragStart(r.id)}
+              onDragEnter={() => handleDragEnter(r.id)}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={() => handleDrop(r.id)}
+              onDragEnd={handleDragEnd}
+            >
               <RadioCard
                 radio={r}
                 index={i}

@@ -142,3 +142,18 @@ export const handleFieldTypeChange = (radioIdx, fieldIdx, value, setRadios) => {
     return validate(updated);
   });
 };
+
+export const moveRadio = (list, fromId, toId) => {
+  const fromIndex = list.findIndex((r) => r.id === fromId);
+  const toIndex = list.findIndex((r) => r.id === toId);
+
+  if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) {
+    return list;
+  }
+
+  const updated = [...list];
+  const [moved] = updated.splice(fromIndex, 1);
+  updated.splice(toIndex, 0, moved);
+  return updated;
+};
+
