@@ -4,7 +4,7 @@ import { createNewRadio, clampValue } from "./radioDefaults";
 export const handleAdd = (setRadios) => {
   setRadios(prev => {
     const newRadio = createNewRadio(prev);
-    return validate([...prev, newRadio]);
+    return validate([newRadio, ...prev]);
   });
 };
 

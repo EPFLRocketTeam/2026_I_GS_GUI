@@ -23,7 +23,7 @@ function RadioCard({ radio, index, onConfigChange, onStructChange, onStructParse
           <span className="card-title">Radio</span>
         </div>
         <span className={`badge ${badge.cls}`}>{badge.label}</span>
-        <button className="btn btn-danger" onClick={() => onRemove?.(index)}>✕</button>
+        <button className="btn btn-danger" onClick={(e) => { e.stopPropagation(); onRemove?.(index); }}>Delete Radio</button>
       </div>
       <div className="section-title">Config Parameters</div>
        {(radio.configParams ?? []).map((param, pIdx) => (

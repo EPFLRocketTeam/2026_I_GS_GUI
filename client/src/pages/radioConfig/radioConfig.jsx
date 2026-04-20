@@ -14,6 +14,7 @@ import { ensureRadioIds } from "./radioUtils/radioDefaults";
 import { getRadioUid, uidCounts } from "./radioUtils/radioIO";
 import { useNavigate } from "react-router-dom";
 import useRadioDrag from "./radioUtils/radioDragUtils";
+import DeleteRadioModal from "../../components/deleteRadioModal/deleteRadioModal";
 
 function RadioConfig({radios, setRadios}) {
   const { lastUpdated, isConnected } = useRadioSocket("ws://127.0.0.1:8001/ws/radio/");
@@ -22,6 +23,7 @@ function RadioConfig({radios, setRadios}) {
   const [ctxMenu, setCtxMenu] = useState(null); 
   const [panelRadioId, setPanelRadioId] = useState(null);
   const [selectedRadioId, setSelectedRadioId] = useState(null);
+  const [radioPendingDelete, setRadioPendingDelete] = useState(null);
 
   const panelRadio = radios.find(r => r.id === panelRadioId) ?? null;
   const { draggedRadioId, dragOverRadioId, handleDragStart, handleDragEnter, handleDrop, handleDragEnd } = useRadioDrag(setRadios);
@@ -111,7 +113,7 @@ function RadioConfig({radios, setRadios}) {
                 onStructChange={(index, text) => handleStructChange(index, text, setRadios)}
                 onStructParse = {(index) => {handleStructParse(index, setRadios); setPanelRadioId(radios[index].id)}}
                 onFieldChange={(index, fieldIdx, value) => handleFieldChange(index, fieldIdx, value, setRadios)}
-                onRemove = {(index) => handleRemove(index, setRadios)}
+                onRemove = {(index) => setRadioPendingDelete({ index, radio: radios[index] })}
                 onConfigTypeChange={(index, pIdx, value) => handleConfigTypeChange(index, pIdx, value, setRadios)}
                 onConfigKeyChange={(index, pIdx, value) => handleConfigKeyChange(index, pIdx, value, setRadios)}
                 isDuplicateUid={counts[getRadioUid(r)] > 1}
@@ -121,6 +123,17 @@ function RadioConfig({radios, setRadios}) {
           ))}
         </RadioCardScroller>
         </div>
+        {radioPendingDelete && (
+          <DeleteRadioModal
+            radio={radioPendingDelete.radio}
+            index={radioPendingDelete.index}
+            onCancel={() => setRadioPendingDelete(null)}
+            onConfirm={() => {
+              handleRemove(radioPendingDelete.index, setRadios);
+              setRadioPendingDelete(null);
+            }}
+          />
+        )}
         {ctxMenu && (
         <ul
           className="ctx-menu"
