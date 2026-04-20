@@ -48,11 +48,23 @@ function RadioCard({ radio, index, onConfigChange, onStructChange, onStructParse
             ) : (
               <input
                 className="table-input param-value-input"
-                type={param.control === "number" ? "number" : "text"}
+                type={param.control === "number" ? "numeric" : "text"}
                 min={param.min}
                 max={param.max}
+                maxLength={param.maxLength}
                 value={param.value}
-                onChange={(e) => onConfigChange?.(index, pIdx, e.target.value)}
+                onChange={(e) => {
+                  let nextValue = e.target.value;
+
+                  if (param.control === "number") {
+                    nextValue = nextValue.replace(/\D/g, "");
+                    if (param.maxLength != null) {
+                      nextValue = nextValue.slice(0, param.maxLength);
+                    }
+                  }
+
+                  onConfigChange?.(index, pIdx, nextValue);
+                }}
                 placeholder="value"
               />
             )}

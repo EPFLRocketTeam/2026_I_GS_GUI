@@ -120,12 +120,8 @@ function DataStructConfig({ radios = [], setRadios }) {
 
   if (availableRadios.length === 0) {
     return (
-      <div className="dsc-page">
-        <div className="dsc-card">
-          <div className="dsc-empty" style={{ padding: "2rem" }}>
-            No radios configured yet.
-          </div>
-        </div>
+      <div className="dsc-empty-page">
+        <div className="dsc-empty-message">No radios configured yet...</div>
       </div>
     );
   }

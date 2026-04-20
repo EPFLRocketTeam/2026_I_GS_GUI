@@ -3,6 +3,7 @@ import "./radioConfig.css";
 import RadioCard from "../../components/radioCard/radioCard";
 import useRadioSocket from "../../sockets/radio/useRadioSocket";
 import RocketDataPanel from "../../components/rocketDataPanel/rocketDataPanel";
+import RadioCardScroller  from "../../components/radioCardScroller/radioCardScroller";
 import { 
   validate, downloadConfig, loadConfig, handleAdd,
   handleConfigChange, handleStructChange, handleStructParse, handleRemove,
@@ -20,6 +21,12 @@ function RadioConfig({radios, setRadios}) {
   const [ctxMenu, setCtxMenu] = useState(null); 
   const [panelRadioId, setPanelRadioId] = useState(null);
   const panelRadio = radios.find(r => r.id === panelRadioId) ?? null;
+
+  const [selectedRadioId, setSelectedRadioId] = useState(null);
+
+  const selectRadioCard = (radioId) => {
+    setSelectedRadioId(radioId);
+  };
 
   useEffect(() => {
     if (!radios.length) {
@@ -63,39 +70,44 @@ function RadioConfig({radios, setRadios}) {
   return (
     <div className="radio-page">
       <div className="topbar">
-        <h2>Radio Config</h2>
-        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-            <button className="btn" onClick={() => loadConfig(loaded => {
-              const normalized = ensureRadioIds(loaded);
-              nextId.current = Math.max(0, ...normalized.map(r => Number(getRadioUid(r)) || 0)) + 1;
-              setRadios(validate(normalized));
-            })}>Load radio config</button>
-            <button className="btn" onClick={() => downloadConfig(radios)}>Download config</button>
-          <div style={{ width: "12px", height: "12px", borderRadius: "50%", backgroundColor: isConnected ? "#4be34b" : "#ff6b6b" }} />
-          <span style={{ fontSize: "12px", color: "#888" }}>{isConnected ? "Connected" : "Disconnected"}</span>
+        <div className="topbar-left">
+          <button className="btn btn-add-radio" onClick={() => handleAdd(setRadios)}> + Add Radio</button>
         </div>
-        {lastUpdated && <span style={{ fontSize: "12px", color: "#888" }}>Last updated: {lastUpdated}</span>}
+        <div className="topbar-right">
+          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+              <button className="btn" onClick={() => loadConfig(loaded => {
+                const normalized = ensureRadioIds(loaded);
+                nextId.current = Math.max(0, ...normalized.map(r => Number(getRadioUid(r)) || 0)) + 1;
+                setRadios(validate(normalized));
+              })}>Load radio config</button>
+              <button className="btn" onClick={() => downloadConfig(radios)}>Download config</button>
+            <div style={{ width: "12px", height: "12px", borderRadius: "50%", backgroundColor: isConnected ? "#4be34b" : "#ff6b6b" }} />
+            <span style={{ fontSize: "12px", color: "#888" }}>{isConnected ? "Connected" : "Disconnected"}</span>
+          </div>
+          {lastUpdated && <span style={{ fontSize: "12px", color: "#888" }}>Last updated: {lastUpdated}</span>}
+        </div>
       </div>
       <div className={`cards-wrap ${radios.length === 0 ? "cards-wrap--empty" : ""}`}>
-        {radios.map((r, i) => (
-          <div key={r.id} onContextMenu={e => handleContextMenu(e, r.id)}>
-            <RadioCard
-              radio={r}
-              index={i}
-              onConfigChange={(index, paramIdx, value) => handleConfigChange(index, paramIdx, value, setRadios)}
-              onStructChange={(index, text) => handleStructChange(index, text, setRadios)}
-              onStructParse = {(index) => {handleStructParse(index, setRadios); setPanelRadioId(radios[index].id)}}
-              onFieldChange={(index, fieldIdx, value) => handleFieldChange(index, fieldIdx, value, setRadios)}
-              onRemove = {(index) => handleRemove(index, setRadios)}
-              onConfigTypeChange={(index, pIdx, value) => handleConfigTypeChange(index, pIdx, value, setRadios)}
-              onConfigKeyChange={(index, pIdx, value) => handleConfigKeyChange(index, pIdx, value, setRadios)}
-              isDuplicateUid={counts[getRadioUid(r)] > 1}
-              onConfigDataStruct={(index) => handleConfigDataStruct(index)} 
-            />
-          </div>
-        ))}
-        <button className="add-btn" onClick={() => handleAdd(setRadios)}>+</button>
-      </div>
+        <RadioCardScroller empty={radios.length === 0}>
+          {radios.map((r, i) => (
+            <div key={r.id} class= {`cards-item ${selectedRadioId === r.id ? "cards-item--selected" : ""}`} onContextMenu={e => handleContextMenu(e, r.id)} onClick={() => selectRadioCard(r.id)}>
+              <RadioCard
+                radio={r}
+                index={i}
+                onConfigChange={(index, paramIdx, value) => handleConfigChange(index, paramIdx, value, setRadios)}
+                onStructChange={(index, text) => handleStructChange(index, text, setRadios)}
+                onStructParse = {(index) => {handleStructParse(index, setRadios); setPanelRadioId(radios[index].id)}}
+                onFieldChange={(index, fieldIdx, value) => handleFieldChange(index, fieldIdx, value, setRadios)}
+                onRemove = {(index) => handleRemove(index, setRadios)}
+                onConfigTypeChange={(index, pIdx, value) => handleConfigTypeChange(index, pIdx, value, setRadios)}
+                onConfigKeyChange={(index, pIdx, value) => handleConfigKeyChange(index, pIdx, value, setRadios)}
+                isDuplicateUid={counts[getRadioUid(r)] > 1}
+                onConfigDataStruct={(index) => handleConfigDataStruct(index)} 
+              />
+            </div>
+          ))}
+        </RadioCardScroller>
+        </div>
         {ctxMenu && (
         <ul
           className="ctx-menu"
