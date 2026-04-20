@@ -165,7 +165,11 @@ function DataStructConfig({ radios = [], setRadios }) {
 
         {isReceiverOnly && (
           <div className="dsc-warning-banner">
-            Receiver mode detected — the data structure should not be modified.
+            <span className="dsc-warning-icon">⚠</span>
+            <div className="dsc-warning-content">
+              <div className="dsc-warning-title">Receiver mode active</div>
+              <div className="dsc-warning-text">This data structure is read-only and should not be modified.</div>
+            </div>
           </div>
         )}
 

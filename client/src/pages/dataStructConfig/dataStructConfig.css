@@ -2,10 +2,12 @@
   padding: 2rem;
 }
 
+.dsc-empty-page { min-height: calc(100vh - 80px); display: flex; align-items: center; justify-content: center; padding: 2rem; }
+.dsc-empty-message { text-align: center; color: #aaa; font-size: 20px; font-weight: 500; }
+
 .dsc-card { background: #1a1a1a; border: 1px solid #444; border-radius: 12px; overflow: hidden; }
 .dsc-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid #444; background: #1e1e1e; flex-wrap: wrap; gap: 10px; }
 .dsc-subtitle { font-size: 12px; color: #888; }
-.dsc-flash { font-size: 12px; color: #888; }
 .dsc-add-row { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-top: 1px solid #444; cursor: pointer; color: #aaa; font-size: 13px; background: #1a1a1a; transition: background 0.12s; }
 .dsc-add-row:hover { background: #2a2a2a; color: #fff; }
 .dsc-add-icon { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid #666; display: flex; align-items: center; justify-content: center; font-size: 13px; line-height: 1; flex-shrink: 0; color: #aaa; }
@@ -80,3 +82,8 @@
 .dsc-btn-header:hover { cursor: pointer; background: #222; border-color: #666; color: #fff; }
 .dsc-btn-header:active { transform: scale(0.98); }
 .dsc-flash { padding: 6px 10px; border-radius: 999px; background: #1a1a1a; border: 1px solid #444; color: #aaa; font-size: 12px; }
+.dsc-warning-banner { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-top: 1px solid rgba(255,255,255,0.04); border-bottom: 1px solid #5a4a1a; background: linear-gradient(180deg, #2a2210 0%, #211c10 100%); }
+.dsc-warning-icon { width: 28px; height: 28px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: rgba(255,193,7,0.12); border: 1px solid rgba(255,193,7,0.28); color: #f0c55a; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+.dsc-warning-content { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.dsc-warning-title { font-size: 13px; font-weight: 600; color: #f5d37a; letter-spacing: 0.01em; }
+.dsc-warning-text { font-size: 12px; line-height: 1.45; color: #c9b37a; }
