@@ -1,51 +1,30 @@
-.send-data {
-  margin: 20px;
-}
-
-.main-container {
-  background-color: black;
-  color: white;
-  min-height: 100vh;
-}
-
-.App {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
+.send-data { margin: 20px; }
+.main-container { background-color: black; color: white; min-height: 100vh; padding: 24px; }
+.dashboard-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.dashboard-hint { color: #888; font-size: 13px; }
+.dashboard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; min-height: calc(100vh - 140px); }
+.dashboard-grid--empty { display: flex; align-items: center; justify-content: center; }
+.dashboard-empty { color: #888; font-size: 18px; }
+.digital-display-card { background: #1a1a1a; border: 1px solid #333; border-radius: 14px; padding: 18px; box-shadow: 0 8px 20px rgba(0,0,0,0.18); display: flex; flex-direction: column; gap: 10px; min-height: 140px; }
+.digital-display-title { font-size: 14px; font-weight: 600; color: #fff; }
+.digital-display-value { font-size: 36px; font-weight: 700; color: #fff; line-height: 1; }
+.digital-display-suffix { margin-left: 6px; font-size: 16px; color: #aaa; font-weight: 500; }
+.digital-display-variable { font-size: 12px; color: #888; margin-top: auto; }
+.dashboard-ctx-menu { position: fixed; z-index: 2000; background: #1e1e1e; border: 1px solid #444; border-radius: 6px; padding: 4px 0; margin: 0; list-style: none; min-width: 180px; box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
+.dashboard-ctx-menu li { padding: 8px 16px; cursor: pointer; font-size: 13px; }
+.dashboard-ctx-menu li:hover { background: #2a2a2a; }
+.dashboard-modal-overlay { position: fixed; inset: 0; z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(0,0,0,0.72); backdrop-filter: blur(4px); }
+.dashboard-modal { width: min(720px, 100%); max-height: 80vh; overflow: hidden; display: flex; flex-direction: column; background: #1a1a1a; border: 1px solid #333; border-radius: 14px; box-shadow: 0 12px 28px rgba(0,0,0,0.35); }
+.dashboard-modal-title { padding: 18px 20px 6px; font-size: 20px; font-weight: 700; color: #fff; }
+.dashboard-modal-subtitle { padding: 0 20px 14px; font-size: 13px; color: #888; border-bottom: 1px solid #2a2a2a; }
+.dashboard-variable-list { padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.dashboard-variable-item { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border: 1px solid #333; border-radius: 10px; background: #111; color: #fff; cursor: pointer; text-align: left; }
+.dashboard-variable-item:hover { background: #1f1f1f; border-color: #555; }
+.dashboard-variable-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.dashboard-variable-name { font-size: 14px; font-weight: 600; color: #fff; }
+.dashboard-variable-meta { font-size: 12px; color: #888; }
+.dashboard-variable-pick { padding: 6px 10px; border: 1px solid #444; border-radius: 8px; background: #1a1a1a; color: #aaa; font-size: 12px; white-space: nowrap; }
+.dashboard-empty-variables { padding: 24px; text-align: center; color: #888; font-size: 14px; }
+.dashboard-modal-actions { display: flex; justify-content: flex-end; padding: 14px 20px 18px; border-top: 1px solid #2a2a2a; }
+.dashboard-modal-btn { padding: 8px 14px; border: 1px solid #444; border-radius: 8px; background: #1a1a1a; color: #fff; cursor: pointer; }
+.dashboard-modal-btn:hover { background: #222; }
