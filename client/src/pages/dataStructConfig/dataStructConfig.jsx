@@ -133,16 +133,22 @@ function DataStructConfig({ radios = [], setRadios }) {
         <div className="dsc-header">
           <div className="dsc-header-left">
             <div className="dsc-radio-selector">
-              {availableRadios.map(r => (
-                <button
-                  key={r.id}
-                  className={`dsc-radio-tab ${r.id === selectedId ? "active" : ""}`}
-                  onClick={() => dispatch({ type: "SET_SELECTED", id: r.id })}
-                >
-                  <span className="dsc-radio-dot" />
-                  Radio {getRadioUid(r) ?? r.id}
-                </button>
-              ))}
+              {availableRadios.map(r => {
+                const isActive = r.id === selectedId;
+
+                return (
+                  <button
+                    key={r.id}
+                    className={`dsc-radio-tab ${isActive ? "active" : ""}`}
+                    onClick={() => dispatch({ type: "SET_SELECTED", id: r.id })}
+                    aria-pressed={isActive}
+                  >
+                    <span className="dsc-radio-dot" />
+                    <span className="dsc-radio-tab-text">Radio {getRadioUid(r) ?? r.id}</span>
+                    {isActive && <span className="dsc-radio-tab-badge">Selected</span>}
+                  </button>
+                );
+              })}
             </div>
             <span className="dsc-subtitle">
                 Data structure · Radio {selectedRadio ? getRadioUid(selectedRadio) : (incomingRadioUid ?? selectedId)}
@@ -152,8 +158,8 @@ function DataStructConfig({ radios = [], setRadios }) {
           </div>
           <div className="dsc-header-actions">
             {state.ui.flashMsg && <span className="dsc-flash">{state.ui.flashMsg}</span>}
-            <button className="dsc-btn" onClick={copyJSON}>Copy JSON</button>
-            <button className="dsc-btn" onClick={copyStruct}>Copy C struct</button>
+            <button className="dsc-btn dsc-btn-header" onClick={copyJSON}>Copy JSON</button>
+            <button className="dsc-btn dsc-btn-header" onClick={copyStruct}>Copy C struct</button>
           </div>
         </div>
 
@@ -212,7 +218,7 @@ function DataStructConfig({ radios = [], setRadios }) {
                 placeholder='[{"name":"packet_nbr","type":"uint32_t","bits":32,"comment":""}]'
               />
               <div className="dsc-import-actions">
-                <button className="dsc-btn dsc-btn-primary" onClick={() => {if (isReceiverOnly) {warnReceiverOnly()}; importJSON()}}>       
+                <button className="dsc-btn dsc-btn-header" onClick={() => {if (isReceiverOnly) {warnReceiverOnly()}; importJSON()}}>       
                 Import</button>
                 {state.ui.importError && <span className="dsc-error">{state.ui.importError}</span>}
               </div>
