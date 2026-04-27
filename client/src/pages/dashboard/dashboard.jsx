@@ -15,6 +15,7 @@ import {
   getDisplayValue,
   createDisplayFromField,
   createDragState,
+  getOverlappingCardIds,
 } from "./dashboardUtils";
 import { useNavigate } from "react-router-dom";
 
@@ -27,8 +28,14 @@ function Dashboard({ displays = [], setDisplays = () => {}, radios = [] }) {
   const panRef = useRef({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [panning, setPanning] = useState(null);
 
   useEffect(() => { panRef.current = pan; }, [pan]);
+
+  const overlappingCardIds = useMemo(
+  () => getOverlappingCardIds(displays),
+  [displays]
+);
 
   const availableVariables = useMemo(
     () => buildAvailableVariables(radios, getRadioUid),
@@ -39,6 +46,34 @@ function Dashboard({ displays = [], setDisplays = () => {}, radios = [] }) {
     () => buildFieldValueMap(radios),
     [radios]
   );
+
+  const startPan = (e) => {
+    if (e.button !== 2 ||!e.ctrlKey) return;
+    if (e.target.closest(".dashboard-draggable-card")) return;
+
+    e.preventDefault();
+    setCtxMenu(null);
+
+    setPanning({
+      startMouseX: e.clientX,
+      startMouseY: e.clientY,
+      startPanX: pan.x,
+      startPanY: pan.y,
+    });
+  };
+
+  const handlePanMove = (e) => {
+    if (!panning) return;
+
+    setPan({
+      x: panning.startPanX + (e.clientX - panning.startMouseX),
+      y: panning.startPanY + (e.clientY - panning.startMouseY),
+    });
+  };
+
+  const stopPan = () => {
+    setPanning(null);
+  };
 
   const zoomAround = useCallback((delta) => {
     const currentPan = panRef.current;
@@ -58,8 +93,8 @@ function Dashboard({ displays = [], setDisplays = () => {}, radios = [] }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!e.ctrlKey) return;
-      if (e.key === "+" || e.key === "=") { e.preventDefault(); zoomAround(0.1); }
-      if (e.key === "-") { e.preventDefault(); zoomAround(-0.1); }
+      if (e.key === "+" || e.key === "=") { e.preventDefault(); zoomAround(0.05); }
+      if (e.key === "-") { e.preventDefault(); zoomAround(-0.05); }
       if (e.key === "0") { e.preventDefault(); setZoom(1); setPan({ x: 0, y: 0 }); }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -118,10 +153,13 @@ const startDrag = (e, display) => {
   };
 
   return (
-    <div className="main-container" onContextMenu={ (e) => { e.preventDefault(); setCtxMenu({ x: e.clientX, y: e.clientY, type: "page" }); } }>
+    <div className="main-container" onContextMenu={ (e) => { e.preventDefault(); if (e.ctrlKey || panning) return; setCtxMenu({ x: e.clientX, y: e.clientY, type: "page" }); } }>
     <div
-      className="dashboard-zoom-viewport"
-      onMouseMove={(e) => { const { x, y } = getViewportMousePos(e); mousePos.current = { x, y }; }}
+      className={`dashboard-zoom-viewport ${panning ? "is-panning" : ""}`}
+      onMouseDown={startPan}
+      onMouseMove={(e) => { const { x, y } = getViewportMousePos(e); mousePos.current = { x, y }; handlePanMove(e);}}
+      onMouseUp={stopPan}
+      onMouseLeave={stopPan}
       onWheel={handleWheel}
     >
       <div
@@ -143,14 +181,16 @@ const startDrag = (e, display) => {
                 key={display.id}
                 className={`dashboard-draggable-card ${
                   dragging?.id === display.id ? "is-dragging" : ""
-                }`}
+                } ${overlappingCardIds.has(display.id) ? "is-overlapping" : ""}`}
                 style={{
                   left: display.x ?? 0,
                   top: display.y ?? 0,
                   width: CARD_W,
                   minHeight: CARD_H,
                 }}
-                onMouseDown={(e) => startDrag(e, display)}
+                onMouseDown={(e) => {
+                  if (e.button === 0) startDrag(e, display);
+                }}
                 onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); setCtxMenu({ x: e.clientX, y: e.clientY, type: "card", displayId: display.id }); }}
               >
               <DigitalDisplayCard

@@ -60,20 +60,7 @@ export const moveDraggedDisplay = ({ displays, dragging, x, y }) => {
   );
 };
 
-export const resolveDroppedDisplay = ({ displays, dragging }) => {
-  const moving = displays.find((display) => display.id === dragging.id);
-  if (!moving) return displays;
-
-  const overlaps = hasCardOverlap(moving, displays);
-
-  if (!overlaps) return displays;
-
-  return displays.map((display) =>
-    display.id === moving.id
-      ? { ...display, x: dragging.startX, y: dragging.startY }
-      : display
-  );
-};
+export const resolveDroppedDisplay = ({ displays }) => displays;
 
 export const clampZoom = (value) => Math.min(2, Math.max(0.4, value));
 
@@ -103,8 +90,8 @@ export const createDisplayFromField = (fieldInfo, count = 0) => ({
   radioId: fieldInfo.radioId,
   radioUid: fieldInfo.radioUid,
   type: fieldInfo.type || "",
-  x: 24 + (count % 4) * 250,
-  y: 24 + Math.floor(count / 4) * 170,
+  x: window.innerWidth / 2 - CARD_W / 2 + (count % 3) * 24,
+  y: window.innerHeight / 2 - CARD_H / 2 + Math.floor(count / 3) * 24,
 });
 
 export const buildFieldValueMap = (radios) => {
@@ -136,4 +123,27 @@ export const buildAvailableVariables = (radios, getRadioUid) =>
 export const getDisplayValue = (fieldValueMap, display) => {
   const value = fieldValueMap.get(`${display.radioId}::${display.variable}`);
   return value !== undefined && value !== "" ? value : "--";
+};
+
+export const getOverlappingCardIds = (displays) => {
+  const overlappingIds = new Set();
+
+  for (let i = 0; i < displays.length; i++) {
+    for (let j = i + 1; j < displays.length; j++) {
+      const a = displays[i];
+      const b = displays[j];
+
+      if (
+        cardsOverlap(
+          { x: a.x ?? 0, y: a.y ?? 0 },
+          { x: b.x ?? 0, y: b.y ?? 0 }
+        )
+      ) {
+        overlappingIds.add(a.id);
+        overlappingIds.add(b.id);
+      }
+    }
+  }
+
+  return overlappingIds;
 };
