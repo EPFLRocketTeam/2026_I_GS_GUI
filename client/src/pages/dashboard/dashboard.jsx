@@ -18,6 +18,7 @@ import {
   getOverlappingCardIds,
 } from "./dashboardUtils";
 import { useNavigate } from "react-router-dom";
+import DeleteRadioModal from "../../components/deleteRadioModal/deleteRadioModal";
 
 function Dashboard({ displays = [], setDisplays = () => {}, radios = [] }) {
   const navigate = useNavigate();
@@ -29,6 +30,7 @@ function Dashboard({ displays = [], setDisplays = () => {}, radios = [] }) {
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [panning, setPanning] = useState(null);
+  const [displayPendingDelete, setDisplayPendingDelete] = useState(null);
 
   useEffect(() => { panRef.current = pan; }, [pan]);
 
@@ -210,8 +212,41 @@ const startDrag = (e, display) => {
           onClick={(e) => e.stopPropagation()}
         >
           {ctxMenu.type === "page" && <li onClick={() => { setCtxMenu(null); setVariablePickerOpen(true); }}>＋ Add digital display</li>}
-          {ctxMenu.type === "card" && <li onClick={() => { setCtxMenu(null); navigate(`/dashboard/display/${ctxMenu.displayId}`); }}>⚙ Parameters</li>}
+          {ctxMenu.type === "card" && (
+            <>
+              <li onClick={() => {
+                setCtxMenu(null);
+                navigate(`/dashboard/display/${ctxMenu.displayId}`);
+              }}>
+                ⚙ Parameters
+              </li>
+
+              <li onClick={() => {
+                const display = displays.find((d) => d.id === ctxMenu.displayId);
+                  setDisplayPendingDelete(display);
+                  setCtxMenu(null);
+                }}>
+                🗑 Remove display
+              </li>
+            </>
+          )}
         </ul>
+      )}
+
+      {displayPendingDelete && (
+        <DeleteRadioModal
+          itemName={`digital display "${displayPendingDelete.title}"`}
+          title="Delete digital display?"
+          message="This will only remove the display from the dashboard. It will not remove the variable from the data structure table."
+          confirmText="Delete display"
+          onCancel={() => setDisplayPendingDelete(null)}
+          onConfirm={() => {
+            setDisplays((prev) =>
+              prev.filter((display) => display.id !== displayPendingDelete.id)
+            );
+            setDisplayPendingDelete(null);
+          }}
+        />
       )}
 
       {variablePickerOpen && (
@@ -231,11 +266,36 @@ const startDrag = (e, display) => {
                 availableVariables.map((field) => (
                   <button
                     key={`${field.radioId}-${field.name}-${field.address ?? ""}`}
-                    className="dashboard-variable-item"
+                    className={`dashboard-variable-item ${
+                      displays.some(
+                        (display) =>
+                          display.radioId === field.radioId &&
+                          display.variable === field.name
+                      )
+                        ? "is-disabled"
+                        : ""
+                    }`}
+                    disabled={displays.some(
+                      (display) =>
+                        display.radioId === field.radioId &&
+                        display.variable === field.name
+                    )}
                     onClick={() => {
-                        setDisplays((prev = []) => [...prev, createDisplayFromField(field, prev.length)]);
-                        setVariablePickerOpen(false);
-                      }}
+                      const alreadyExists = displays.some(
+                        (display) =>
+                          display.radioId === field.radioId &&
+                          display.variable === field.name
+                      );
+
+                      if (alreadyExists) return;
+
+                      setDisplays((prev = []) => [
+                        ...prev,
+                        createDisplayFromField(field, prev.length),
+                      ]);
+
+                      setVariablePickerOpen(false);
+                    }}
                   >
                     <div className="dashboard-variable-main">
                       <div className="dashboard-variable-name">{field.name}</div>

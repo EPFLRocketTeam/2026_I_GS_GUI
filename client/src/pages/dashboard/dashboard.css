@@ -37,4 +37,12 @@ body,
 .dashboard-zoom-viewport.is-panning { cursor: grabbing; }
 .dashboard-zoom-viewport.is-panning 
 .dashboard-draggable-card { pointer-events: none;}
+.dashboard-variable-item.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
 
+.dashboard-variable-item.is-disabled:hover {
+  background: #111;
+  border-color: #333;
+}
