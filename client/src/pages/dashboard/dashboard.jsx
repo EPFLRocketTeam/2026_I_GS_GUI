@@ -1,66 +1,70 @@
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import { getRadioUid } from "../radioConfig/radioUtils/radioIO";
 import "./dashboard.css";
 import DigitalDisplayCard from "../../components/digitalDisplayCard/digitalDisplayCard";
 import {
   CARD_W,
   CARD_H,
-  createDragState,
   getDraggedCardPosition,
   moveDraggedDisplay,
   resolveDroppedDisplay,
+  buildAvailableVariables,
+  getNextZoomPan,
+  getViewportMousePos,
+  buildFieldValueMap,
+  getDisplayValue,
+  createDisplayFromField,
+  createDragState,
 } from "./dashboardUtils";
-
-const createDisplayFromField = (fieldInfo, count = 0) => ({
-  id: crypto.randomUUID(),
-  title: fieldInfo.name || `Display ${count + 1}`,
-  variable: fieldInfo.name || "",
-  suffix: "",
-  radioId: fieldInfo.radioId,
-  radioUid: fieldInfo.radioUid,
-  type: fieldInfo.type || "",
-  x: 24 + (count % 4) * 250,
-  y: 24 + Math.floor(count / 4) * 170,
-});
+import { useNavigate } from "react-router-dom";
 
 function Dashboard({ displays = [], setDisplays = () => {}, radios = [] }) {
+  const navigate = useNavigate();
   const [ctxMenu, setCtxMenu] = useState(null);
   const [variablePickerOpen, setVariablePickerOpen] = useState(false);
-  const navigate = useNavigate();
   const [dragging, setDragging] = useState(null);
+  const mousePos = useRef({ x: 0, y: 0 });
+  const panRef = useRef({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
-  const clampZoom = (value) => Math.min(2, Math.max(0.4, value));
-  const canvasScale = 1 / zoom;
-  const updateZoom = (delta) => {
-    setZoom((prev) => clampZoom(Number((prev + delta).toFixed(2))));
-  };
+
+  useEffect(() => { panRef.current = pan; }, [pan]);
+
+  const availableVariables = useMemo(
+    () => buildAvailableVariables(radios, getRadioUid),
+    [radios]
+  );
+
+  const fieldValueMap = useMemo(
+    () => buildFieldValueMap(radios),
+    [radios]
+  );
+
+  const zoomAround = useCallback((delta) => {
+    const currentPan = panRef.current;
+    setZoom((prevZoom) => {
+      const { zoom: nextZoom, pan: nextPan } = getNextZoomPan({
+        mouseX: mousePos.current.x,
+        mouseY: mousePos.current.y,
+        zoom: prevZoom,
+        pan: currentPan,
+        delta,
+      });
+      setPan(nextPan);
+      return nextZoom;
+    });
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!e.ctrlKey) return;
-
-      if (e.key === "+" || e.key === "=") {
-        e.preventDefault();
-        updateZoom(0.1);
-      }
-
-      if (e.key === "-") {
-        e.preventDefault();
-        updateZoom(-0.1);
-      }
-
-      if (e.key === "0") {
-        e.preventDefault();
-        setZoom(1);
-        setPan({ x: 0, y: 0 });
-      }
+      if (e.key === "+" || e.key === "=") { e.preventDefault(); zoomAround(0.1); }
+      if (e.key === "-") { e.preventDefault(); zoomAround(-0.1); }
+      if (e.key === "0") { e.preventDefault(); setZoom(1); setPan({ x: 0, y: 0 }); }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [zoomAround]);
 
   useEffect(() => {
     const close = () => setCtxMenu(null);
@@ -68,74 +72,17 @@ function Dashboard({ displays = [], setDisplays = () => {}, radios = [] }) {
     return () => window.removeEventListener("click", close);
   }, []);
 
-  const availableVariables = useMemo(() => {
-    return radios.flatMap((radio) => {
-      const radioUid = getRadioUid(radio) ?? radio.id;
-      return (radio.structFields ?? [])
-        .filter((field) => field?.name?.trim())
-        .map((field) => ({
-          radioId: radio.id,
-          radioUid,
-          name: field.name,
-          type: field.type,
-          address: field.address,
-          bits: field.bits,
-          comment: field.comment,
-        }));
-    });
-  }, [radios]);
 
-  const fieldValueMap = useMemo(() => {
-  const map = new Map();
-
-  radios.forEach((radio) => {
-      (radio.structFields ?? []).forEach((field) => {
-        const key = `${radio.id}::${field.name}`;
-        map.set(key, field.value ?? "--");
-      });
-    });
-
-    return map;
-  }, [radios]);
-
-  const getDisplayValue = (display) => {
-    const key = `${display.radioId}::${display.variable}`;
-    const value = fieldValueMap.get(key);
-    return value !== undefined && value !== "" ? value : "--";
-  };
-
-  const handlePageContextMenu = (e) => {
+  const handleWheel = (e) => {
+    if (!e.ctrlKey) return;
     e.preventDefault();
-    setCtxMenu({ x: e.clientX, y: e.clientY, type: "page" });
+    const { x: mouseX, y: mouseY } = getViewportMousePos(e);
+    const { zoom: nextZoom, pan: nextPan } = getNextZoomPan({
+      mouseX, mouseY, zoom, pan, delta: e.deltaY < 0 ? 0.1 : -0.1,
+    });
+    setPan(nextPan);
+    setZoom(nextZoom);
   };
-
-  const handleCardContextMenu = (e, displayId) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setCtxMenu({ x: e.clientX, y: e.clientY, type: "card", displayId });
-  };
-
-  const openAddDisplayPicker = () => {
-    setCtxMenu(null);
-    setVariablePickerOpen(true);
-  };
-
-  const addDigitalDisplay = (fieldInfo) => {
-    setDisplays((prev = []) => [...prev, createDisplayFromField(fieldInfo, prev.length)]);
-    setVariablePickerOpen(false);
-  };
-
-  const openParameters = (displayId) => {
-    setCtxMenu(null);
-    navigate(`/dashboard/display/${displayId}`);
-  };
-
-  const startDrag = (e, display) => {
-  const dragState = createDragState({ e, display, zoom, pan });
-  if (!dragState) return;
-
-  setDragging(dragState);
-};
 
 const handleCanvasMouseMove = (e) => {
   if (!dragging) return;
@@ -165,33 +112,17 @@ const handleCanvasMouseUp = () => {
   setDragging(null);
 };
 
+const startDrag = (e, display) => {
+    const dragState = createDragState({ e, display, zoom, pan });
+    if (dragState) setDragging(dragState);
+  };
+
   return (
-    <div className="main-container" onContextMenu={handlePageContextMenu}>
+    <div className="main-container" onContextMenu={ (e) => { e.preventDefault(); setCtxMenu({ x: e.clientX, y: e.clientY, type: "page" }); } }>
     <div
       className="dashboard-zoom-viewport"
-      onWheel={(e) => {
-        if (!e.ctrlKey) return;
-        e.preventDefault();
-
-        const rect = e.currentTarget.getBoundingClientRect();
-
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-
-        const nextZoom = clampZoom(
-          Number((zoom + (e.deltaY < 0 ? 0.1 : -0.1)).toFixed(2))
-        );
-
-        const worldX = (mouseX - pan.x) / zoom;
-        const worldY = (mouseY - pan.y) / zoom;
-
-        setPan({
-          x: mouseX - worldX * nextZoom,
-          y: mouseY - worldY * nextZoom,
-        });
-
-        setZoom(nextZoom);
-      }}
+      onMouseMove={(e) => { const { x, y } = getViewportMousePos(e); mousePos.current = { x, y }; }}
+      onWheel={handleWheel}
     >
       <div
         className="dashboard-zoom-layer"
@@ -200,10 +131,7 @@ const handleCanvasMouseUp = () => {
         }}
       >
         <div className={`dashboard-canvas ${displays.length === 0 ? "dashboard-canvas--empty" : ""}`} 
-        style={{
-          width: `${100 * canvasScale}%`,
-          height: `${100 * canvasScale}%`,
-        }}
+        style={{ width: `${100 / zoom}%`, height: `${100 / zoom}%` }}
         onMouseMove={handleCanvasMouseMove}
         onMouseUp={handleCanvasMouseUp}
         onMouseLeave={handleCanvasMouseUp}>
@@ -223,13 +151,11 @@ const handleCanvasMouseUp = () => {
                   minHeight: CARD_H,
                 }}
                 onMouseDown={(e) => startDrag(e, display)}
-                onContextMenu={(e) => handleCardContextMenu(e, display.id)}
+                onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); setCtxMenu({ x: e.clientX, y: e.clientY, type: "card", displayId: display.id }); }}
               >
               <DigitalDisplayCard
-                key={display.id}
                 display={display}
-                value={getDisplayValue(display)}
-                onContextMenu={(e) => handleCardContextMenu(e, display.id)}
+                value={getDisplayValue(fieldValueMap, display)}
               />
               </div>
             ))
@@ -243,8 +169,8 @@ const handleCanvasMouseUp = () => {
           style={{ top: ctxMenu.y, left: ctxMenu.x }}
           onClick={(e) => e.stopPropagation()}
         >
-          {ctxMenu.type === "page" && <li onClick={openAddDisplayPicker}>＋ Add digital display</li>}
-          {ctxMenu.type === "card" && <li onClick={() => openParameters(ctxMenu.displayId)}>⚙ Parameters</li>}
+          {ctxMenu.type === "page" && <li onClick={() => { setCtxMenu(null); setVariablePickerOpen(true); }}>＋ Add digital display</li>}
+          {ctxMenu.type === "card" && <li onClick={() => { setCtxMenu(null); navigate(`/dashboard/display/${ctxMenu.displayId}`); }}>⚙ Parameters</li>}
         </ul>
       )}
 
@@ -266,7 +192,10 @@ const handleCanvasMouseUp = () => {
                   <button
                     key={`${field.radioId}-${field.name}-${field.address ?? ""}`}
                     className="dashboard-variable-item"
-                    onClick={() => addDigitalDisplay(field)}
+                    onClick={() => {
+                        setDisplays((prev = []) => [...prev, createDisplayFromField(field, prev.length)]);
+                        setVariablePickerOpen(false);
+                      }}
                   >
                     <div className="dashboard-variable-main">
                       <div className="dashboard-variable-name">{field.name}</div>

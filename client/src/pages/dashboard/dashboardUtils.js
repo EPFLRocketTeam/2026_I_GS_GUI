@@ -74,3 +74,66 @@ export const resolveDroppedDisplay = ({ displays, dragging }) => {
       : display
   );
 };
+
+export const clampZoom = (value) => Math.min(2, Math.max(0.4, value));
+
+export const getViewportMousePos = (e) => {
+  const rect = e.currentTarget.getBoundingClientRect();
+  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+};
+
+export const getNextZoomPan = ({ mouseX, mouseY, zoom, pan, delta }) => {
+  const nextZoom = clampZoom(Number((zoom + delta).toFixed(2)));
+  const worldX = (mouseX - pan.x) / zoom;
+  const worldY = (mouseY - pan.y) / zoom;
+  return {
+    zoom: nextZoom,
+    pan: {
+      x: mouseX - worldX * nextZoom,
+      y: mouseY - worldY * nextZoom,
+    },
+  };
+};
+
+export const createDisplayFromField = (fieldInfo, count = 0) => ({
+  id: crypto.randomUUID(),
+  title: fieldInfo.name || `Display ${count + 1}`,
+  variable: fieldInfo.name || "",
+  suffix: "",
+  radioId: fieldInfo.radioId,
+  radioUid: fieldInfo.radioUid,
+  type: fieldInfo.type || "",
+  x: 24 + (count % 4) * 250,
+  y: 24 + Math.floor(count / 4) * 170,
+});
+
+export const buildFieldValueMap = (radios) => {
+  const map = new Map();
+  radios.forEach((radio) => {
+    (radio.structFields ?? []).forEach((field) => {
+      map.set(`${radio.id}::${field.name}`, field.value ?? "--");
+    });
+  });
+  return map;
+};
+
+export const buildAvailableVariables = (radios, getRadioUid) =>
+  radios.flatMap((radio) => {
+    const radioUid = getRadioUid(radio) ?? radio.id;
+    return (radio.structFields ?? [])
+      .filter((field) => field?.name?.trim())
+      .map((field) => ({
+        radioId: radio.id,
+        radioUid,
+        name: field.name,
+        type: field.type,
+        address: field.address,
+        bits: field.bits,
+        comment: field.comment,
+      }));
+  });
+
+export const getDisplayValue = (fieldValueMap, display) => {
+  const value = fieldValueMap.get(`${display.radioId}::${display.variable}`);
+  return value !== undefined && value !== "" ? value : "--";
+};
