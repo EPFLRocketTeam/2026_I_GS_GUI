@@ -11,7 +11,7 @@ import {
 } from "./dataStructUtils.js";
 import DataStructTable from "../../components/dataStructTable/dataStructTable.jsx";
 
-function DataStructConfig({ radios = [], setRadios }) {
+function DataStructConfig({ radios = [], setRadios, displays = [], setDisplays }) {
   const location = useLocation();
   const incomingRadioId = location.state?.radioId ?? null;
   const incomingRadioUid = location.state?.radioUid ?? null;
@@ -87,14 +87,18 @@ function DataStructConfig({ radios = [], setRadios }) {
   const totalBits = fields.reduce((sum, f) => sum + (Number.parseInt(f.bits) || 0), 0);
 
   const selectedOperatingMode =
-    selectedRadio?.configParams?.find((p) => p.key === "operating_mode")?.value ?? null;
+    selectedRadio?.configParams?.find(
+      (p) => p.key?.toLowerCase() === "operating_mode"
+    )?.value ?? null;
 
-  const isReceiverOnly = selectedOperatingMode === "receiver";
+  const isReceiverOnly =
+    String(selectedOperatingMode).toLowerCase().includes("receiver");
+
 
   const warnReceiverOnly = () => {
     dispatch({
         type: "SET_FLASH",
-        value: "Receiver mode: this data structure is read-only.",
+        value: "This radio's data values should not be modified because it is configured as a receiver.",
     });
   };
 
@@ -125,6 +129,31 @@ function DataStructConfig({ radios = [], setRadios }) {
       </div>
     );
   }
+
+  const updateFieldAndLinkedDisplays = (key, prop, value) => {
+    const oldField = fields.find((f) => f.key === key);
+
+    if (
+      prop === "name" &&
+      oldField?.name &&
+      oldField.name !== value &&
+      setDisplays
+    ) {
+      setDisplays((prev) =>
+        prev.map((display) =>
+          display.radioId === selectedId && display.variable === oldField.name
+            ? {
+                ...display,
+                variable: value,
+                title: display.title === oldField.name ? value : display.title,
+              }
+            : display
+        )
+      );
+    }
+
+    dispatch({ type: "UPDATE_FIELD", key, prop, value });
+  };
 
   return (
     <div className="dsc-page">
@@ -168,7 +197,7 @@ function DataStructConfig({ radios = [], setRadios }) {
             <span className="dsc-warning-icon">⚠</span>
             <div className="dsc-warning-content">
               <div className="dsc-warning-title">Receiver mode active</div>
-              <div className="dsc-warning-text">This data structure is read-only and should not be modified.</div>
+              <div className="dsc-warning-text">This radio's data values should not be modified because it is configured as a receiver.</div>
             </div>
           </div>
         )}
@@ -177,7 +206,7 @@ function DataStructConfig({ radios = [], setRadios }) {
           fields={fields}
           onUpdateField={(key, prop, value) => {
             if (isReceiverOnly) {warnReceiverOnly(); }
-            dispatch({ type: "UPDATE_FIELD", key, prop, value })
+            updateFieldAndLinkedDisplays(key, prop, value);
             }
         }
           onRemoveField={(key) =>{

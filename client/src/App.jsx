@@ -8,7 +8,7 @@ import DigitalDisplayParams from "./components/digitalDisplayParams/digitalDispl
 
 function App() {
   const [radios, setRadios] = useState([]);
-  const [dashboardDisplays, setDashboardDisplays] = useState([]);
+  const [dashboardDisplays, setDashboardDisplays] = useState([]); 
 
   return (
     <BrowserRouter>
@@ -17,8 +17,10 @@ function App() {
         <Routes>
           <Route path="/" element={<Dashboard displays={dashboardDisplays} setDisplays={setDashboardDisplays} radios={radios} />} />
           <Route path="/radioConfig" element={<RadioConfig />} element={<RadioConfig radios={radios} setRadios={setRadios} />} />
-          <Route path="/dataStructConfig" element={<DataStructConfig />} element={<DataStructConfig radios={radios} setRadios={setRadios} />} />
-          <Route path="/dashboard/display/:id" element={<DigitalDisplayParams displays={dashboardDisplays} setDisplays={setDashboardDisplays} radios={radios} setRadios={setRadios} />} />        </Routes>
+          <Route path="/dataStructConfig" element={<DataStructConfig />} element={<DataStructConfig radios={radios} setRadios={setRadios} displays={dashboardDisplays}
+                setDisplays={setDashboardDisplays}/>} />
+          <Route path="/dashboard/display/:id" element={<DigitalDisplayParams displays={dashboardDisplays} setDisplays={setDashboardDisplays} radios={radios} setRadios={setRadios} />} />        
+        </Routes>
       </div>
     </BrowserRouter>
   );
