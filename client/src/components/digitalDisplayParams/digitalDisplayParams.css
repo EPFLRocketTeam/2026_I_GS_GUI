@@ -17,3 +17,5 @@
 .ddp-btn:hover { background: #333; }
 
 .ddp-btn-secondary { background: transparent; color: #aaa; }
+.ddp-field-info { margin-top: 2px; }
+.ddp-readonly { font-size: 14px; padding: 10px 12px; border: 1px solid #333; border-radius: 8px; background: #111; color: #aaa; width: 100%; box-sizing: border-box; }

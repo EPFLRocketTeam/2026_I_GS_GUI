@@ -1,15 +1,10 @@
 .send-data { margin: 20px; }
+.dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 220px)); gap: 18px; min-height: calc(100vh - 140px); justify-content: start; align-items: start; }
 .main-container { background-color: black; color: white; min-height: 100vh; padding: 24px; }
 .dashboard-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
 .dashboard-hint { color: #888; font-size: 13px; }
-.dashboard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; min-height: calc(100vh - 140px); }
 .dashboard-grid--empty { display: flex; align-items: center; justify-content: center; }
 .dashboard-empty { color: #888; font-size: 18px; }
-.digital-display-card { background: #1a1a1a; border: 1px solid #333; border-radius: 14px; padding: 18px; box-shadow: 0 8px 20px rgba(0,0,0,0.18); display: flex; flex-direction: column; gap: 10px; min-height: 140px; }
-.digital-display-title { font-size: 14px; font-weight: 600; color: #fff; }
-.digital-display-value { font-size: 36px; font-weight: 700; color: #fff; line-height: 1; }
-.digital-display-suffix { margin-left: 6px; font-size: 16px; color: #aaa; font-weight: 500; }
-.digital-display-variable { font-size: 12px; color: #888; margin-top: auto; }
 .dashboard-ctx-menu { position: fixed; z-index: 2000; background: #1e1e1e; border: 1px solid #444; border-radius: 6px; padding: 4px 0; margin: 0; list-style: none; min-width: 180px; box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
 .dashboard-ctx-menu li { padding: 8px 16px; cursor: pointer; font-size: 13px; }
 .dashboard-ctx-menu li:hover { background: #2a2a2a; }

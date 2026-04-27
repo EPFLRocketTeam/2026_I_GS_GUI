@@ -2,13 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getRadioUid } from "../radioConfig/radioUtils/radioIO";
 import "./dashboard.css";
+import DigitalDisplayCard from "../../components/digitalDisplayCard/digitalDisplayCard";
 
 const createDisplayFromField = (fieldInfo, count = 0) => ({
   id: crypto.randomUUID(),
   title: fieldInfo.name || `Display ${count + 1}`,
   variable: fieldInfo.name || "",
   suffix: "",
-  value: "--",
   radioId: fieldInfo.radioId,
   radioUid: fieldInfo.radioUid,
   type: fieldInfo.type || "",
@@ -41,6 +41,25 @@ function Dashboard({ displays = [], setDisplays = () => {}, radios = [] }) {
         }));
     });
   }, [radios]);
+
+  const fieldValueMap = useMemo(() => {
+  const map = new Map();
+
+  radios.forEach((radio) => {
+      (radio.structFields ?? []).forEach((field) => {
+        const key = `${radio.id}::${field.name}`;
+        map.set(key, field.value ?? "--");
+      });
+    });
+
+    return map;
+  }, [radios]);
+
+  const getDisplayValue = (display) => {
+    const key = `${display.radioId}::${display.variable}`;
+    const value = fieldValueMap.get(key);
+    return value !== undefined && value !== "" ? value : "--";
+  };
 
   const handlePageContextMenu = (e) => {
     e.preventDefault();
@@ -79,20 +98,12 @@ function Dashboard({ displays = [], setDisplays = () => {}, radios = [] }) {
           <div className="dashboard-empty">Right-click anywhere to add a digital display</div>
         ) : (
           displays.map((display) => (
-            <div
+            <DigitalDisplayCard
               key={display.id}
-              className="digital-display-card"
+              display={display}
+              value={getDisplayValue(display)}
               onContextMenu={(e) => handleCardContextMenu(e, display.id)}
-            >
-              <div className="digital-display-title">{display.title || "Untitled display"}</div>
-              <div className="digital-display-value">
-                {display.value ?? "--"}
-                {display.suffix ? <span className="digital-display-suffix">{display.suffix}</span> : null}
-              </div>
-              <div className="digital-display-variable">
-                Radio {display.radioUid ?? "?"} · {display.variable || "No variable selected"}
-              </div>
-            </div>
+            />
           ))
         )}
       </div>

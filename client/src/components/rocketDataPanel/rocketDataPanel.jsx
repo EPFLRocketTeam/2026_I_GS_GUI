@@ -24,13 +24,11 @@ function RocketDataPanel({ radio, onClose, onFieldChange, onFieldLabelChange, on
       ref={panelRef}
       style={{ left: pos.x, top: pos.y }}
     >
-      {/* ── Drag handle / header ── */}
       <div className="rdp-header" onMouseDown={onMouseDown}>
         <span>📡 Radio {radio.uid} — Rocket Data</span>
         <button className="rdp-close" onMouseDown={e => e.stopPropagation()} onClick={onClose}>✕</button>
       </div>
 
-      {/* ── Body ── */}
       <div className="rdp-body">
         {(radio.structFields ?? []).length === 0 ? (
           <p className="rdp-empty">No struct parsed yet. Paste and parse a struct first.</p>
