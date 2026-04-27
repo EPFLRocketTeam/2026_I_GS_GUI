@@ -1,12 +1,38 @@
 const TYPE_MAP = {
+  int_8: "int8",
+  int_16: "int16",
+  int_32: "int32",
+  uint_8: "uint8",
+  uint_16: "uint16",
+  uint_32: "uint32",
   uint8: "uint8",
   uint16: "uint16",
   uint32: "uint32",
   int8: "int8",
   int16: "int16",
   int32: "int32",
+  float_8: "float8",
+  float_16: "float16",
+  float_32: "float32",
+  float_64: "float64",
   bool: "bool",
   enum: "enum",
+};
+
+const RADIO_CONSTANTS = {
+  DEFAULT_TX_POWER: "22",
+  DEFAULT_BW: "125",
+  DEFAULT_SF: "7",
+  DEFAULT_CR: "1",
+  DEFAULT_PREAMBLE_LENGTH: "8",
+  DEFAULT_CRC: "true",
+  RADIO_TYPE_EMITTER: "RADIO_TYPE_EMITTER",
+  RADIO_TYPE_RECEIVER: "RADIO_TYPE_RECEIVER",
+};
+
+const resolveValue = (value) => {
+  const cleanValue = value.trim();
+  return RADIO_CONSTANTS[cleanValue] ?? cleanValue;
 };
 
 const getControlFromType = (type) => {
@@ -14,11 +40,16 @@ const getControlFromType = (type) => {
   return "number";
 };
 
-const toLabel = (key) =>
-  key
-    .replaceAll("_", " ")
+const toLabel = (key) => {
+  const parts = key.split("_");
+
+  const labelParts = parts.length > 1 ? parts.slice(1) : parts;
+
+  return labelParts
+    .join(" ")
     .toLowerCase()
     .replace(/\b\w/g, (c) => c.toUpperCase());
+};
 
 export const parseRadioProfile = (raw = "") => {
   console.log("RAW PROFILE FILE:", raw);
@@ -44,7 +75,7 @@ export const parseRadioProfile = (raw = "") => {
         label: toLabel(key),
         type,
         control: getControlFromType(type),
-        value: value.trim(),
+        value: resolveValue(value),
         options:
           type === "bool"
             ? [

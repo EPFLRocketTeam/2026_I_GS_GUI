@@ -1,4 +1,20 @@
 .radio-page { padding: 1.5rem; min-height: 100vh; }
+.cards-item { position: relative; cursor: pointer; border-radius: 16px; display: inline-block; height: fit-content; }
+
+.cards-item::after {
+  content: "";
+  position: absolute;
+  border: 2px solid transparent;
+  border-radius: 18px;
+  inset: 0;
+  pointer-events: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.cards-item--selected::after {
+  border-color: #fff;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.18);
+}
 .cards-wrap { width: 100%; display: flex; justify-content: center; }
 .cards-wrap--empty { min-height: calc(100vh - 140px); display: flex; justify-content: center; align-items: center; }.add-btn { width: 48px; height: 48px; border-radius: 50%; border: 1px solid #444; background: #1a1a1a; color: #aaa; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; align-self: center; }
 .add-btn:hover { background: #333; color: #fff; }
@@ -7,7 +23,6 @@
 .ctx-menu li { padding: 8px 16px; cursor: pointer; font-size: 13px; }
 .ctx-menu li:hover { background: #2a2a2a; }
 .btn.btn-add-radio { border: 2px solid #fff; }
-.cards-item { cursor: pointer; border: 2px solid transparent; border-radius: 16px; transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease; }
 .cards-item--selected { border-color: #ffffff; box-shadow: 0 0 0 1px rgba(255,255,255,0.18); }
 .topbar {
   display: flex;
