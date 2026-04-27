@@ -14,11 +14,13 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import path
+from django.urls import path, re_path
 from telemetry.views.telemetryViews import TelemetryListView
 from telemetry.views.radioViews import RadioConfigListView
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path("api/telemetry/", TelemetryListView.as_view(), name="telemetry-list"),
-    path("api/radio/", RadioConfigListView.as_view(), name="radio-list")
+    path("api/radio/", RadioConfigListView.as_view(), name="radio-list"),
+    re_path(r"^.*$", TemplateView.as_view(template_name="index.html")),
 ]
