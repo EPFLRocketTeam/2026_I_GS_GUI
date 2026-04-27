@@ -10,7 +10,7 @@ import {
   handleFieldChange, handleConfigTypeChange, handleConfigKeyChange,
   handleFieldLabelChange, handleFieldTypeChange,
 } from "./radioUtils";
-import { ensureRadioIds, RADIO_PROFILE_OPTIONS } from "./radioUtils/radioDefaults";
+import { ensureRadioIds, RADIO_PROFILE_OPTIONS, switchRadioConfigTemplate } from "./radioUtils/radioDefaults";
 import { getRadioUid, uidCounts } from "./radioUtils/radioIO";
 import { useNavigate } from "react-router-dom";
 import useRadioDrag from "./radioUtils/radioDragUtils";
@@ -167,19 +167,12 @@ function RadioConfig({radios, setRadios}) {
       {panelRadio && (
         <RocketDataPanel
           radio={panelRadio}
-          onClose={() => setPanelRadioId(null)}
-          onFieldChange={(fieldIdx, value) =>
-            handleFieldChange(
-              radios.findIndex(r => r.id === panelRadioId),
-              fieldIdx,
-              value,
-              setRadios
-            )
-          }
-          onFieldLabelChange={(fieldIdx, value) => 
-            handleFieldLabelChange(radios.findIndex(r => r.id === panelRadioId), fieldIdx, value, setRadios)}
-          onFieldTypeChange={(fieldIdx, value) => 
-            handleFieldTypeChange(radios.findIndex(r => r.id === panelRadioId), fieldIdx, value, setRadios)}
+          profileOptions={RADIO_PROFILE_OPTIONS}
+          onSwitchConfig={(templateName) => {
+            setRadios((prev) =>
+              switchRadioConfigTemplate(prev, panelRadioId, templateName)
+            );
+          }}
         />
       )}
       

@@ -84,3 +84,22 @@ export function clampValue(value, min, max) {
   if (max != null && num > max) return String(max);
   return String(num);
 }
+
+export const switchRadioConfigTemplate = (radios, radioId, templateName) => {
+  return radios.map((radio) => {
+    if (radio.id !== radioId) return radio;
+
+    const currentUid =
+      radio.configParams?.find((p) => p.key?.toLowerCase() === "uid")?.value ??
+      "0";
+
+    return {
+      ...radio,
+      configTemplate: templateName,
+      configParams: cloneConfigParams(templateName).map((p) => ({
+        ...p,
+        value: p.key?.toLowerCase() === "uid" ? currentUid : p.value,
+      })),
+    };
+  });
+};
