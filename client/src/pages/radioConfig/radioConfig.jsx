@@ -159,22 +159,26 @@ function RadioConfig({radios, setRadios}) {
           onClick={e => e.stopPropagation()}
         >
           <li onClick={() => { setPanelRadioId(ctxMenu.radioId); setCtxMenu(null); }}>
-            👁 View Rocket Data
+            👁 Properties
           </li>
         </ul>
       )}
 
-      {panelRadio && (
-        <RocketDataPanel
-          radio={panelRadio}
-          profileOptions={RADIO_PROFILE_OPTIONS}
-          onSwitchConfig={(templateName) => {
-            setRadios((prev) =>
-              switchRadioConfigTemplate(prev, panelRadioId, templateName)
-            );
-          }}
-        />
-      )}
+      <RocketDataPanel
+        open={!!panelRadio}
+        radio={panelRadio}
+        onClose={() => setPanelRadioId(null)}
+        profileOptions={RADIO_PROFILE_OPTIONS}
+        onSwitchConfig={(templateName) => {
+          setRadios((prev) =>
+            switchRadioConfigTemplate(prev, panelRadioId, templateName)
+          );
+        }}
+        onConfigChange={(paramIdx, value) => {
+          const radioIndex = radios.findIndex((r) => r.id === panelRadioId);
+          handleConfigChange(radioIndex, paramIdx, value, setRadios);
+        }}
+      />
       
     </div>
   );
