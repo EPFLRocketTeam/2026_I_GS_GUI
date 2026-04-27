@@ -10,7 +10,7 @@ import {
   handleFieldChange, handleConfigTypeChange, handleConfigKeyChange,
   handleFieldLabelChange, handleFieldTypeChange,
 } from "./radioUtils";
-import { ensureRadioIds } from "./radioUtils/radioDefaults";
+import { ensureRadioIds, RADIO_PROFILE_OPTIONS } from "./radioUtils/radioDefaults";
 import { getRadioUid, uidCounts } from "./radioUtils/radioIO";
 import { useNavigate } from "react-router-dom";
 import useRadioDrag from "./radioUtils/radioDragUtils";
@@ -24,6 +24,7 @@ function RadioConfig({radios, setRadios}) {
   const [panelRadioId, setPanelRadioId] = useState(null);
   const [selectedRadioId, setSelectedRadioId] = useState(null);
   const [radioPendingDelete, setRadioPendingDelete] = useState(null);
+  const [selectedProfile, setSelectedProfile] = useState("uplink");
 
   const panelRadio = radios.find(r => r.id === panelRadioId) ?? null;
   const { draggedRadioId, dragOverRadioId, handleDragStart, handleDragEnter, handleDrop, handleDragEnd } = useRadioDrag(setRadios);
@@ -75,7 +76,24 @@ function RadioConfig({radios, setRadios}) {
     <div className="radio-page">
       <div className="topbar">
         <div className="topbar-left">
-          <button className="btn btn-add-radio" onClick={() => handleAdd(setRadios)}> + Add Radio</button>
+          <select
+            className="btn"
+            value={selectedProfile}
+            onChange={(e) => setSelectedProfile(e.target.value)}
+          >
+            {RADIO_PROFILE_OPTIONS.map((profile) => (
+              <option key={profile.value} value={profile.value}>
+                {profile.label}
+              </option>
+            ))}
+          </select>
+
+          <button
+            className="btn btn-add-radio"
+            onClick={() => handleAdd(setRadios, selectedProfile)}
+          >
+            + Add Radio
+          </button>
         </div>
         <div className="topbar-right">
           <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>

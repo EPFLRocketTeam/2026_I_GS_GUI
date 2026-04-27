@@ -1,0 +1,5 @@
+#define UID 0 (uint32)
+#define PAYLOAD_FREQUENCY 868.00E6 (uint32)
+#define PAYLOAD_POWER DEFAULT_TX_POWER (uint8)
+#define PAYLOAD_CRC true (bool)
+#define OPERATING_MODE RADIO_TYPE_EMITTER (enum)

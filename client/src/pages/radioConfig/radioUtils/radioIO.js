@@ -54,7 +54,7 @@ export const loadConfig = (onSuccess) => {
 export const getRadioUid = (radio) =>
   String(
     radio.uid ??
-    radio.configParams?.find((p) => p.key === "uid")?.value ??
+    radio.configParams?.find((p) => p.key.toLowerCase() === "uid")?.value ??
     ""
   ).trim();
 

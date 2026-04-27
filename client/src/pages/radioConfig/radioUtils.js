@@ -1,4 +1,4 @@
-export { RADIO_CONFIG_PARAMS, DEFAULT_RADIOS, createNewRadio } from "./radioUtils/radioDefaults";
+export { RADIO_CONFIG_TEMPLATES, DEFAULT_RADIOS, createNewRadio } from "./radioUtils/radioDefaults";
 export { validate, parseStruct, downloadConfig, loadConfig } from "./radioUtils/radioIO";
 export {
   handleAdd, handleRemove,

@@ -1,10 +1,10 @@
 import { validate, parseStruct } from "./radioIO";
 import { createNewRadio, clampValue } from "./radioDefaults";
 
-export const handleAdd = (setRadios) => {
-  setRadios(prev => {
-    const newRadio = createNewRadio(prev);
-    return validate([newRadio, ...prev]);
+export const handleAdd = (setRadios, templateName = "uplink") => {
+  setRadios((prev) => {
+    const newRadio = createNewRadio(prev, templateName);
+    return [newRadio, ...prev];
   });
 };
 

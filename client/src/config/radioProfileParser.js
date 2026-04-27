@@ -1,20 +1,17 @@
 const TYPE_MAP = {
-  int_8: "int8",
-  int_16: "int16",
-  int_32: "int32",
-  uint_8: "uint8",
-  uint_16: "uint16",
-  uint_32: "uint32",
-  float_8: "float8",
-  float_16: "float16",
-  float_32: "float_32",
-  float_64: "float_64",
+  uint8: "uint8",
+  uint16: "uint16",
+  uint32: "uint32",
+  int8: "int8",
+  int16: "int16",
+  int32: "int32",
   bool: "bool",
+  enum: "enum",
 };
 
 const getControlFromType = (type) => {
-  if (type === "bool") return "select";
-  return "text";
+  if (type === "bool" || type === "enum") return "select";
+  return "number";
 };
 
 const toLabel = (key) =>
@@ -23,17 +20,20 @@ const toLabel = (key) =>
     .toLowerCase()
     .replace(/\b\w/g, (c) => c.toUpperCase());
 
-export const parseRadioProfile = (raw) => {
+export const parseRadioProfile = (raw = "") => {
+  console.log("RAW PROFILE FILE:", raw);
+
   return raw
-    .split("\n")
+    .replace(/\u00A0/g, " ")
+    .split(/\r?\n/)
     .map((line) => line.trim())
-    .filter(Boolean)
     .filter((line) => line.startsWith("#define"))
     .map((line) => {
-      const match = line.match(/^#define\s+(\w+)\s+(.+?)\s+\((\w+)\)$/);
+      const match = line.match(/^#define\s+([A-Za-z_]\w*)\s+(.+?)\s*\((\w+)\)\s*$/);
 
       if (!match) {
-        throw new Error(`Invalid radio profile line: ${line}`);
+        console.error("Invalid radio profile line:", line);
+        return null;
       }
 
       const [, key, value, rawType] = match;
@@ -44,7 +44,7 @@ export const parseRadioProfile = (raw) => {
         label: toLabel(key),
         type,
         control: getControlFromType(type),
-        value,
+        value: value.trim(),
         options:
           type === "bool"
             ? [
@@ -58,5 +58,6 @@ export const parseRadioProfile = (raw) => {
                 ]
               : undefined,
       };
-    });
+    })
+    .filter(Boolean);
 };
