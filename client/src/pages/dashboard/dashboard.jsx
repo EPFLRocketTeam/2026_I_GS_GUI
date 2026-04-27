@@ -18,6 +18,35 @@ function Dashboard({ displays = [], setDisplays = () => {}, radios = [] }) {
   const [ctxMenu, setCtxMenu] = useState(null);
   const [variablePickerOpen, setVariablePickerOpen] = useState(false);
   const navigate = useNavigate();
+  const [zoom, setZoom] = useState(1);
+  const clampZoom = (value) => Math.min(2, Math.max(0.4, value));
+  const updateZoom = (delta) => {
+    setZoom((prev) => clampZoom(Number((prev + delta).toFixed(2))));
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!e.ctrlKey) return;
+
+      if (e.key === "+" || e.key === "=") {
+        e.preventDefault();
+        updateZoom(0.1);
+      }
+
+      if (e.key === "-") {
+        e.preventDefault();
+        updateZoom(-0.1);
+      }
+
+      if (e.key === "0") {
+        e.preventDefault();
+        setZoom(1);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   useEffect(() => {
     const close = () => setCtxMenu(null);
@@ -89,23 +118,32 @@ function Dashboard({ displays = [], setDisplays = () => {}, radios = [] }) {
 
   return (
     <div className="main-container" onContextMenu={handlePageContextMenu}>
-      <div className="dashboard-topbar">
-        <span className="dashboard-hint">Right-click to add a digital display</span>
-      </div>
-
-      <div className={`dashboard-grid ${displays.length === 0 ? "dashboard-grid--empty" : ""}`}>
-        {displays.length === 0 ? (
-          <div className="dashboard-empty">Right-click anywhere to add a digital display</div>
-        ) : (
-          displays.map((display) => (
-            <DigitalDisplayCard
-              key={display.id}
-              display={display}
-              value={getDisplayValue(display)}
-              onContextMenu={(e) => handleCardContextMenu(e, display.id)}
-            />
-          ))
-        )}
+    <div
+      className="dashboard-zoom-viewport"
+      onWheel={(e) => {
+        if (!e.ctrlKey) return;
+        e.preventDefault();
+        updateZoom(e.deltaY < 0 ? 0.1 : -0.1);
+      }}
+    >
+    <div
+        className="dashboard-zoom-layer"
+        style={{ transform: `scale(${zoom})` }}
+      >
+        <div className={`dashboard-grid ${displays.length === 0 ? "dashboard-grid--empty" : ""}`}>
+          {displays.length === 0 ? (
+            <div className="dashboard-empty">Right-click anywhere to add a digital display</div>
+          ) : (
+            displays.map((display) => (
+              <DigitalDisplayCard
+                key={display.id}
+                display={display}
+                value={getDisplayValue(display)}
+                onContextMenu={(e) => handleCardContextMenu(e, display.id)}
+              />
+            ))
+          )}
+        </div>
       </div>
 
       {ctxMenu && (
@@ -159,6 +197,7 @@ function Dashboard({ displays = [], setDisplays = () => {}, radios = [] }) {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }
