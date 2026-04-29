@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState, useRef, useCallback } from "react";
-import { getRadioUid } from "../radioConfig/radioUtils/radioIO";
 import "./dashboard.css";
 import DigitalDisplayCard from "../../components/digitalDisplayCard/digitalDisplayCard";
 import {
@@ -8,12 +7,10 @@ import {
   getDraggedCardPosition,
   moveDraggedDisplay,
   resolveDroppedDisplay,
-  buildAvailableVariables,
   getNextZoomPan,
   getViewportMousePos,
   buildFieldValueMap,
   getDisplayValue,
-  createDisplayFromField,
   createDragState,
   getOverlappingCardIds,
 } from "./dashboardUtils";
@@ -23,7 +20,6 @@ import DeleteRadioModal from "../../components/deleteRadioModal/deleteRadioModal
 function Dashboard({ displays = [], setDisplays = () => {}, radios = [] }) {
   const navigate = useNavigate();
   const [ctxMenu, setCtxMenu] = useState(null);
-  const [variablePickerOpen, setVariablePickerOpen] = useState(false);
   const [dragging, setDragging] = useState(null);
   const mousePos = useRef({ x: 0, y: 0 });
   const panRef = useRef({ x: 0, y: 0 });
@@ -38,11 +34,6 @@ function Dashboard({ displays = [], setDisplays = () => {}, radios = [] }) {
   () => getOverlappingCardIds(displays),
   [displays]
 );
-
-  const availableVariables = useMemo(
-    () => buildAvailableVariables(radios, getRadioUid),
-    [radios]
-  );
 
   const fieldValueMap = useMemo(
     () => buildFieldValueMap(radios),
@@ -154,6 +145,23 @@ const startDrag = (e, display) => {
     if (dragState) setDragging(dragState);
   };
 
+const createEmptyDisplay = () => {
+  setDisplays((prev = []) => [
+    ...prev,
+    {
+      id: crypto.randomUUID(),
+      title: `Display ${prev.length + 1}`,
+      name: "",
+      radioId: null,
+      radioUid: "",
+      variable: "",
+      type: "",
+      address: null,
+      x: 40 + prev.length * 20,
+      y: 40 + prev.length * 20,
+    },
+  ]);
+};
   return (
     <div className="main-container" onContextMenu={ (e) => { e.preventDefault(); if (e.ctrlKey || panning) return; setCtxMenu({ x: e.clientX, y: e.clientY, type: "page" }); } }>
     <div
@@ -211,7 +219,10 @@ const startDrag = (e, display) => {
           style={{ top: ctxMenu.y, left: ctxMenu.x }}
           onClick={(e) => e.stopPropagation()}
         >
-          {ctxMenu.type === "page" && <li onClick={() => { setCtxMenu(null); setVariablePickerOpen(true); }}>＋ Add digital display</li>}
+          {ctxMenu.type === "page" && <li onClick={() => {
+              createEmptyDisplay();
+              setCtxMenu(null);
+            }}>＋ Add digital display</li>}
           {ctxMenu.type === "card" && (
             <>
               <li onClick={() => {
@@ -247,75 +258,6 @@ const startDrag = (e, display) => {
             setDisplayPendingDelete(null);
           }}
         />
-      )}
-
-      {variablePickerOpen && (
-        <div className="dashboard-modal-overlay" onClick={() => setVariablePickerOpen(false)}>
-          <div className="dashboard-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="dashboard-modal-title">Choose a variable</div>
-            <div className="dashboard-modal-subtitle">
-              Select one variable from the data structures of all configured radios
-            </div>
-
-            <div className="dashboard-variable-list">
-              {availableVariables.length === 0 ? (
-                <div className="dashboard-empty-variables">
-                  No variables found. Configure a radio data structure first.
-                </div>
-              ) : (
-                availableVariables.map((field) => (
-                  <button
-                    key={`${field.radioId}-${field.name}-${field.address ?? ""}`}
-                    className={`dashboard-variable-item ${
-                      displays.some(
-                        (display) =>
-                          display.radioId === field.radioId &&
-                          display.variable === field.name
-                      )
-                        ? "is-disabled"
-                        : ""
-                    }`}
-                    disabled={displays.some(
-                      (display) =>
-                        display.radioId === field.radioId &&
-                        display.variable === field.name
-                    )}
-                    onClick={() => {
-                      const alreadyExists = displays.some(
-                        (display) =>
-                          display.radioId === field.radioId &&
-                          display.variable === field.name
-                      );
-
-                      if (alreadyExists) return;
-
-                      setDisplays((prev = []) => [
-                        ...prev,
-                        createDisplayFromField(field, prev.length),
-                      ]);
-
-                      setVariablePickerOpen(false);
-                    }}
-                  >
-                    <div className="dashboard-variable-main">
-                      <div className="dashboard-variable-name">{field.name}</div>
-                      <div className="dashboard-variable-meta">
-                        Radio {field.radioUid} · {field.type || "—"} · Addr {field.address ?? 0}
-                      </div>
-                    </div>
-                    <div className="dashboard-variable-pick">Add</div>
-                  </button>
-                ))
-              )}
-            </div>
-
-            <div className="dashboard-modal-actions">
-              <button className="dashboard-modal-btn" onClick={() => setVariablePickerOpen(false)}>
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
       )}
     </div>
     </div>

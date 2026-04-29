@@ -6,7 +6,8 @@ const MIN_FONT_SIZE = 12;
 const BOX_PADDING = 12;
 
 function DigitalDisplayCard({ display, value, onContextMenu }) {
-  const displayText = `${value ?? "--"}${display.suffix ? ` ${display.suffix}` : ""}`;
+  const hasVariable = Boolean(display?.variable);
+  const displayValue = hasVariable ? value ?? "--" : "--";
 
   const bodyRef = useRef(null);
   const valueRef = useRef(null);
@@ -48,13 +49,13 @@ function DigitalDisplayCard({ display, value, onContextMenu }) {
     fitText();
     window.addEventListener("resize", fitText);
     return () => window.removeEventListener("resize", fitText);
-  }, [displayText]);
+  }, [displayValue, display?.suffix, display?.variable]);
 
   return (
-    <div className="digital-display-card" onContextMenu={onContextMenu}>
+    <div className={`digital-display-card ${!hasVariable ? "is-empty" : ""}`} onContextMenu={onContextMenu}>
       <div className="digital-display-card-header">
         <div className="digital-display-title">
-          {display.title || display.variable || "Untitled display"}
+          {display.title || "Untitled display"}
         </div>
       </div>
 
@@ -64,8 +65,8 @@ function DigitalDisplayCard({ display, value, onContextMenu }) {
           className="digital-display-value"
           style={{ fontSize: `${fontSize}px` }}
         >
-          {value ?? "--"}
-          {display.suffix ? <span className="digital-display-suffix">{display.suffix}</span> : null}
+          {displayValue}
+          {hasVariable && display.suffix ? <span className="digital-display-suffix">{display.suffix}</span> : null}
         </div>
       </div>
 

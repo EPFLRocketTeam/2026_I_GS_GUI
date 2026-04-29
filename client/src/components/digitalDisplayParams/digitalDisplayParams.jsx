@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./digitalDisplayParams.css";
+import { getRadioUid } from "../../pages/radioConfig/radioUtils/radioIO";
 
-function DigitalDisplayParams({ displays = [], setDisplays, radios = [], setRadios }) {
+function DigitalDisplayParams({ displays = [], setDisplays, radios = [] }) {
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -12,29 +13,45 @@ function DigitalDisplayParams({ displays = [], setDisplays, radios = [], setRadi
   );
 
   const [title, setTitle] = useState("");
-  const [variable, setVariable] = useState("");
+  const [selectedKey, setSelectedKey] = useState("");
   const [suffix, setSuffix] = useState("");
-  const [currentValue, setCurrentValue] = useState("");
-  const [originalVariable, setOriginalVariable] = useState("");
 
-  const selectedField = useMemo(() => {
-    if (!display) return null;
-    const radio = radios.find((r) => r.id === display.radioId);
-    if (!radio) return null;
-    return (radio.structFields ?? []).find((field) => field.name === originalVariable);
-  }, [display, radios, originalVariable]);
+  const variableOptions = useMemo(() => {
+    return radios.flatMap((radio) =>
+      (radio.structFields ?? []).map((field) => {
+        const radioUid = getRadioUid(radio);
 
-  useEffect(() => {
-    if (!display) return;
-    setTitle(display.title ?? "");
-    setVariable(display.variable ?? "");
-    setOriginalVariable(display.variable ?? "");
-    setSuffix(display.suffix ?? "");
+        return {
+          key: `${radio.id}::${field.name}`,
+          radioId: radio.id,
+          radioUid,
+          name: field.name,
+          type: field.type,
+          address: field.address,
+          value: field.value,
+        };
+      })
+    );
+  }, [radios]);
 
-    const radio = radios.find((r) => r.id === display.radioId);
-    const field = (radio?.structFields ?? []).find((f) => f.name === display.variable);
-    setCurrentValue(field?.value ?? "");
-  }, [display, radios]);
+    const selectedField = useMemo(() => {
+      return variableOptions.find((option) => option.key === selectedKey) ?? null;
+    }, [variableOptions, selectedKey]);
+
+    useEffect(() => {
+      if (!display) return;
+
+      setTitle(display.title ?? "");
+      setSuffix(display.suffix ?? "");
+
+      const key =
+        display.radioId && display.variable
+          ? `${display.radioId}::${display.variable}`
+          : "";
+
+      setSelectedKey(key);
+
+    }, [display, variableOptions]);
 
   if (!display) {
     return (
@@ -49,39 +66,27 @@ function DigitalDisplayParams({ displays = [], setDisplays, radios = [], setRadi
   }
 
   const handleSave = () => {
-    const cleanVariable = variable.trim();
     setDisplays((prev) =>
       prev.map((item) =>
         item.id === id
           ? {
               ...item,
-              title,
-              variable: cleanVariable,
+              title: title.trim() || "Untitled display",
+              variable: selectedField?.name ?? "",
+              radioId: selectedField?.radioId ?? null,
+              radioUid: selectedField?.radioUid ?? "",
+              type: selectedField?.type ?? "",
+              address: selectedField?.address ?? null,
               suffix,
             }
           : item
       )
     );
 
-    if (setRadios) {
-      setRadios((prev) =>
-        prev.map((radio) => {
-          if (radio.id !== display.radioId) return radio;
-
-          return {
-            ...radio,
-            structFields: (radio.structFields ?? []).map((field) =>
-              field.name === originalVariable
-                ? { ...field, name: cleanVariable, value: currentValue }
-                : field
-            ),
-          };
-        })
-      );
-    }
-
     navigate("/");
   };
+
+  console.log("RADIOS IN PARAMS:", radios);
 
   return (
     <div className="ddp-page">
@@ -90,12 +95,26 @@ function DigitalDisplayParams({ displays = [], setDisplays, radios = [], setRadi
 
         <div className="ddp-field">
           <label>Title</label>
-          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Engine Pressure" />
+          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Untitled display" />
         </div>
 
         <div className="ddp-field">
           <label>Variable</label>
-          <input value={variable} onChange={(e) => setVariable(e.target.value)} placeholder="chamber_pressure" />
+          <select
+            value={selectedKey}
+            onChange={(e) => {
+              setSelectedKey(e.target.value);
+            }}
+          >
+            <option value="">No variable selected</option>
+
+            {variableOptions.map((option) => (
+              <option key={option.key} value={option.key}>
+                Radio {option.radioUid} · {option.name} ·{" "}
+                {option.type || "Unknown type"}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="ddp-field">
@@ -103,15 +122,12 @@ function DigitalDisplayParams({ displays = [], setDisplays, radios = [], setRadi
           <input value={suffix} onChange={(e) => setSuffix(e.target.value)} placeholder="psi" />
         </div>
 
-        <div className="ddp-field">
-          <label>Current Value</label>
-          <input value={currentValue} onChange={(e) => setCurrentValue(e.target.value)} placeholder="Enter value" />
-        </div>
-
         <div className="ddp-field ddp-field-info">
           <label>Linked radio / type</label>
           <div className="ddp-readonly">
-            Radio {display.radioUid ?? "?"} · {selectedField?.type ?? display.type ?? "Unknown type"}
+            {selectedField
+              ? `Radio ${selectedField.radioUid} · ${selectedField.type || "Unknown type"}`
+              : "No variable linked"}
           </div>
         </div>
 
