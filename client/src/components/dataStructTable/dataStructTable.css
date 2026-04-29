@@ -3,10 +3,8 @@
 .dsc-table th { font-size: 11px; font-weight: 500; color: #888; text-transform: uppercase; letter-spacing: 0.06em; padding: 10px 12px; border-bottom: 1px solid #444; text-align: left; white-space: nowrap; }
 .col-num { width: 5%; text-align: center; }
 .col-name { width: 20%; }
-.col-address { width: 11%; }
 .col-type { width: 18%; }
 .col-bits { width: 9%; }
-.col-value { width: 12%; }
 .col-comment { width: 21%; }
 .col-del { width: 4%; }
 .dsc-row { border-bottom: 1px solid #444; transition: background 0.1s; }
@@ -20,7 +18,7 @@
 .dsc-input:focus { border-color: #666; background: #222; color: #fff; }
 .dsc-input::placeholder { color: #666; }
 .dsc-select { font-family: inherit; cursor: pointer; appearance: none; -webkit-appearance: none; padding-right: 28px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 10px; background-color: #1a1a1a; color: #ddd; }
-.dsc-bits, .dsc-address, .dsc-value { text-align: center; font-variant-numeric: tabular-nums; }
+.dsc-bits, 
 .dsc-comment { color: #ddd; }
 .dsc-type-wrap { display: flex; align-items: center; gap: 8px; width: 100%; min-width: 0; }
 .dsc-type-wrap .dsc-select { flex: 1; min-width: 0; }

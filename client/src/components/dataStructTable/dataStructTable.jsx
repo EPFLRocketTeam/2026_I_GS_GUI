@@ -71,7 +71,7 @@ function DataStructTable({ fields, onUpdateField, onRemoveField }) {
 
         {fields.length === 0 && (
           <tr>
-            <td colSpan={8} className="dsc-empty">
+            <td colSpan={6} className="dsc-empty">
               No fields yet — add one below
             </td>
           </tr>
