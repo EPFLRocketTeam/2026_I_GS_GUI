@@ -28,6 +28,7 @@
 .dot-8 { background: #3B6D11; }
 .dot-16 { background: #185FA5; }
 .dot-32 { background: #534AB7; }
+.dot-64 { background: #b74aa3; }
 .dot-other { background: #888780; }
 .dsc-del { background: none; border: none; cursor: pointer; color: #888; font-size: 15px; width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.12s, background 0.12s, color 0.12s; margin: auto; }
 .dsc-del:hover { background: #2a2a2a; color: #fff; }

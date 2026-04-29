@@ -94,14 +94,6 @@ function DataStructConfig({ radios = [], setRadios, displays = [], setDisplays }
   const isReceiverOnly =
     String(selectedOperatingMode).toLowerCase().includes("receiver");
 
-
-  const warnReceiverOnly = () => {
-    dispatch({
-        type: "SET_FLASH",
-        value: "This radio's data values should not be modified because it is configured as a receiver.",
-    });
-  };
-
   const copyJSON = () => {
       navigator.clipboard.writeText(JSON.stringify(buildCopyJSON(selectedId, fields), null, 2));
       dispatch({ type: "SET_FLASH", value: "JSON copied" });
@@ -205,19 +197,16 @@ function DataStructConfig({ radios = [], setRadios, displays = [], setDisplays }
         <DataStructTable
           fields={fields}
           onUpdateField={(key, prop, value) => {
-            if (isReceiverOnly) {warnReceiverOnly(); }
             updateFieldAndLinkedDisplays(key, prop, value);
             }
         }
           onRemoveField={(key) =>{
-            if (isReceiverOnly) {warnReceiverOnly(); }
             dispatch({ type: "REMOVE_FIELD", key })
             }
         }
         />
 
         <div className="dsc-add-row" onClick={() => {
-            if (isReceiverOnly) {warnReceiverOnly(); }
             dispatch({ type: "ADD_FIELD" })
             }
         }
@@ -243,15 +232,12 @@ function DataStructConfig({ radios = [], setRadios, displays = [], setDisplays }
                 className="dsc-textarea"
                 value={state.ui.jsonInput}
                 onChange={e => {
-                  if (isReceiverOnly) {
-                    warnReceiverOnly();
-                  }
                   dispatch({ type: "SET_JSON_INPUT", value: e.target.value });
                 }}
                 placeholder='[{"name":"packet_nbr","type":"uint32_t","bits":32,"comment":""}]'
               />
               <div className="dsc-import-actions">
-                <button className="dsc-btn dsc-btn-header" onClick={() => {if (isReceiverOnly) {warnReceiverOnly()}; importJSON()}}>       
+                <button className="dsc-btn dsc-btn-header" onClick={() => {importJSON()}}>       
                 Import</button>
                 {state.ui.importError && <span className="dsc-error">{state.ui.importError}</span>}
               </div>

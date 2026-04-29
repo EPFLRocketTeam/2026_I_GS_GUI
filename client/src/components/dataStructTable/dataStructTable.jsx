@@ -1,5 +1,5 @@
 import "./dataStructTable.css";
-import { TYPES, dotClass, clampAddress } from "../../pages/dataStructConfig/dataStructUtils";
+import { TYPES, dotClass } from "../../pages/dataStructConfig/dataStructUtils";
 
 function DataStructTable({ fields, onUpdateField, onRemoveField }) {
 
@@ -9,10 +9,8 @@ function DataStructTable({ fields, onUpdateField, onRemoveField }) {
         <tr>
           <th className="col-num">#</th>
           <th className="col-name">Field name</th>
-          <th className="col-address">Address</th>
           <th className="col-type">Type</th>
           <th className="col-bits">Bits</th>
-          <th className="col-value">Value</th>
           <th className="col-comment">Comment</th>
           <th className="col-del" />
         </tr>
@@ -27,18 +25,6 @@ function DataStructTable({ fields, onUpdateField, onRemoveField }) {
                 value={f.name}
                 placeholder="field_name"
                 onChange={(e) => onUpdateField(f.key, "name", e.target.value)}
-              />
-            </td>
-            <td>
-              <input
-                className="dsc-input dsc-address"
-                type="number"
-                min="0"
-                max="255"
-                value={f.address ?? 0}
-                onChange={(e) =>
-                  onUpdateField(f.key, "address", clampAddress(e.target.value))
-                }
               />
             </td>
             <td>
@@ -65,14 +51,6 @@ function DataStructTable({ fields, onUpdateField, onRemoveField }) {
                 max="64"
                 value={f.bits}
                 onChange={(e) => onUpdateField(f.key, "bits", e.target.value)}
-              />
-            </td>
-            <td>
-              <input
-                className="dsc-input dsc-value"
-                value={f.value}
-                placeholder="—"
-                onChange={(e) => onUpdateField(f.key, "value", e.target.value)}
               />
             </td>
             <td>

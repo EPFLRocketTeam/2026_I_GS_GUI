@@ -117,9 +117,12 @@ export function buildCopyJSON(radioId, fields) {
 
 export function buildCopyStruct(radioId, fields) {
   const lines = fields
-    .map(f => `  ${f.type} ${f.name};${f.comment ? " // " + f.comment : ""}`)
+    .map((f) => `  ${f.type} ${f.name};`)
     .join("\n");
-  return `/* Radio ${radioId} */\ntypedef struct {\n${lines}\n} Radio${radioId}Data_t;`;
+
+  return `typedef struct {
+${lines}
+} Radio${radioId}Data_t;`;
 }
 
 export function parseImportRaw(raw) {

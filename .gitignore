@@ -150,6 +150,7 @@ build/
 *.spec
 __pycache__/
 
+
 # Spyder project settings
 .spyderproject
 .spyproject

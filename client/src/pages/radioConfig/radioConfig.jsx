@@ -2,15 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import "./radioConfig.css";
 import RadioCard from "../../components/radioCard/radioCard";
 import useRadioSocket from "../../sockets/radio/useRadioSocket";
-import RocketDataPanel from "../../components/rocketDataPanel/rocketDataPanel";
 import RadioCardScroller  from "../../components/radioCardScroller/radioCardScroller";
 import { 
   validate, downloadConfig, loadConfig, handleAdd,
   handleConfigChange, handleStructChange, handleStructParse, handleRemove,
   handleFieldChange, handleConfigTypeChange, handleConfigKeyChange,
-  handleFieldLabelChange, handleFieldTypeChange,
 } from "./radioUtils";
-import { ensureRadioIds, RADIO_PROFILE_OPTIONS, switchRadioConfigTemplate } from "./radioUtils/radioDefaults";
+import { ensureRadioIds} from "./radioUtils/radioDefaults";
 import { getRadioUid, uidCounts } from "./radioUtils/radioIO";
 import { useNavigate } from "react-router-dom";
 import useRadioDrag from "./radioUtils/radioDragUtils";
@@ -26,7 +24,6 @@ function RadioConfig({radios, setRadios}) {
   const [radioPendingDelete, setRadioPendingDelete] = useState(null);
   const [selectedProfile, setSelectedProfile] = useState("uplink");
 
-  const panelRadio = radios.find(r => r.id === panelRadioId) ?? null;
   const { draggedRadioId, dragOverRadioId, handleDragStart, handleDragEnter, handleDrop, handleDragEnd } = useRadioDrag(setRadios);
 
   const handleContextMenu = (e, radioId) => {
@@ -76,18 +73,6 @@ function RadioConfig({radios, setRadios}) {
     <div className="radio-page">
       <div className="topbar">
         <div className="topbar-left">
-          <select
-            className="btn"
-            value={selectedProfile}
-            onChange={(e) => setSelectedProfile(e.target.value)}
-          >
-            {RADIO_PROFILE_OPTIONS.map((profile) => (
-              <option key={profile.value} value={profile.value}>
-                {profile.label}
-              </option>
-            ))}
-          </select>
-
           <button
             className="btn btn-add-radio"
             onClick={() => handleAdd(setRadios, selectedProfile)}
@@ -163,22 +148,6 @@ function RadioConfig({radios, setRadios}) {
           </li>
         </ul>
       )}
-
-      <RocketDataPanel
-        open={!!panelRadio}
-        radio={panelRadio}
-        onClose={() => setPanelRadioId(null)}
-        profileOptions={RADIO_PROFILE_OPTIONS}
-        onSwitchConfig={(templateName) => {
-          setRadios((prev) =>
-            switchRadioConfigTemplate(prev, panelRadioId, templateName)
-          );
-        }}
-        onConfigChange={(paramIdx, value) => {
-          const radioIndex = radios.findIndex((r) => r.id === panelRadioId);
-          handleConfigChange(radioIndex, paramIdx, value, setRadios);
-        }}
-      />
       
     </div>
   );
