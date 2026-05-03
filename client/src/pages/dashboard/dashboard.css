@@ -35,8 +35,21 @@ body {
 .dashboard-modal-actions { display: flex; justify-content: flex-end; padding: 14px 20px 18px; border-top: 1px solid #2a2a2a; }
 .dashboard-modal-btn { padding: 8px 14px; border: 1px solid #444; border-radius: 8px; background: #1a1a1a; color: #fff; cursor: pointer; }
 .dashboard-modal-btn:hover { background: #222; }
-.dashboard-zoom-viewport { cursor: default; }
-.dashboard-zoom-layer { transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1); width: 100%; height: 100%; }
+.dashboard-zoom-viewport {
+  position: relative;
+  cursor: default;
+  width: 100%;
+  min-height: calc(100vh - 48px);
+  overflow: hidden;
+}
+.dashboard-zoom-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  min-height: calc(100vh - 120px);
+  transform-origin: 0 0;
+  will-change: transform;
+}
 .dashboard-zoom-viewport.is-panning { cursor: grabbing; }
 .dashboard-zoom-viewport.is-panning 
 .dashboard-draggable-card { pointer-events: none;}

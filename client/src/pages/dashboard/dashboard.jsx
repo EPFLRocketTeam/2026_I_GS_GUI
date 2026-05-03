@@ -16,6 +16,11 @@ import {
 } from "./dashboardUtils";
 import { useNavigate } from "react-router-dom";
 import DeleteRadioModal from "../../components/deleteRadioModal/deleteRadioModal";
+import DashboardGridControls, {
+  DEFAULT_GRID_SETTINGS,
+  buildGridCssVars,
+  snapToGridValue,
+} from "../../components/dashboardGridControls/dashboardGridControls";
 
 function Dashboard({ displays = [], setDisplays = () => {}, radios = [] }) {
   const navigate = useNavigate();
@@ -23,10 +28,12 @@ function Dashboard({ displays = [], setDisplays = () => {}, radios = [] }) {
   const [dragging, setDragging] = useState(null);
   const mousePos = useRef({ x: 0, y: 0 });
   const panRef = useRef({ x: 0, y: 0 });
+  const viewportRef = useRef(null);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [panning, setPanning] = useState(null);
   const [displayPendingDelete, setDisplayPendingDelete] = useState(null);
+  const [gridSettings, setGridSettings] = useState(DEFAULT_GRID_SETTINGS);
 
   useEffect(() => { panRef.current = pan; }, [pan]);
 
@@ -38,6 +45,11 @@ function Dashboard({ displays = [], setDisplays = () => {}, radios = [] }) {
   const fieldValueMap = useMemo(
     () => buildFieldValueMap(radios),
     [radios]
+  );
+
+  const snapValue = useCallback(
+    (value) => snapToGridValue(value, gridSettings),
+    [gridSettings]
   );
 
   const startPan = (e) => {
@@ -54,6 +66,22 @@ function Dashboard({ displays = [], setDisplays = () => {}, radios = [] }) {
       startPanY: pan.y,
     });
   };
+
+  const getWorldPointFromClient = useCallback(
+    (clientX, clientY) => {
+      const rect = viewportRef.current?.getBoundingClientRect();
+
+      if (!rect) {
+        return { x: 0, y: 0 };
+      }
+
+      return {
+        x: (clientX - rect.left - pan.x) / zoom,
+        y: (clientY - rect.top - pan.y) / zoom,
+      };
+    },
+    [pan, zoom]
+  );
 
   const handlePanMove = (e) => {
     if (!panning) return;
@@ -121,8 +149,8 @@ const handleCanvasMouseMove = (e) => {
     moveDraggedDisplay({
       displays: prev,
       dragging,
-      x,
-      y,
+      x: snapValue(x),
+      y: snapValue(y),
     })
   );
 };
@@ -145,41 +173,83 @@ const startDrag = (e, display) => {
     if (dragState) setDragging(dragState);
   };
 
-const createEmptyDisplay = () => {
-  setDisplays((prev = []) => [
-    ...prev,
-    {
-      id: crypto.randomUUID(),
-      title: `Display ${prev.length + 1}`,
-      name: "",
-      radioId: null,
-      radioUid: "",
-      variable: "",
-      type: "",
-      address: null,
-      x: 40 + prev.length * 20,
-      y: 40 + prev.length * 20,
-    },
-  ]);
+const createEmptyDisplay = (point = null) => {
+  setDisplays((prev = []) => {
+    const fallbackX = 40 + prev.length * 20;
+    const fallbackY = 40 + prev.length * 20;
+
+    const x = point?.x ?? fallbackX;
+    const y = point?.y ?? fallbackY;
+
+    return [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        title: `Display ${prev.length + 1}`,
+        name: "",
+        radioId: null,
+        radioUid: "",
+        variable: "",
+        type: "",
+        address: null,
+        x: snapValue(x),
+        y: snapValue(y),
+      },
+    ];
+  });
 };
   return (
-    <div className="main-container" onContextMenu={ (e) => { e.preventDefault(); if (e.ctrlKey || panning) return; setCtxMenu({ x: e.clientX, y: e.clientY, type: "page" }); } }>
+    <div className="main-container" >
+    <DashboardGridControls
+        gridSettings={gridSettings}
+        setGridSettings={setGridSettings}
+    />
     <div
-      className={`dashboard-zoom-viewport ${panning ? "is-panning" : ""}`}
+      ref={viewportRef}
+      className={`dashboard-zoom-viewport dashboard-grid-viewport ${
+        panning ? "is-panning" : ""
+      }`}
+      style={buildGridCssVars(gridSettings, zoom, pan)}
+      onContextMenu={(e) => {
+        e.preventDefault();
+
+        if (e.ctrlKey || panning) return;
+        if (e.target.closest(".dashboard-draggable-card")) return;
+
+        const point = getWorldPointFromClient(e.clientX, e.clientY);
+
+        setCtxMenu({
+          x: e.clientX,
+          y: e.clientY,
+          type: "page",
+          canvasX: snapValue(point.x),
+          canvasY: snapValue(point.y),
+        });
+      }}
       onMouseDown={startPan}
-      onMouseMove={(e) => { const { x, y } = getViewportMousePos(e); mousePos.current = { x, y }; handlePanMove(e);}}
+      onMouseMove={(e) => {
+        const { x, y } = getViewportMousePos(e);
+        mousePos.current = { x, y };
+        handlePanMove(e);
+      }}
       onMouseUp={stopPan}
       onMouseLeave={stopPan}
       onWheel={handleWheel}
-    >
+      >
       <div
         className="dashboard-zoom-layer"
         style={{
           transform: `matrix(${zoom}, 0, 0, ${zoom}, ${pan.x}, ${pan.y})`,
         }}
       >
-        <div className={`dashboard-canvas ${displays.length === 0 ? "dashboard-canvas--empty" : ""}`} 
-        style={{ width: `${100 / zoom}%`, height: `${100 / zoom}%` }}
+      <div
+          className={`dashboard-canvas ${
+            displays.length === 0 ? "dashboard-canvas--empty" : ""
+          }`}
+          style={{
+            width: `${100 / zoom}%`,
+            height: `${100 / zoom}%`,
+          }}
         onMouseMove={handleCanvasMouseMove}
         onMouseUp={handleCanvasMouseUp}
         onMouseLeave={handleCanvasMouseUp}>
@@ -212,6 +282,7 @@ const createEmptyDisplay = () => {
           )}
         </div>
       </div>
+      </div>
 
       {ctxMenu && (
         <ul
@@ -219,10 +290,19 @@ const createEmptyDisplay = () => {
           style={{ top: ctxMenu.y, left: ctxMenu.x }}
           onClick={(e) => e.stopPropagation()}
         >
-          {ctxMenu.type === "page" && <li onClick={() => {
-              createEmptyDisplay();
+        {ctxMenu.type === "page" && (
+          <li
+            onClick={() => {
+              createEmptyDisplay({
+                x: ctxMenu.canvasX,
+                y: ctxMenu.canvasY,
+              });
               setCtxMenu(null);
-            }}>＋ Add digital display</li>}
+            }}
+          >
+            ＋ Add digital display
+          </li>
+        )}
           {ctxMenu.type === "card" && (
             <>
               <li onClick={() => {
@@ -259,7 +339,6 @@ const createEmptyDisplay = () => {
           }}
         />
       )}
-    </div>
     </div>
   );
 }
