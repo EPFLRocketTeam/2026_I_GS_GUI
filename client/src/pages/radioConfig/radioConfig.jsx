@@ -20,7 +20,7 @@ import { ensureRadioIds } from "./radioUtils/radioDefaults";
 import { getRadioUid, uidCounts } from "./radioUtils/radioIO";
 import { useNavigate } from "react-router-dom";
 import useRadioDrag from "./radioUtils/radioDragUtils";
-import DeleteRadioModal from "../../components/deleteRadioModal/deleteRadioModal";
+import DeleteRadioModal from "../../components/deleteModal/deleteModal";
 
 function RadioConfig({ radios, setRadios }) {
   const { lastUpdated, isConnected } = useRadioSocket(

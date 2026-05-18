@@ -8,7 +8,6 @@ import {
 
 export function useDashboardDrag(
   setDisplays: any,
-  snapValue: any,
   zoom: number,
   pan: any,
 ) {
@@ -28,8 +27,8 @@ export function useDashboardDrag(
       moveDraggedDisplay({
         displays: prev,
         dragging,
-        x: snapValue(x),
-        y: snapValue(y),
+        x,
+        y,
       }),
     );
   };

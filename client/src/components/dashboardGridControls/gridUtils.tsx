@@ -6,12 +6,8 @@ export const snapToGridValue = (
   gridSettings: GridSettings,
   zoom = 1,
 ): number => {
-  if (!gridSettings.snap) return value;
   const gridPx = GRID_SIZES[gridSettings.size].px;
-  // value is in world units; convert to screen px with zoom, snap, then convert back
-  return (
-    Math.round((value * zoom) / gridPx) * (gridPx / zoom)
-  );
+  return Math.round((value * zoom) / gridPx) * (gridPx / zoom);
 };
 
 export const buildGridCssVars = (
@@ -41,20 +37,7 @@ export const buildGridCssVars = (
 
 export const enum GridSettingsKeys {
   grid = "grid",
-  snap = "snap",
   size = "size",
   major = "major",
   opacity = "opacity",
-}
-
-export const enum GridOpacityLevels {
-  low = 0.04,
-  medium = 0.18,
-  high = 0.35,
-}
-
-export const enum GridMajorLevels {
-  low = 2,
-  medium = 5,
-  high = 10,
 }

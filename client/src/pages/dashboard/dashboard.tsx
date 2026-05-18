@@ -1,4 +1,4 @@
-import { useMemo, useRef, useCallback, useState } from "react";
+import { useMemo, useRef, useCallback, useState, useEffect } from "react";
 import "./dashboard.css";
 import DigitalDisplayCard from "../../components/digitalDisplayCard/digitalDisplayCard";
 import {
@@ -8,20 +8,24 @@ import {
 import {
   CARD_W,
   CARD_H,
+  GRID_WIDTH,
+  GRID_HEIGHT,
   buildFieldValueMap,
+  clampDisplayPosition,
   getDisplayValue,
   getOverlappingCardIds,
   getViewportMousePos,
+  getCardHeight,
+  getCardWidth,
 } from "./dashboardUtils";
+import { GRID_SIZES, DEFAULT_GRID_SETTINGS } from "../../constants/gridConstants/gridConstants";
 import { useNavigate } from "react-router-dom";
-import DeleteRadioModal from "../../components/deleteRadioModal/deleteRadioModal";
-import { DEFAULT_GRID_SETTINGS } from "../../constants/gridConstants/gridConstants";
+import DeleteRadioModal from "../../components/deleteModal/deleteModal";
 import { useDashboardPan } from "./hooks/useDashboardPan";
 import { useDashboardZoom } from "./hooks/useDashboardZoom";
 import { useDashboardDrag } from "./hooks/useDashboardDrag";
 import { useDashboardContextMenu } from "./hooks/useDashboardContextMenu";
 import {
-  snapToGridValue,
   buildGridCssVars,
 } from "../../components/dashboardGridControls/gridUtils";
 import DashboardGridControls from "../../components/dashboardGridControls/dashboardGridControls";
@@ -35,27 +39,53 @@ function Dashboard({
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const mousePos = useRef({ x: 0, y: 0 });
   const [gridSettings, setGridSettings] = useState(DEFAULT_GRID_SETTINGS);
+  const gridPx = GRID_SIZES[gridSettings.size].px;
+  const cardWidth = getCardWidth(gridPx);
+  const cardHeight = getCardHeight(gridPx);
   const [displayPendingDelete, setDisplayPendingDelete] =
     useState<DigitalDisplay | null>(null);
 
   // ---------------------------
   // PAN
   // ---------------------------
-  const { pan, startPan, onPanMove, stopPan, panning, panRef } =
-    useDashboardPan();
+  const zoomRef = useRef(1);
+
+  const clampPan = useCallback(
+    (
+      nextPan: { x: number; y: number },
+      zoomValue = zoomRef.current,
+    ) => {
+      const rect = viewportRef.current?.getBoundingClientRect();
+      if (!rect) return nextPan;
+
+      const scaledWidth = GRID_WIDTH * zoomValue;
+      const scaledHeight = GRID_HEIGHT * zoomValue;
+      const minX = Math.min(0, rect.width - scaledWidth);
+      const minY = Math.min(0, rect.height - scaledHeight);
+
+      return {
+        x: Math.max(minX, Math.min(nextPan.x, 0)),
+        y: Math.max(minY, Math.min(nextPan.y, 0)),
+      };
+    },
+    [],
+  );
+
+  const { pan, startPan, onPanMove, stopPan, panning, panRef, setPan } =
+    useDashboardPan(clampPan);
 
   // ---------------------------
   // ZOOM
   // ---------------------------
   const {
     zoom,
-    zoomAround,
-    resetZoom,
-    mouseRef,
     panRef: zoomPanRef,
     handleWheel,
-  } = useDashboardZoom();
+  } = useDashboardZoom(setPan, clampPan);
 
+  useEffect(() => {
+    zoomRef.current = zoom;
+  }, [zoom]);
   // sync refs between systems
   panRef.current = pan;
   zoomPanRef.current = pan;
@@ -63,14 +93,8 @@ function Dashboard({
   // ---------------------------
   // DRAG
   // ---------------------------
-  const snapValue = useCallback(
-    (value: number) => snapToGridValue(value, gridSettings, zoom),
-    [gridSettings, zoom],
-  );
-
   const { dragging, startDrag, onDragMove, stopDrag } = useDashboardDrag(
     setDisplays,
-    snapValue,
     zoom,
     pan,
   );
@@ -115,16 +139,21 @@ function Dashboard({
   // ---------------------------
 
   const createEmptyDisplay = (point: { x: number; y: number }) => {
+    const { x: clampedX, y: clampedY } = clampDisplayPosition({
+      x: point.x,
+      y: point.y,
+    });
+
     setDisplays((prev) => {
       const newDisplay: DigitalDisplay = {
         digitalDisplayId: crypto.randomUUID(),
-        title: `TODO: Add title of display here `,
+        title: 'New display',
         varName: "",
         varValue: "",
         radioId: null,
         type: "",
-        posx: point.x,
-        posy: point.y,
+        posx: clampedX,
+        posy: clampedY,
       };
 
       return [...prev, newDisplay];
@@ -159,8 +188,8 @@ function Dashboard({
             x: e.clientX,
             y: e.clientY,
             type: "page",
-            canvasX: snapValue(point.x),
-            canvasY: snapValue(point.y),
+            canvasX: point.x,
+            canvasY: point.y,
           });
         }}
         onMouseDown={startPan}
@@ -168,10 +197,21 @@ function Dashboard({
           const { x, y } = getViewportMousePos(e);
           mousePos.current = { x, y };
           onPanMove(e);
+          onDragMove(e);
         }}
-        onMouseUp={stopPan}
-        onMouseLeave={stopPan}
-        onWheel={handleWheel}
+        onMouseUp={() => {
+          stopPan();
+          stopDrag();
+        }}
+        onMouseLeave={() => {
+          stopPan();
+          stopDrag();
+        }}
+        onWheel={(e) => {
+          if (!e.ctrlKey) return;
+          e.stopPropagation();
+          handleWheel(e);
+        }}
       >
         <div
           className="dashboard-zoom-layer"
@@ -184,12 +224,9 @@ function Dashboard({
               displays.length === 0 ? "dashboard-canvas--empty" : ""
             }`}
             style={{
-              width: `${100 / zoom}%`,
-              height: `${100 / zoom}%`,
+              width: `${GRID_WIDTH}px`,
+              height: `${GRID_HEIGHT}px`,
             }}
-            onMouseMove={onDragMove}
-            onMouseUp={stopDrag}
-            onMouseLeave={stopDrag}
           >
             {displays.length === 0 ? (
               <div className="dashboard-empty">
@@ -208,8 +245,8 @@ function Dashboard({
                   style={{
                     left: display.posx ?? 0,
                     top: display.posy ?? 0,
-                    width: CARD_W,
-                    minHeight: CARD_H,
+                    width: cardWidth,
+                    minHeight: cardHeight,
                   }}
                   onMouseDown={(e) => {
                     if (e.button === 0) startDrag(e, display);

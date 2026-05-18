@@ -14,20 +14,23 @@ function DigitalDisplayCard({ display, value, onContextMenu }) {
   const [fontSize, setFontSize] = useState(MAX_FONT_SIZE);
 
   useLayoutEffect(() => {
-    const fitText = () => {
-      const bodyEl = bodyRef.current;
-      const valueEl = valueRef.current;
-      if (!bodyEl || !valueEl) return;
+    const bodyEl = bodyRef.current;
+    const valueEl = valueRef.current;
 
+    if (!bodyEl || !valueEl) return;
+
+    const fitText = () => {
       const maxWidth = bodyEl.clientWidth - BOX_PADDING * 2;
       const maxHeight = bodyEl.clientHeight - BOX_PADDING * 2;
 
       let nextSize = MAX_FONT_SIZE;
+
       valueEl.style.fontSize = `${nextSize}px`;
 
       while (
         nextSize > MIN_FONT_SIZE &&
-        (valueEl.scrollWidth > maxWidth || valueEl.scrollHeight > maxHeight)
+        (valueEl.scrollWidth > maxWidth ||
+          valueEl.scrollHeight > maxHeight)
       ) {
         nextSize -= 1;
         valueEl.style.fontSize = `${nextSize}px`;
@@ -50,8 +53,19 @@ function DigitalDisplayCard({ display, value, onContextMenu }) {
     };
 
     fitText();
+
+    const resizeObserver = new ResizeObserver(() => {
+      fitText();
+    });
+
+    resizeObserver.observe(bodyEl);
+
     window.addEventListener("resize", fitText);
-    return () => window.removeEventListener("resize", fitText);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", fitText);
+    };
   }, [displayValue, display?.suffix, display?.variable]);
 
   return (

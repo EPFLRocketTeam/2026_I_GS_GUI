@@ -1,6 +1,8 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef } from "react";
 
-export function useDashboardPan() {
+export function useDashboardPan(
+  clampPan?: (nextPan: { x: number; y: number }) => { x: number; y: number },
+) {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [panning, setPanning] = useState<null | {
     startMouseX: number;
@@ -25,10 +27,12 @@ export function useDashboardPan() {
   const onPanMove = (e: React.MouseEvent) => {
     if (!panning) return;
 
-    setPan({
+    const nextPan = {
       x: panning.startPanX + (e.clientX - panning.startMouseX),
       y: panning.startPanY + (e.clientY - panning.startMouseY),
-    });
+    };
+
+    setPan(clampPan ? clampPan(nextPan) : nextPan);
   };
 
   const stopPan = () => setPanning(null);

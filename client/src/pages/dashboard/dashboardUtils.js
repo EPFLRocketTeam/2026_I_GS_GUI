@@ -1,6 +1,20 @@
-export const CARD_W = 220;
-export const CARD_H = 140;
+export const CARD_W = 5;
+export const CARD_H = 5;
 export const CARD_GAP = 18;
+
+export const GRID_WIDTH = 720;
+export const GRID_HEIGHT = 540;
+
+export const getCardWidth = (gridPx) =>
+  CARD_W * gridPx;
+
+export const getCardHeight = (gridPx) =>
+  CARD_H * gridPx;
+
+export const clampDisplayPosition = ({ x, y }) => ({
+  x: Math.max(0, x),
+  y: Math.max(0, y),
+}); 
 
 export const cardsOverlap = (a, b) => {
   return !(
@@ -65,14 +79,15 @@ export const getDraggedCardPosition = ({ e, dragging, zoom, pan }) => {
 };
 
 export const moveDraggedDisplay = ({ displays, dragging, x, y }) => {
+  const clamped = clampDisplayPosition({ x, y });
   return displays.map((display) => {
     const id = display.digitalDisplayId ?? display.id;
     if (id === dragging.id) {
       // preserve existing field names
       if (display.digitalDisplayId) {
-        return { ...display, posx: x, posy: y };
+        return { ...display, posx: clamped.x, posy: clamped.y };
       }
-      return { ...display, x, y };
+      return { ...display, x: clamped.x, y: clamped.y };
     }
     return display;
   });
@@ -80,7 +95,7 @@ export const moveDraggedDisplay = ({ displays, dragging, x, y }) => {
 
 export const resolveDroppedDisplay = ({ displays }) => displays;
 
-export const clampZoom = (value) => Math.min(2, Math.max(0.4, value));
+export const clampZoom = (value) => Math.min(2, Math.max(1, value));
 
 export const getViewportMousePos = (e) => {
   const rect = e.currentTarget.getBoundingClientRect();

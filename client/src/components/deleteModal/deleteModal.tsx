@@ -1,4 +1,4 @@
-import "./deleteRadioModal.css";
+import "./deleteModal.css";
 import { getRadioUid } from "../../pages/radioConfig/radioUtils/radioIO";
 
 type DeleteRadioModalProps = {

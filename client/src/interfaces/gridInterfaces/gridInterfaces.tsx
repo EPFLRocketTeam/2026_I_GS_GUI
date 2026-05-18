@@ -4,7 +4,6 @@ export type GridSizePreset = keyof typeof GRID_SIZES;
 
 export interface GridSettings {
   visible: boolean;
-  snap: boolean;
   size: GridSizePreset;
   major: number;
   opacity: number;
