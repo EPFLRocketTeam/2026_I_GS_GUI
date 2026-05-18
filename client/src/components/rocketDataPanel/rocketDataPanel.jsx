@@ -9,19 +9,21 @@ function RocketDataPanel({
   onConfigChange,
 }) {
   return (
-    <div
-      className={`rdp-overlay ${open ? "open" : ""}`}
-      onClick={onClose}
-    >
+    <div className={`rdp-overlay ${open ? "open" : ""}`} onClick={onClose}>
       <aside
         className={`rdp-panel ${open ? "open" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="rdp-header">
-          <span>📡 Radio{" "}
-            {radio?.configParams?.find((p) => p.key?.toLowerCase() === "uid")?.value ?? ""}
-            {" "}— Properties</span>
-          <button className="rdp-close" onClick={onClose}>✕</button>
+          <span>
+            📡 Radio{" "}
+            {radio?.configParams?.find((p) => p.key?.toLowerCase() === "uid")
+              ?.value ?? ""}{" "}
+            — Properties
+          </span>
+          <button className="rdp-close" onClick={onClose}>
+            ✕
+          </button>
         </div>
 
         {radio && (
@@ -60,13 +62,17 @@ function RocketDataPanel({
                     {radio.configParams.map((param, pIdx) => (
                       <tr key={`${param.key}-${pIdx}`}>
                         <td>{param.label ?? param.key}</td>
-                        <td><span className="rdp-type-pill">{param.type}</span></td>
+                        <td>
+                          <span className="rdp-type-pill">{param.type}</span>
+                        </td>
                         <td>
                           {param.control === "select" ? (
                             <select
                               className="rdp-input"
                               value={param.value ?? ""}
-                              onChange={(e) => onConfigChange?.(pIdx, e.target.value)}
+                              onChange={(e) =>
+                                onConfigChange?.(pIdx, e.target.value)
+                              }
                             >
                               {(param.options ?? []).map((option) => (
                                 <option key={option.value} value={option.value}>
@@ -78,7 +84,9 @@ function RocketDataPanel({
                             <input
                               className="rdp-input"
                               value={param.value ?? ""}
-                              onChange={(e) => onConfigChange?.(pIdx, e.target.value)}
+                              onChange={(e) =>
+                                onConfigChange?.(pIdx, e.target.value)
+                              }
                             />
                           )}
                         </td>

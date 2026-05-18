@@ -12,7 +12,8 @@ export const RADIO_PROFILE_FILES = {
     label: "Downlink Radio",
     raw: downlinkRaw,
   },
-  payload: { 
-    label: "Payload Radio", 
-    raw: payloadRaw },
+  payload: {
+    label: "Payload Radio",
+    raw: payloadRaw,
+  },
 };

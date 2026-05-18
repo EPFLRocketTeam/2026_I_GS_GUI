@@ -60,7 +60,9 @@ export const parseRadioProfile = (raw = "") => {
     .map((line) => line.trim())
     .filter((line) => line.startsWith("#define"))
     .map((line) => {
-      const match = line.match(/^#define\s+([A-Za-z_]\w*)\s+(.+?)\s*\((\w+)\)\s*$/);
+      const match = line.match(
+        /^#define\s+([A-Za-z_]\w*)\s+(.+?)\s*\((\w+)\)\s*$/,
+      );
 
       if (!match) {
         console.error("Invalid radio profile line:", line);

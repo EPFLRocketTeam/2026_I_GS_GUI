@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useReducer } from "react";
 import { useLocation } from "react-router-dom";
 import "./dataStructConfig.css";
-import { getRadioUid } from "../radioConfig/radioUtils/radioIO";
+import { getRadioUid } from "../radioConfig/radioUtils/radioIO.js";
 import {
   buildCopyJSON,
   buildCopyStruct,
@@ -10,33 +10,46 @@ import {
   dataStructReducer,
 } from "./dataStructUtils.js";
 import DataStructTable from "../../components/dataStructTable/dataStructTable.jsx";
+import { DigitalDisplay } from "../../interfaces/dashboardInterfaces/dashboardInterfaces.js";
 
-function DataStructConfig({ radios = [], setRadios, displays = [], setDisplays }) {
+type Props = {
+  radios: any[];
+  setRadios: React.Dispatch<React.SetStateAction<any[]>>;
+  displays: DigitalDisplay[];
+  setDisplays: React.Dispatch<React.SetStateAction<DigitalDisplay[]>>;
+};
+
+function DataStructConfig({
+  radios = [],
+  setRadios,
+  displays = [],
+  setDisplays,
+}: Props) {
   const location = useLocation();
   const incomingRadioId = location.state?.radioId ?? null;
   const incomingRadioUid = location.state?.radioUid ?? null;
   const incomingFields = location.state?.fields ?? [];
 
   const availableRadios = useMemo(() => {
-  if (radios.length > 0) return radios;
+    if (radios.length > 0) return radios;
 
-  if (incomingRadioId != null) {
-    return [
-      {
-        id: incomingRadioId,
-        uid: incomingRadioUid,
-        structFields: incomingFields,
-      },
-    ];
-  }
+    if (incomingRadioId != null) {
+      return [
+        {
+          id: incomingRadioId,
+          uid: incomingRadioUid,
+          structFields: incomingFields,
+        },
+      ];
+    }
 
-  return [];
+    return [];
   }, [radios, incomingRadioId, incomingRadioUid, incomingFields]);
 
   const [state, dispatch] = useReducer(
     dataStructReducer,
     { incomingRadioId, incomingFields, availableRadios },
-    createInitialState
+    createInitialState,
   );
 
   useEffect(() => {
@@ -74,42 +87,46 @@ function DataStructConfig({ radios = [], setRadios, displays = [], setDisplays }
   useEffect(() => {
     if (!setRadios || selectedId == null) return;
 
-    setRadios(prev =>
-        prev.map(r =>
-        r.id === selectedId
-            ? { ...r, structFields: fields }
-            : r
-        )
+    setRadios((prev) =>
+      prev.map((r) =>
+        r.id === selectedId ? { ...r, structFields: fields } : r,
+      ),
     );
   }, [selectedId, fields, setRadios]);
 
   const selectedRadio = availableRadios.find((r) => r.id === selectedId);
-  const totalBits = fields.reduce((sum, f) => sum + (Number.parseInt(f.bits) || 0), 0);
+  const totalBits = fields.reduce(
+    (sum: number, f: { bits: string }) => sum + (Number.parseInt(f.bits) || 0),
+    0,
+  );
 
   const selectedOperatingMode =
     selectedRadio?.configParams?.find(
-      (p) => p.key?.toLowerCase() === "operating_mode"
+      (p: { key: string }) => p.key?.toLowerCase() === "operating_mode",
     )?.value ?? null;
 
-  const isReceiverOnly =
-    String(selectedOperatingMode).toLowerCase().includes("receiver");
+  const isReceiverOnly = String(selectedOperatingMode)
+    .toLowerCase()
+    .includes("receiver");
 
   const copyJSON = () => {
-      navigator.clipboard.writeText(JSON.stringify(buildCopyJSON(selectedId, fields), null, 2));
-      dispatch({ type: "SET_FLASH", value: "JSON copied" });
-    };
+    navigator.clipboard.writeText(
+      JSON.stringify(buildCopyJSON(selectedId, fields), null, 2),
+    );
+    dispatch({ type: "SET_FLASH", value: "JSON copied" });
+  };
 
   const copyStruct = () => {
-      navigator.clipboard.writeText(buildCopyStruct(selectedId, fields));
-      dispatch({ type: "SET_FLASH", value: "Struct copied" });
-    };
+    navigator.clipboard.writeText(buildCopyStruct(selectedId, fields));
+    dispatch({ type: "SET_FLASH", value: "Struct copied" });
+  };
 
   const importJSON = () => {
-      dispatch({ type: "SET_IMPORT_ERROR", value: "" });
+    dispatch({ type: "SET_IMPORT_ERROR", value: "" });
     try {
       const parsed = parseImportRaw(state.ui.jsonInput);
       dispatch({ type: "IMPORT_FIELDS", fields: parsed });
-    } catch (e) {
+    } catch (e: any) {
       dispatch({ type: "SET_IMPORT_ERROR", value: e.message });
     }
   };
@@ -122,8 +139,12 @@ function DataStructConfig({ radios = [], setRadios, displays = [], setDisplays }
     );
   }
 
-  const updateFieldAndLinkedDisplays = (key, prop, value) => {
-    const oldField = fields.find((f) => f.key === key);
+  const updateFieldAndLinkedDisplays = (
+    key: string,
+    prop: string,
+    value: string,
+  ) => {
+    const oldField = fields.find((f: { key: string }) => f.key === key);
 
     if (
       prop === "name" &&
@@ -132,15 +153,15 @@ function DataStructConfig({ radios = [], setRadios, displays = [], setDisplays }
       setDisplays
     ) {
       setDisplays((prev) =>
-        prev.map((display) =>
-          display.radioId === selectedId && display.variable === oldField.name
+        prev.map((display: DigitalDisplay) =>
+          display.radioId === selectedId && display.varName === oldField.name
             ? {
                 ...display,
-                variable: value,
+                varValue: value,
                 title: display.title === oldField.name ? value : display.title,
               }
-            : display
-        )
+            : display,
+        ),
       );
     }
 
@@ -150,11 +171,10 @@ function DataStructConfig({ radios = [], setRadios, displays = [], setDisplays }
   return (
     <div className="dsc-page">
       <div className="dsc-card">
-
         <div className="dsc-header">
           <div className="dsc-header-left">
             <div className="dsc-radio-selector">
-              {availableRadios.map(r => {
+              {availableRadios.map((r) => {
                 const isActive = r.id === selectedId;
 
                 return (
@@ -165,22 +185,35 @@ function DataStructConfig({ radios = [], setRadios, displays = [], setDisplays }
                     aria-pressed={isActive}
                   >
                     <span className="dsc-radio-dot" />
-                    <span className="dsc-radio-tab-text">Radio {getRadioUid(r) ?? r.id}</span>
-                    {isActive && <span className="dsc-radio-tab-badge">Selected</span>}
+                    <span className="dsc-radio-tab-text">
+                      Radio {getRadioUid(r) ?? r.id}
+                    </span>
+                    {isActive && (
+                      <span className="dsc-radio-tab-badge">Selected</span>
+                    )}
                   </button>
                 );
               })}
             </div>
             <span className="dsc-subtitle">
-                Data structure · Radio {selectedRadio ? getRadioUid(selectedRadio) : (incomingRadioUid ?? selectedId)}
-                            {" "}· {fields.length} field{fields.length !== 1 ? "s" : ""}
-                            {" "}· {totalBits} bits
+              Data structure · Radio{" "}
+              {selectedRadio
+                ? getRadioUid(selectedRadio)
+                : (incomingRadioUid ?? selectedId)}{" "}
+              · {fields.length} field{fields.length !== 1 ? "s" : ""} ·{" "}
+              {totalBits} bits
             </span>
           </div>
           <div className="dsc-header-actions">
-            {state.ui.flashMsg && <span className="dsc-flash">{state.ui.flashMsg}</span>}
-            <button className="dsc-btn dsc-btn-header" onClick={copyJSON}>Copy JSON</button>
-            <button className="dsc-btn dsc-btn-header" onClick={copyStruct}>Copy C struct</button>
+            {state.ui.flashMsg && (
+              <span className="dsc-flash">{state.ui.flashMsg}</span>
+            )}
+            <button className="dsc-btn dsc-btn-header" onClick={copyJSON}>
+              Copy JSON
+            </button>
+            <button className="dsc-btn dsc-btn-header" onClick={copyStruct}>
+              Copy C struct
+            </button>
           </div>
         </div>
 
@@ -189,62 +222,85 @@ function DataStructConfig({ radios = [], setRadios, displays = [], setDisplays }
             <span className="dsc-warning-icon">⚠</span>
             <div className="dsc-warning-content">
               <div className="dsc-warning-title">Receiver mode active</div>
-              <div className="dsc-warning-text">This radio's data values should not be modified because it is configured as a receiver.</div>
+              <div className="dsc-warning-text">
+                This radio's data values should not be modified because it is
+                configured as a receiver.
+              </div>
             </div>
           </div>
         )}
 
         <DataStructTable
           fields={fields}
-          onUpdateField={(key, prop, value) => {
+          onUpdateField={(key: string, prop: string, value: string) => {
             updateFieldAndLinkedDisplays(key, prop, value);
-            }
-        }
-          onRemoveField={(key) =>{
-            dispatch({ type: "REMOVE_FIELD", key })
-            }
-        }
+          }}
+          onRemoveField={(key: string) => {
+            dispatch({ type: "REMOVE_FIELD", key });
+          }}
         />
 
-        <div className="dsc-add-row" onClick={() => {
-            dispatch({ type: "ADD_FIELD" })
-            }
-        }
+        <div
+          className="dsc-add-row"
+          onClick={() => {
+            dispatch({ type: "ADD_FIELD" });
+          }}
         >
           <span className="dsc-add-icon">+</span>
           <span>Add field</span>
         </div>
 
         <div className="dsc-footer">
-          <div className="dsc-stat"><div className="dsc-stat-label">Fields</div><div className="dsc-stat-val">{fields.length}</div></div>
-          <div className="dsc-stat"><div className="dsc-stat-label">Total bits</div><div className="dsc-stat-val">{totalBits}</div></div>
-          <div className="dsc-stat"><div className="dsc-stat-label">Total bytes</div><div className="dsc-stat-val">{Math.ceil(totalBits / 8)}</div></div>
+          <div className="dsc-stat">
+            <div className="dsc-stat-label">Fields</div>
+            <div className="dsc-stat-val">{fields.length}</div>
+          </div>
+          <div className="dsc-stat">
+            <div className="dsc-stat-label">Total bits</div>
+            <div className="dsc-stat-val">{totalBits}</div>
+          </div>
+          <div className="dsc-stat">
+            <div className="dsc-stat-label">Total bytes</div>
+            <div className="dsc-stat-val">{Math.ceil(totalBits / 8)}</div>
+          </div>
         </div>
 
         <div className="dsc-import-section">
-          <div className="dsc-import-header" onClick={() => dispatch({ type: "TOGGLE_IMPORT" })}>
+          <div
+            className="dsc-import-header"
+            onClick={() => dispatch({ type: "TOGGLE_IMPORT" })}
+          >
             <span>Import from JSON</span>
-            <span className="dsc-chevron">{state.ui.importOpen ? "▴" : "▾"}</span>
+            <span className="dsc-chevron">
+              {state.ui.importOpen ? "▴" : "▾"}
+            </span>
           </div>
           {state.ui.importOpen && (
             <div className="dsc-import-body">
               <textarea
                 className="dsc-textarea"
                 value={state.ui.jsonInput}
-                onChange={e => {
+                onChange={(e) => {
                   dispatch({ type: "SET_JSON_INPUT", value: e.target.value });
                 }}
                 placeholder='[{"name":"packet_nbr","type":"uint32_t","bits":32,"comment":""}]'
               />
               <div className="dsc-import-actions">
-                <button className="dsc-btn dsc-btn-header" onClick={() => {importJSON()}}>       
-                Import</button>
-                {state.ui.importError && <span className="dsc-error">{state.ui.importError}</span>}
+                <button
+                  className="dsc-btn dsc-btn-header"
+                  onClick={() => {
+                    importJSON();
+                  }}
+                >
+                  Import
+                </button>
+                {state.ui.importError && (
+                  <span className="dsc-error">{state.ui.importError}</span>
+                )}
               </div>
             </div>
           )}
         </div>
-
       </div>
     </div>
   );

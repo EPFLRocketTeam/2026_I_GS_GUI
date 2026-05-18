@@ -9,11 +9,11 @@ export const handleAdd = (setRadios, templateName = "uplink") => {
 };
 
 export const handleRemove = (index, setRadios) => {
-  setRadios(prev => validate(prev.filter((_, i) => i !== index)));
+  setRadios((prev) => validate(prev.filter((_, i) => i !== index)));
 };
 
 export const handleConfigChange = (radioIdx, paramIdx, value, setRadios) => {
-  setRadios(prev =>
+  setRadios((prev) =>
     prev.map((radio, i) => {
       if (i !== radioIdx) return radio;
 
@@ -36,13 +36,17 @@ export const handleConfigChange = (radioIdx, paramIdx, value, setRadios) => {
         ...radio,
         configParams,
       };
-    })
+    }),
   );
 };
 
-
-export const handleConfigLabelChange = (radioIdx, paramIdx, value, setRadios) => {
-  setRadios(prev => {
+export const handleConfigLabelChange = (
+  radioIdx,
+  paramIdx,
+  value,
+  setRadios,
+) => {
+  setRadios((prev) => {
     const updated = [...prev];
     const params = [...updated[radioIdx].configParams];
     params[paramIdx] = { ...params[paramIdx], label: value };
@@ -51,8 +55,13 @@ export const handleConfigLabelChange = (radioIdx, paramIdx, value, setRadios) =>
   });
 };
 
-export const handleConfigTypeChange = (radioIdx, paramIdx, value, setRadios) => {
-  setRadios(prev => {
+export const handleConfigTypeChange = (
+  radioIdx,
+  paramIdx,
+  value,
+  setRadios,
+) => {
+  setRadios((prev) => {
     const updated = [...prev];
     const params = [...updated[radioIdx].configParams];
     params[paramIdx] = { ...params[paramIdx], type: value };
@@ -62,7 +71,7 @@ export const handleConfigTypeChange = (radioIdx, paramIdx, value, setRadios) => 
 };
 
 export const handleConfigKeyChange = (radioIdx, paramIdx, value, setRadios) => {
-  setRadios(prev => {
+  setRadios((prev) => {
     const updated = [...prev];
     const params = [...updated[radioIdx].configParams];
     params[paramIdx] = { ...params[paramIdx], key: value };
@@ -72,32 +81,34 @@ export const handleConfigKeyChange = (radioIdx, paramIdx, value, setRadios) => {
 };
 
 export const handleAddConfigParam = (radioIdx, setRadios) => {
-  setRadios(prev => {
+  setRadios((prev) => {
     const updated = [...prev];
     updated[radioIdx] = {
       ...updated[radioIdx],
       configParams: [
         ...(updated[radioIdx].configParams ?? []),
-        { key: Date.now().toString(), label: "", type: "", value: "" }
-      ]
+        { key: Date.now().toString(), label: "", type: "", value: "" },
+      ],
     };
     return validate(updated);
   });
 };
 
 export const handleRemoveConfigParam = (radioIdx, paramIdx, setRadios) => {
-  setRadios(prev => {
+  setRadios((prev) => {
     const updated = [...prev];
     updated[radioIdx] = {
       ...updated[radioIdx],
-      configParams: updated[radioIdx].configParams.filter((_, i) => i !== paramIdx)
+      configParams: updated[radioIdx].configParams.filter(
+        (_, i) => i !== paramIdx,
+      ),
     };
     return validate(updated);
   });
 };
 
 export const handleStructChange = (radioIdx, text, setRadios) => {
-  setRadios(prev => {
+  setRadios((prev) => {
     const updated = [...prev];
     updated[radioIdx] = { ...updated[radioIdx], structText: text };
     return updated;
@@ -105,7 +116,7 @@ export const handleStructChange = (radioIdx, text, setRadios) => {
 };
 
 export const handleStructParse = (radioIdx, setRadios) => {
-  setRadios(prev => {
+  setRadios((prev) => {
     const updated = [...prev];
     const fields = parseStruct(updated[radioIdx].structText);
     updated[radioIdx] = { ...updated[radioIdx], structFields: fields };
@@ -114,7 +125,7 @@ export const handleStructParse = (radioIdx, setRadios) => {
 };
 
 export const handleFieldChange = (radioIdx, fieldIdx, value, setRadios) => {
-  setRadios(prev => {
+  setRadios((prev) => {
     const updated = [...prev];
     const fields = [...updated[radioIdx].structFields];
     fields[fieldIdx] = { ...fields[fieldIdx], value };
@@ -123,8 +134,13 @@ export const handleFieldChange = (radioIdx, fieldIdx, value, setRadios) => {
   });
 };
 
-export const handleFieldLabelChange = (radioIdx, fieldIdx, value, setRadios) => {
-  setRadios(prev => {
+export const handleFieldLabelChange = (
+  radioIdx,
+  fieldIdx,
+  value,
+  setRadios,
+) => {
+  setRadios((prev) => {
     const updated = [...prev];
     const fields = [...updated[radioIdx].structFields];
     fields[fieldIdx] = { ...fields[fieldIdx], label: value };
@@ -134,7 +150,7 @@ export const handleFieldLabelChange = (radioIdx, fieldIdx, value, setRadios) => 
 };
 
 export const handleFieldTypeChange = (radioIdx, fieldIdx, value, setRadios) => {
-  setRadios(prev => {
+  setRadios((prev) => {
     const updated = [...prev];
     const fields = [...updated[radioIdx].structFields];
     fields[fieldIdx] = { ...fields[fieldIdx], type: value };
@@ -156,4 +172,3 @@ export const moveRadio = (list, fromId, toId) => {
   updated.splice(toIndex, 0, moved);
   return updated;
 };
-

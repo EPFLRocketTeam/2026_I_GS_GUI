@@ -18,7 +18,10 @@ function useRadioSocket(url) {
         ws.current = new WebSocket(url);
 
         ws.current.onopen = () => {
-          if (closed) { ws.current.close(); return; }
+          if (closed) {
+            ws.current.close();
+            return;
+          }
           console.log("Radio WS connected");
           setIsConnected(true);
           reconnectAttempts.current = 0;
@@ -29,7 +32,9 @@ function useRadioSocket(url) {
           try {
             const data = JSON.parse(event.data);
             const point = data.received ?? data;
-            setLastUpdated(data.last_updated ?? new Date().toLocaleTimeString());
+            setLastUpdated(
+              data.last_updated ?? new Date().toLocaleTimeString(),
+            );
             setLastReceived(point);
           } catch (e) {
             console.error("Failed to parse radio WS message:", e);

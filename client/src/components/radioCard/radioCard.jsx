@@ -2,24 +2,28 @@ import "./radioCard.css";
 import { getRadioUid } from "../../pages/radioConfig/radioUtils/radioIO";
 
 const STATUS_BADGE = {
-  online:  { label: "online",  cls: "badge-online" },
+  online: { label: "online", cls: "badge-online" },
   syncing: { label: "syncing", cls: "badge-syncing" },
   offline: { label: "offline", cls: "badge-offline" },
   waiting: { label: "waiting", cls: "badge-syncing" },
 };
 
-function RadioCard({ radio, index, onConfigChange, onStructChange, onStructParse,
-   onRemove, isDuplicateUid, onConfigDataStruct
- }) {
+function RadioCard({
+  radio,
+  index,
+  onConfigChange,
+  onStructChange,
+  onStructParse,
+  onRemove,
+  isDuplicateUid,
+  onConfigDataStruct,
+}) {
   const badge = STATUS_BADGE[radio.status] ?? STATUS_BADGE.offline;
   const uid = getRadioUid(radio) ?? "—";
 
   return (
-    
     <div className="radio-card">
-        {isDuplicateUid && (
-          <div className="warn-inline">same id used twice</div>
-        )}
+      {isDuplicateUid && <div className="warn-inline">same id used twice</div>}
       <div className="card-header">
         <div className="card-title-row">
           <span className="card-title">Radio {uid}</span>
@@ -39,12 +43,10 @@ function RadioCard({ radio, index, onConfigChange, onStructChange, onStructParse
         </div>
       </div>
       <div className="section-title">Config Parameters</div>
-       {(radio.configParams ?? []).map((param, pIdx) => (
+      {(radio.configParams ?? []).map((param, pIdx) => (
         <div className="param-block" key={param.key + pIdx}>
           <div className="name-value-row">
-            <div className="param-label">
-              {param.label}
-            </div>
+            <div className="param-label">{param.label}</div>
 
             {param.control === "select" ? (
               <select
@@ -84,7 +86,9 @@ function RadioCard({ radio, index, onConfigChange, onStructChange, onStructParse
           </div>
         </div>
       ))}
-        <button className="btn" onClick={() => onConfigDataStruct?.(index)}>Config Data Structure</button>
+      <button className="btn" onClick={() => onConfigDataStruct?.(index)}>
+        Config Data Structure
+      </button>
     </div>
   );
 }

@@ -53,7 +53,15 @@ export function dotClass(type) {
 }
 
 export function createField() {
-  return { key: crypto.randomUUID(), name: "", address: 0, type: "uint8_t", bits: 8, value: "", comment: "" };
+  return {
+    key: crypto.randomUUID(),
+    name: "",
+    address: 0,
+    type: "uint8_t",
+    bits: 8,
+    value: "",
+    comment: "",
+  };
 }
 
 export function parseStruct(raw) {
@@ -63,12 +71,16 @@ export function parseStruct(raw) {
     .split("\n");
 
   const parsed = lines
-    .map(line => line.trim())
-    .filter(line => line && !line.startsWith("//"))
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith("//"))
     .map((line, idx) => {
       const commentMatch = line.match(/\/\/\s*(.+)/);
       const comment = commentMatch ? commentMatch[1].trim() : "";
-      const clean = line.replace(/\/\/.*/, "").trim().replace(/;$/, "").trim();
+      const clean = line
+        .replace(/\/\/.*/, "")
+        .trim()
+        .replace(/;$/, "")
+        .trim();
       const parts = clean.split(/\s+/);
 
       if (parts.length < 2) {
@@ -87,7 +99,7 @@ export function parseStruct(raw) {
         comment,
       };
     });
-    return withSequentialAddresses(parsed);
+  return withSequentialAddresses(parsed);
 }
 
 export function normalizeImportedFields(parsed) {
@@ -110,15 +122,18 @@ export function buildCopyJSON(radioId, fields) {
   return {
     radioId,
     fields: fields.map(({ name, address, type, bits, value, comment }) => ({
-      name, address: clampAddress(address ?? 0), type, bits: Number.parseInt(bits) || 0, value, comment
-    }))
+      name,
+      address: clampAddress(address ?? 0),
+      type,
+      bits: Number.parseInt(bits) || 0,
+      value,
+      comment,
+    })),
   };
 }
 
 export function buildCopyStruct(radioId, fields) {
-  const lines = fields
-    .map((f) => `  ${f.type} ${f.name};`)
-    .join("\n");
+  const lines = fields.map((f) => `  ${f.type} ${f.name};`).join("\n");
 
   return `typedef struct {
 ${lines}
@@ -136,20 +151,31 @@ export function parseImportRaw(raw) {
   try {
     parsed = JSON.parse(cleaned);
   } catch {
-    const lines = cleaned.split("\n").map(l => l.trim()).filter(Boolean);
+    const lines = cleaned
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
     parsed = lines.map((line, idx) => {
-      try { return JSON.parse(line); }
-      catch { throw new Error(`Line ${idx + 1} is not valid JSON`); }
+      try {
+        return JSON.parse(line);
+      } catch {
+        throw new Error(`Line ${idx + 1} is not valid JSON`);
+      }
     });
   }
 
   if (parsed.fields) parsed = parsed.fields;
-  if (!Array.isArray(parsed)) throw new Error("Expected a JSON array or C struct");
+  if (!Array.isArray(parsed))
+    throw new Error("Expected a JSON array or C struct");
 
   return normalizeImportedFields(parsed);
 }
 
-export const createInitialState = ({ incomingRadioId, incomingFields, availableRadios }) => {
+export const createInitialState = ({
+  incomingRadioId,
+  incomingFields,
+  availableRadios,
+}) => {
   const fieldsByRadio = {};
 
   if (incomingRadioId != null) {
@@ -188,7 +214,8 @@ export function dataStructReducer(state, action) {
       return {
         ...state,
         fieldsByRadio: next,
-        selectedId: state.selectedId ?? action.selectedId ?? action.radios[0]?.id ?? null,
+        selectedId:
+          state.selectedId ?? action.selectedId ?? action.radios[0]?.id ?? null,
       };
     }
 
@@ -211,7 +238,9 @@ export function dataStructReducer(state, action) {
     case "SET_FIELDS": {
       const current = state.fieldsByRadio[state.selectedId] ?? [];
       const nextFields =
-        typeof action.updater === "function" ? action.updater(current) : action.updater;
+        typeof action.updater === "function"
+          ? action.updater(current)
+          : action.updater;
 
       return {
         ...state,
@@ -228,7 +257,10 @@ export function dataStructReducer(state, action) {
         ...state,
         fieldsByRadio: {
           ...state.fieldsByRadio,
-          [state.selectedId]: withSequentialAddresses([...current, createField()]),
+          [state.selectedId]: withSequentialAddresses([
+            ...current,
+            createField(),
+          ]),
         },
       };
     }

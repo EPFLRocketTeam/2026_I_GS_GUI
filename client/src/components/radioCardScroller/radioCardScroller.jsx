@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import "./radioCardScroller.css";
 
-function RadioCardScroller({ children, empty = false, itemWidth = 360, scrollRatio = 0.75, className = "" }) {
+function RadioCardScroller({
+  children,
+  empty = false,
+  itemWidth = 360,
+  scrollRatio = 0.75,
+  className = "",
+}) {
   const scrollerRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -30,7 +36,10 @@ function RadioCardScroller({ children, empty = false, itemWidth = 360, scrollRat
     const el = scrollerRef.current;
     if (!el) return;
 
-    const amount = Math.max(itemWidth, Math.floor(el.clientWidth * scrollRatio));
+    const amount = Math.max(
+      itemWidth,
+      Math.floor(el.clientWidth * scrollRatio),
+    );
     el.scrollBy({
       left: direction === "left" ? -amount : amount,
       behavior: "smooth",
@@ -48,7 +57,9 @@ function RadioCardScroller({ children, empty = false, itemWidth = 360, scrollRat
   };
 
   return (
-    <div className={`hcs-shell ${empty ? "hcs-shell--empty" : ""} ${className}`}>
+    <div
+      className={`hcs-shell ${empty ? "hcs-shell--empty" : ""} ${className}`}
+    >
       <button
         className={`hcs-arrow hcs-arrow--left ${!canScrollLeft ? "is-hidden" : ""}`}
         onClick={() => scrollCards("left")}

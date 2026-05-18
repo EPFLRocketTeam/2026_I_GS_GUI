@@ -2,23 +2,34 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./digitalDisplayParams.css";
 import { getRadioUid } from "../../pages/radioConfig/radioUtils/radioIO";
+import { DigitalDisplay } from "../../interfaces/dashboardInterfaces/dashboardInterfaces";
 
-function DigitalDisplayParams({ displays = [], setDisplays, radios = [] }) {
+type Props = {
+  displays: DigitalDisplay[];
+  setDisplays: React.Dispatch<React.SetStateAction<DigitalDisplay[]>>;
+  radios: any[]; // TODO: This should be typed according to the structure of a radio in your application.
+};
+
+function DigitalDisplayParams({
+  displays = [],
+  setDisplays,
+  radios = [],
+}: Props) {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const display = useMemo(
-    () => displays.find((item) => item.id === id),
-    [displays, id]
+    () => displays.find((item) => item.digitalDisplayId === id),
+    [displays, id],
   );
 
   const [title, setTitle] = useState("");
   const [selectedKey, setSelectedKey] = useState("");
-  const [suffix, setSuffix] = useState("");
+  // const [suffix, setSuffix] = useState("");
 
   const variableOptions = useMemo(() => {
     return radios.flatMap((radio) =>
-      (radio.structFields ?? []).map((field) => {
+      (radio.structFields ?? []).map((field: any) => {
         const radioUid = getRadioUid(radio);
 
         return {
@@ -30,28 +41,27 @@ function DigitalDisplayParams({ displays = [], setDisplays, radios = [] }) {
           address: field.address,
           value: field.value,
         };
-      })
+      }),
     );
   }, [radios]);
 
-    const selectedField = useMemo(() => {
-      return variableOptions.find((option) => option.key === selectedKey) ?? null;
-    }, [variableOptions, selectedKey]);
+  const selectedField = useMemo(() => {
+    return variableOptions.find((option) => option.key === selectedKey) ?? null;
+  }, [variableOptions, selectedKey]);
 
-    useEffect(() => {
-      if (!display) return;
+  useEffect(() => {
+    if (!display) return;
 
-      setTitle(display.title ?? "");
-      setSuffix(display.suffix ?? "");
+    setTitle(display.title ?? "");
+    // setSuffix(display.suffix ?? "");
 
-      const key =
-        display.radioId && display.variable
-          ? `${display.radioId}::${display.variable}`
-          : "";
+    const key =
+      display.radioId && display.varName
+        ? `${display.radioId}::${display.varName}`
+        : "";
 
-      setSelectedKey(key);
-
-    }, [display, variableOptions]);
+    setSelectedKey(key);
+  }, [display, variableOptions]);
 
   if (!display) {
     return (
@@ -59,7 +69,9 @@ function DigitalDisplayParams({ displays = [], setDisplays, radios = [] }) {
         <div className="ddp-card">
           <h2>Digital Display Parameters</h2>
           <p>Display not found.</p>
-          <button className="ddp-btn" onClick={() => navigate("/")}>Back</button>
+          <button className="ddp-btn" onClick={() => navigate("/")}>
+            Back
+          </button>
         </div>
       </div>
     );
@@ -68,19 +80,19 @@ function DigitalDisplayParams({ displays = [], setDisplays, radios = [] }) {
   const handleSave = () => {
     setDisplays((prev) =>
       prev.map((item) =>
-        item.id === id
+        item.digitalDisplayId === id
           ? {
               ...item,
               title: title.trim() || "Untitled display",
-              variable: selectedField?.name ?? "",
+              varName: selectedField?.name ?? "",
               radioId: selectedField?.radioId ?? null,
               radioUid: selectedField?.radioUid ?? "",
               type: selectedField?.type ?? "",
               address: selectedField?.address ?? null,
-              suffix,
+              // suffix,
             }
-          : item
-      )
+          : item,
+      ),
     );
 
     navigate("/");
@@ -95,7 +107,11 @@ function DigitalDisplayParams({ displays = [], setDisplays, radios = [] }) {
 
         <div className="ddp-field">
           <label>Title</label>
-          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Untitled display" />
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Untitled display"
+          />
         </div>
 
         <div className="ddp-field">
@@ -117,10 +133,14 @@ function DigitalDisplayParams({ displays = [], setDisplays, radios = [] }) {
           </select>
         </div>
 
-        <div className="ddp-field">
+        {/* <div className="ddp-field">
           <label>Suffix</label>
-          <input value={suffix} onChange={(e) => setSuffix(e.target.value)} placeholder="psi" />
-        </div>
+          <input
+            value={suffix}
+            onChange={(e) => setSuffix(e.target.value)}
+            placeholder="psi"
+          />
+        </div> */}
 
         <div className="ddp-field ddp-field-info">
           <label>Linked radio / type</label>
@@ -132,8 +152,15 @@ function DigitalDisplayParams({ displays = [], setDisplays, radios = [] }) {
         </div>
 
         <div className="ddp-actions">
-          <button className="ddp-btn ddp-btn-secondary" onClick={() => navigate("/")}>Cancel</button>
-          <button className="ddp-btn" onClick={handleSave}>Save</button>
+          <button
+            className="ddp-btn ddp-btn-secondary"
+            onClick={() => navigate("/")}
+          >
+            Cancel
+          </button>
+          <button className="ddp-btn" onClick={handleSave}>
+            Save
+          </button>
         </div>
       </div>
     </div>

@@ -13,12 +13,16 @@ export const cardsOverlap = (a, b) => {
 
 export const hasCardOverlap = (moving, displays) => {
   return displays.some((display) => {
-    if (display.id === moving.id) return false;
+    const movingId = moving.digitalDisplayId ?? moving.id;
+    const displayId = display.digitalDisplayId ?? display.id;
+    if (displayId === movingId) return false;
 
-    return cardsOverlap(
-      { x: moving.x ?? 0, y: moving.y ?? 0 },
-      { x: display.x ?? 0, y: display.y ?? 0 }
-    );
+    const movingX = moving.posx ?? moving.x ?? 0;
+    const movingY = moving.posy ?? moving.y ?? 0;
+    const displayX = display.posx ?? display.x ?? 0;
+    const displayY = display.posy ?? display.y ?? 0;
+
+    return cardsOverlap({ x: movingX, y: movingY }, { x: displayX, y: displayY });
   });
 };
 
@@ -29,16 +33,22 @@ export const createDragState = ({ e, display, zoom, pan }) => {
   if (!viewport) return null;
 
   const rect = viewport.getBoundingClientRect();
-
   const mouseWorldX = (e.clientX - rect.left - pan.x) / zoom;
   const mouseWorldY = (e.clientY - rect.top - pan.y) / zoom;
 
+  // support both legacy (`id`, `x`, `y`) and Dashboard component shape
+  const id = display.digitalDisplayId ?? display.id;
+  const digitalDisplayId = display.digitalDisplayId ?? null;
+  const startX = display.posx ?? display.x ?? 0;
+  const startY = display.posy ?? display.y ?? 0;
+
   return {
-    id: display.id,
-    startX: display.x ?? 0,
-    startY: display.y ?? 0,
-    offsetX: mouseWorldX - (display.x ?? 0),
-    offsetY: mouseWorldY - (display.y ?? 0),
+    id,
+    digitalDisplayId,
+    startX,
+    startY,
+    offsetX: mouseWorldX - startX,
+    offsetY: mouseWorldY - startY,
   };
 };
 
@@ -55,9 +65,17 @@ export const getDraggedCardPosition = ({ e, dragging, zoom, pan }) => {
 };
 
 export const moveDraggedDisplay = ({ displays, dragging, x, y }) => {
-  return displays.map((display) =>
-    display.id === dragging.id ? { ...display, x, y } : display
-  );
+  return displays.map((display) => {
+    const id = display.digitalDisplayId ?? display.id;
+    if (id === dragging.id) {
+      // preserve existing field names
+      if (display.digitalDisplayId) {
+        return { ...display, posx: x, posy: y };
+      }
+      return { ...display, x, y };
+    }
+    return display;
+  });
 };
 
 export const resolveDroppedDisplay = ({ displays }) => displays;
@@ -83,6 +101,9 @@ export const getNextZoomPan = ({ mouseX, mouseY, zoom, pan, delta }) => {
 };
 
 export const createDisplayFromField = (fieldInfo, count = 0) => ({
+  // produce legacy shape by default (id/x/y). Consumers that use
+  // `digitalDisplayId/posx/posy` should map accordingly when creating
+  // displays; Dashboard.createEmptyDisplay uses the other shape.
   id: crypto.randomUUID(),
   title: fieldInfo.name || `Display ${count + 1}`,
   variable: fieldInfo.name || "",
@@ -133,14 +154,14 @@ export const getOverlappingCardIds = (displays) => {
       const a = displays[i];
       const b = displays[j];
 
-      if (
-        cardsOverlap(
-          { x: a.x ?? 0, y: a.y ?? 0 },
-          { x: b.x ?? 0, y: b.y ?? 0 }
-        )
-      ) {
-        overlappingIds.add(a.id);
-        overlappingIds.add(b.id);
+      const ax = a.posx ?? a.x ?? 0;
+      const ay = a.posy ?? a.y ?? 0;
+      const bx = b.posx ?? b.x ?? 0;
+      const by = b.posy ?? b.y ?? 0;
+
+      if (cardsOverlap({ x: ax, y: ay }, { x: bx, y: by })) {
+        overlappingIds.add(a.digitalDisplayId ?? a.id);
+        overlappingIds.add(b.digitalDisplayId ?? b.id);
       }
     }
   }

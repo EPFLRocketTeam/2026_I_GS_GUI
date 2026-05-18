@@ -11,14 +11,14 @@ export const RADIO_CONFIG_TEMPLATES = Object.fromEntries(
     console.log("PROFILE:", key, parsed);
     console.log("PROFILE PARSED:", key, parsed);
     return [key, parsed];
-  })
+  }),
 );
 
 export const RADIO_PROFILE_OPTIONS = Object.entries(RADIO_PROFILE_FILES).map(
   ([key, profile]) => ({
     value: key,
     label: profile.label,
-  })
+  }),
 );
 
 export const cloneConfigParams = (templateName = "uplink") => {
@@ -40,11 +40,11 @@ export const createNewRadio = (radios, templateName = "uplink") => {
     radios
       .map((r) => {
         const uidParam = r.configParams?.find(
-          (p) => p.key?.toLowerCase() === "uid"
+          (p) => p.key?.toLowerCase() === "uid",
         );
         return Number(uidParam?.value);
       })
-      .filter((n) => !Number.isNaN(n))
+      .filter((n) => !Number.isNaN(n)),
   );
 
   let uid = 0;
@@ -71,7 +71,8 @@ export const ensureRadioIds = (radios) =>
   radios.map((r) => ({
     ...r,
     id: r.id ?? crypto.randomUUID(),
-    configParams: r.configParams ?? cloneConfigParams(r.configTemplate ?? "uplink"),
+    configParams:
+      r.configParams ?? cloneConfigParams(r.configTemplate ?? "uplink"),
     structText: r.structText ?? "",
     structFields: r.structFields ?? [],
   }));

@@ -1,26 +1,29 @@
-export const validate = (radios) =>
-  radios.map(r => ({ ...r, errors: [] }));
+export const validate = (radios) => radios.map((r) => ({ ...r, errors: [] }));
 
 export const parseStruct = (structText) => {
   const lines = structText
-    .replace(/\/\/[^\n]*/g, "")     
-    .replace(/\/\*[\s\S]*?\*\//g, "") 
-    .replace(/[{}]/g, "")   
+    .replace(/\/\/[^\n]*/g, "")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/[{}]/g, "")
     .split(";")
-    .map(s => s.trim())
+    .map((s) => s.trim())
     .filter(Boolean);
 
-  return lines.map(line => {
-    const match = line.match(/^([\w\s*]+?)\s+(\w+)\s*$/);
-    if (!match) return null;
-    const [, rawType, name] = match;
-    return { key: name, label: name, type: rawType.trim(), value: "" };
-  }).filter(Boolean);
+  return lines
+    .map((line) => {
+      const match = line.match(/^([\w\s*]+?)\s+(\w+)\s*$/);
+      if (!match) return null;
+      const [, rawType, name] = match;
+      return { key: name, label: name, type: rawType.trim(), value: "" };
+    })
+    .filter(Boolean);
 };
 
 export const downloadConfig = (radios) => {
   const config = radios.map(({ errors, saved, ...radio }) => radio);
-  const blob = new Blob([JSON.stringify(config, null, 2)], { type: "application/json" });
+  const blob = new Blob([JSON.stringify(config, null, 2)], {
+    type: "application/json",
+  });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -41,7 +44,7 @@ export const loadConfig = (onSuccess) => {
       try {
         const parsed = JSON.parse(ev.target.result);
         if (!Array.isArray(parsed)) throw new Error("Invalid format");
-        onSuccess(parsed.map(radio => ({ ...radio, saved: false })));
+        onSuccess(parsed.map((radio) => ({ ...radio, saved: false })));
       } catch {
         alert("Invalid config file — must be a JSON array.");
       }
@@ -54,13 +57,14 @@ export const loadConfig = (onSuccess) => {
 export const getRadioUid = (radio) =>
   String(
     radio.uid ??
-    radio.configParams?.find((p) => p.key.toLowerCase() === "uid")?.value ??
-    ""
+      radio.configParams?.find((p) => p.key.toLowerCase() === "uid")?.value ??
+      "",
   ).trim();
 
-export const uidCounts = (radios) => radios.reduce((acc, r) => {
-  const uid = getRadioUid(r);
-  if (!uid) return acc;
-  acc[uid] = (acc[uid] ?? 0) + 1;
-  return acc;
-}, {});
+export const uidCounts = (radios) =>
+  radios.reduce((acc, r) => {
+    const uid = getRadioUid(r);
+    if (!uid) return acc;
+    acc[uid] = (acc[uid] ?? 0) + 1;
+    return acc;
+  }, {});

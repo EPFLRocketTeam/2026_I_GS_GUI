@@ -1,11 +1,19 @@
 import { useCallback, useState } from "react";
 
-export const handleDragStart = (radioId, setDraggedRadioId, setDragOverRadioId) => {
+export const handleDragStart = (
+  radioId,
+  setDraggedRadioId,
+  setDragOverRadioId,
+) => {
   setDraggedRadioId(radioId);
   setDragOverRadioId(null);
 };
 
-export const handleDragEnter = (radioId, draggedRadioId, setDragOverRadioId) => {
+export const handleDragEnter = (
+  radioId,
+  draggedRadioId,
+  setDragOverRadioId,
+) => {
   if (radioId !== draggedRadioId) {
     setDragOverRadioId(radioId);
   }
@@ -16,7 +24,7 @@ export const handleDrop = (
   draggedRadioId,
   setDraggedRadioId,
   setDragOverRadioId,
-  setRadios
+  setRadios,
 ) => {
   if (!draggedRadioId || draggedRadioId === targetRadioId) {
     setDraggedRadioId(null);
@@ -57,24 +65,30 @@ function useRadioDrag(setRadios) {
     setDragOverRadioId(null);
   }, []);
 
-  const handleDragEnter = useCallback((radioId) => {
-    setDragOverRadioId((current) => {
-      if (radioId === draggedRadioId) return current;
-      return radioId;
-    });
-  }, [draggedRadioId]);
+  const handleDragEnter = useCallback(
+    (radioId) => {
+      setDragOverRadioId((current) => {
+        if (radioId === draggedRadioId) return current;
+        return radioId;
+      });
+    },
+    [draggedRadioId],
+  );
 
-  const handleDrop = useCallback((targetRadioId) => {
-    if (!draggedRadioId || draggedRadioId === targetRadioId) {
+  const handleDrop = useCallback(
+    (targetRadioId) => {
+      if (!draggedRadioId || draggedRadioId === targetRadioId) {
+        setDraggedRadioId(null);
+        setDragOverRadioId(null);
+        return;
+      }
+
+      setRadios((prev) => moveRadio(prev, draggedRadioId, targetRadioId));
       setDraggedRadioId(null);
       setDragOverRadioId(null);
-      return;
-    }
-
-    setRadios((prev) => moveRadio(prev, draggedRadioId, targetRadioId));
-    setDraggedRadioId(null);
-    setDragOverRadioId(null);
-  }, [draggedRadioId, setRadios]);
+    },
+    [draggedRadioId, setRadios],
+  );
 
   const handleDragEnd = useCallback(() => {
     setDraggedRadioId(null);

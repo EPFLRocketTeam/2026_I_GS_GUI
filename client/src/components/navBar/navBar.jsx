@@ -6,13 +6,23 @@ function NavBar() {
     <nav className="navbar">
       <span className="navbar-brand">🚀 Rocket GUI</span>
       <div className="navbar-links">
-        <NavLink to="/" end className={({ isActive }) => isActive ? "active" : ""}>
+        <NavLink
+          to="/"
+          end
+          className={({ isActive }) => (isActive ? "active" : "")}
+        >
           Dashboard
         </NavLink>
-        <NavLink to="/radioConfig" className={({ isActive }) => isActive ? "active" : ""}>
+        <NavLink
+          to="/radioConfig"
+          className={({ isActive }) => (isActive ? "active" : "")}
+        >
           RadioConfig
         </NavLink>
-        <NavLink to="/dataStructConfig" className={({ isActive }) => isActive ? "active" : ""}>
+        <NavLink
+          to="/dataStructConfig"
+          className={({ isActive }) => (isActive ? "active" : "")}
+        >
           DataStructConfig
         </NavLink>
       </div>

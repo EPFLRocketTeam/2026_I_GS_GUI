@@ -1,10 +1,4 @@
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-} from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid } from "recharts";
 import "./telemetryChart.css";
 
 function TelemetryChart({ data, title, dataKey }) {
@@ -31,7 +25,7 @@ function TelemetryChart({ data, title, dataKey }) {
             fill="#8884d8"
             fillOpacity={0.25}
             connectNulls={false}
-            />   
+          />
         </AreaChart>
       </div>
     </div>

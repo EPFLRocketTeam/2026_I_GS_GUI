@@ -19,18 +19,18 @@ export default function useTelemetrySocket(url) {
     socket.onmessage = (event) => {
       if (closed) return;
       try {
-          const point = JSON.parse(event.data);
-          setData((prev) => [...prev.slice(-49), point]);
-        } catch (e) {
-          console.error("Failed to parse message:", e);
-        }
-      };
+        const point = JSON.parse(event.data);
+        setData((prev) => [...prev.slice(-49), point]);
+      } catch (e) {
+        console.error("Failed to parse message:", e);
+      }
+    };
 
     socket.onclose = (event) => {
       if (closed) return;
-        console.log("WebSocket disconnected", event);
-        setIsConnected(false);
-      };
+      console.log("WebSocket disconnected", event);
+      setIsConnected(false);
+    };
 
     socket.onerror = (error) => {
       console.error("WebSocket error:", error);

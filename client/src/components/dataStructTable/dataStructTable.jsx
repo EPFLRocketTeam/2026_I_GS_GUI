@@ -2,7 +2,6 @@ import "./dataStructTable.css";
 import { TYPES, dotClass } from "../../pages/dataStructConfig/dataStructUtils";
 
 function DataStructTable({ fields, onUpdateField, onRemoveField }) {
-
   return (
     <table className="dsc-table">
       <thead>
@@ -58,7 +57,9 @@ function DataStructTable({ fields, onUpdateField, onRemoveField }) {
                 className="dsc-input dsc-comment"
                 value={f.comment}
                 placeholder="optional note"
-                onChange={(e) => onUpdateField(f.key, "comment", e.target.value)}
+                onChange={(e) =>
+                  onUpdateField(f.key, "comment", e.target.value)
+                }
               />
             </td>
             <td>

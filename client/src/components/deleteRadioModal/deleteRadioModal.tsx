@@ -1,7 +1,19 @@
 import "./deleteRadioModal.css";
 import { getRadioUid } from "../../pages/radioConfig/radioUtils/radioIO";
 
-function DeleteRadioModal({ 
+type DeleteRadioModalProps = {
+  readonly radio?: any;
+  readonly index?: number;
+  readonly itemName?: string;
+  readonly title?: string;
+  readonly message?: string;
+  readonly confirmText?: string;
+  readonly cancelText?: string;
+  readonly onConfirm: () => void;
+  readonly onCancel: () => void;
+};
+
+function DeleteRadioModal({
   radio,
   index,
   itemName,
@@ -10,16 +22,17 @@ function DeleteRadioModal({
   confirmText = "Delete",
   cancelText = "Cancel",
   onConfirm,
-  onCancel, 
-}) {
+  onCancel,
+}: DeleteRadioModalProps) {
   const defaultName =
-    itemName ??
-    (radio ? `Radio ${getRadioUid(radio) ?? index}` : "this item");
+    itemName ?? (radio ? `Radio ${getRadioUid(radio) ?? index}` : "this item");
 
   return (
     <div className="radio-modal-overlay" onClick={onCancel}>
       <div className="radio-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="radio-modal-title">{title ?? `Delete ${defaultName}?`}</div>
+        <div className="radio-modal-title">
+          {title ?? `Delete ${defaultName}?`}
+        </div>
         <div className="radio-modal-text">
           {message ?? `Are you sure you want to delete ${defaultName}?`}
         </div>
