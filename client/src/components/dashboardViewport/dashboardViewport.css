@@ -1,0 +1,34 @@
+.dashboard-viewport {
+  position: relative;
+  width: 100%;
+  min-height: calc(100vh - 48px);
+  overflow: hidden;
+}
+
+.dashboard-zoom-viewport.is-panning {
+  cursor: grabbing;
+}
+
+.dashboard-zoom-viewport.is-panning .dashboard-draggable-card {
+  pointer-events: none;
+}
+
+.dashboard-zoom-layer {
+  position: absolute;
+  inset: 0;
+  transform-origin: top left;
+  will-change: transform;
+}
+
+.dashboard-viewport-wrapper {
+  width: 100%;
+  height: calc(100vh - 48px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 40px;
+  box-sizing: border-box;
+
+  background: #000;
+}

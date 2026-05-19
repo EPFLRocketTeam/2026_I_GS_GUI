@@ -1,0 +1,18 @@
+.dashboard-display {
+  position: absolute;
+  cursor: grab;
+  user-select: none;
+}
+
+.dashboard-display.is-dragging {
+  cursor: grabbing;
+  z-index: 50;
+}
+
+.dashboard-display.is-overlapping {
+  outline: 2px solid rgba(255, 80, 80, 0.7);
+}
+
+.dashboard-display * {
+  user-select: none;
+}

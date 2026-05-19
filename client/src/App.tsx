@@ -5,7 +5,7 @@ import Dashboard from "./pages/dashboard/dashboard";
 import RadioConfig from "./pages/radioConfig/radioConfig";
 import DataStructConfig from "./pages/dataStructConfig/dataStructConfig";
 import DigitalDisplayParams from "./components/digitalDisplayParams/digitalDisplayParams";
-import { DigitalDisplay } from "./interfaces/dashboardInterfaces/dashboardInterfaces";
+import { DigitalDisplay } from "./interfaces/dashboardInterfaces";
 
 function App() {
   const [radios, setRadios] = useState<any[]>([]);

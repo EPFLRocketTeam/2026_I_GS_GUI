@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./digitalDisplayParams.css";
 import { getRadioUid } from "../../pages/radioConfig/radioUtils/radioIO";
-import { DigitalDisplay } from "../../interfaces/dashboardInterfaces/dashboardInterfaces";
+import { DigitalDisplay } from "../../interfaces/dashboardInterfaces";
 
 type Props = {
   displays: DigitalDisplay[];
@@ -132,16 +132,6 @@ function DigitalDisplayParams({
             ))}
           </select>
         </div>
-
-        {/* <div className="ddp-field">
-          <label>Suffix</label>
-          <input
-            value={suffix}
-            onChange={(e) => setSuffix(e.target.value)}
-            placeholder="psi"
-          />
-        </div> */}
-
         <div className="ddp-field ddp-field-info">
           <label>Linked radio / type</label>
           <div className="ddp-readonly">

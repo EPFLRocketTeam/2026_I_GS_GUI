@@ -1,9 +1,4 @@
-export const CARD_W = 5;
-export const CARD_H = 5;
-export const CARD_GAP = 18;
-
-export const GRID_WIDTH = 720;
-export const GRID_HEIGHT = 540;
+import { CARD_GAP, CARD_W, CARD_H, GRID_HEIGHT, GRID_WIDTH } from "../../constants/gridConstants";
 
 export const getCardWidth = (gridPx) =>
   CARD_W * gridPx;
@@ -11,9 +6,9 @@ export const getCardWidth = (gridPx) =>
 export const getCardHeight = (gridPx) =>
   CARD_H * gridPx;
 
-export const clampDisplayPosition = ({ x, y }) => ({
-  x: Math.max(0, x),
-  y: Math.max(0, y),
+export const clampDisplayPosition = ({x, y, maxX, maxY}) => ({
+  x: Math.max(0, Math.min(x, maxX)),
+  y: Math.max(0, Math.min(y, maxY)),
 }); 
 
 export const cardsOverlap = (a, b) => {
@@ -78,8 +73,15 @@ export const getDraggedCardPosition = ({ e, dragging, zoom, pan }) => {
   };
 };
 
-export const moveDraggedDisplay = ({ displays, dragging, x, y }) => {
-  const clamped = clampDisplayPosition({ x, y });
+export const moveDraggedDisplay = ({ displays, dragging, x, y, gridPixelSize }) => {
+  const cardWidth = CARD_W * gridPixelSize;
+  const cardHeight = CARD_H * gridPixelSize;
+  const clamped = clampDisplayPosition({
+    x,
+    y,
+    maxX: GRID_WIDTH - 100,
+    maxY: GRID_HEIGHT - 100,
+  });
   return displays.map((display) => {
     const id = display.digitalDisplayId ?? display.id;
     if (id === dragging.id) {
@@ -116,18 +118,15 @@ export const getNextZoomPan = ({ mouseX, mouseY, zoom, pan, delta }) => {
 };
 
 export const createDisplayFromField = (fieldInfo, count = 0) => ({
-  // produce legacy shape by default (id/x/y). Consumers that use
-  // `digitalDisplayId/posx/posy` should map accordingly when creating
-  // displays; Dashboard.createEmptyDisplay uses the other shape.
-  id: crypto.randomUUID(),
+  digitalDisplayId: crypto.randomUUID(),
   title: fieldInfo.name || `Display ${count + 1}`,
-  variable: fieldInfo.name || "",
-  suffix: "",
-  radioId: fieldInfo.radioId,
-  radioUid: fieldInfo.radioUid,
+  varName: fieldInfo.name || "",
+  varValue: "--",
+  radioId: fieldInfo.radioId ?? null,
   type: fieldInfo.type || "",
-  x: window.innerWidth / 2 - CARD_W / 2 + (count % 3) * 24,
-  y: window.innerHeight / 2 - CARD_H / 2 + Math.floor(count / 3) * 24,
+  suffix: "",
+  posx: fieldInfo.x ?? GRID_WIDTH / 2 - CARD_W / 2 + (count % 3) * CARD_W,
+  posy: fieldInfo.y ?? GRID_HEIGHT / 2 - CARD_H / 2 + Math.floor(count / 3) * CARD_H,
 });
 
 export const buildFieldValueMap = (radios) => {
@@ -183,3 +182,5 @@ export const getOverlappingCardIds = (displays) => {
 
   return overlappingIds;
 };
+
+

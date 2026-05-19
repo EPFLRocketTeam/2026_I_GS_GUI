@@ -1,67 +1,70 @@
-import { useMemo, useRef, useCallback, useState, useEffect } from "react";
-import "./dashboard.css";
-import DigitalDisplayCard from "../../components/digitalDisplayCard/digitalDisplayCard";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { DigitalDisplay, DigitalDisplayProps } from "../../interfaces/dashboardInterfaces";
 import {
-  DigitalDisplay,
-  DigitalDisplayProps,
-} from "../../interfaces/dashboardInterfaces/dashboardInterfaces";
+  buildFieldValueMap,
+  createDisplayFromField,
+} from "./dashboardUtils";
 import {
-  CARD_W,
-  CARD_H,
+  DEFAULT_GRID_SETTINGS,
   GRID_WIDTH,
   GRID_HEIGHT,
-  buildFieldValueMap,
-  clampDisplayPosition,
-  getDisplayValue,
-  getOverlappingCardIds,
-  getViewportMousePos,
-  getCardHeight,
-  getCardWidth,
-} from "./dashboardUtils";
-import { GRID_SIZES, DEFAULT_GRID_SETTINGS } from "../../constants/gridConstants/gridConstants";
-import { useNavigate } from "react-router-dom";
-import DeleteRadioModal from "../../components/deleteModal/deleteModal";
-import { useDashboardPan } from "./hooks/useDashboardPan";
-import { useDashboardZoom } from "./hooks/useDashboardZoom";
-import { useDashboardDrag } from "./hooks/useDashboardDrag";
-import { useDashboardContextMenu } from "./hooks/useDashboardContextMenu";
-import {
-  buildGridCssVars,
-} from "../../components/dashboardGridControls/gridUtils";
+} from "../../constants/gridConstants";
 import DashboardGridControls from "../../components/dashboardGridControls/dashboardGridControls";
+import DashboardViewport from "../../components/dashboardViewport/dashboardViewport";
+import DashboardCanvas from "../../components/dashboardCanvas/dashboardCanvas";
+import DashboardDisplayLayer from "../../components/dashboardDisplayLayer/dashboardDisplayLayer";
+import DeleteModal from "../../components/deleteModal/deleteModal";
+import DashboardContextMenu from "../../components/dashboardContextMenu/dashboardContextMenu";
+import { useDashboardContextMenu } from "../../hooks/useDashboardContextMenu";
+import { useDashboardPan } from "../../hooks/useDashboardPan";
+import { useDashboardZoom } from "../../hooks/useDashboardZoom";
+import { buildGridCssVars } from "../../components/dashboardGridControls/gridUtils";
 
 function Dashboard({
   displays = [],
   setDisplays,
   radios = [],
 }: Readonly<DigitalDisplayProps>) {
-  const navigate = useNavigate();
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const mousePos = useRef({ x: 0, y: 0 });
-  const [gridSettings, setGridSettings] = useState(DEFAULT_GRID_SETTINGS);
-  const gridPx = GRID_SIZES[gridSettings.size].px;
-  const cardWidth = getCardWidth(gridPx);
-  const cardHeight = getCardHeight(gridPx);
+  const zoomRef = useRef(1);
+
+  const [gridSettings, setGridSettings] =
+    useState(DEFAULT_GRID_SETTINGS);
+
   const [displayPendingDelete, setDisplayPendingDelete] =
     useState<DigitalDisplay | null>(null);
 
-  // ---------------------------
-  // PAN
-  // ---------------------------
-  const zoomRef = useRef(1);
+  const fieldValueMap = useMemo(
+    () => buildFieldValueMap(radios),
+    [radios],
+  );
 
+  const { ctxMenu, setCtxMenu } = useDashboardContextMenu();
+
+  const handleDisplayContextMenu = useCallback(
+    (e: React.MouseEvent, display: DigitalDisplay) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setCtxMenu({
+        x: e.clientX,
+        y: e.clientY,
+        type: "card",
+        displayId: display.digitalDisplayId,
+      });
+    },
+    [setCtxMenu],
+  );
+
+  // Clamp pan values to prevent infinite panning
   const clampPan = useCallback(
-    (
-      nextPan: { x: number; y: number },
-      zoomValue = zoomRef.current,
-    ) => {
-      const rect = viewportRef.current?.getBoundingClientRect();
-      if (!rect) return nextPan;
+    (nextPan: { x: number; y: number }, zoomValue: number = zoomRef.current) => {
+      if (!viewportRef.current) return nextPan;
 
       const scaledWidth = GRID_WIDTH * zoomValue;
       const scaledHeight = GRID_HEIGHT * zoomValue;
-      const minX = Math.min(0, rect.width - scaledWidth);
-      const minY = Math.min(0, rect.height - scaledHeight);
+      const minX = Math.min(0, viewportRef.current.offsetWidth - scaledWidth);
+      const minY = Math.min(0, viewportRef.current.offsetHeight - scaledHeight);
 
       return {
         x: Math.max(minX, Math.min(nextPan.x, 0)),
@@ -71,61 +74,26 @@ function Dashboard({
     [],
   );
 
-  const { pan, startPan, onPanMove, stopPan, panning, panRef, setPan } =
+  // Pan hook with clamping
+  const { pan, setPan, panning, startPan, onPanMove, stopPan } =
     useDashboardPan(clampPan);
 
-  // ---------------------------
-  // ZOOM
-  // ---------------------------
-  const {
-    zoom,
-    panRef: zoomPanRef,
-    handleWheel,
-  } = useDashboardZoom(setPan, clampPan);
+  // Zoom hook with clamping
+  const { zoom, handleWheel, mouseRef: zoomMouseRef } = useDashboardZoom(
+    setPan,
+    clampPan,
+  );
 
+  // Sync zoom to ref for drag calculations
   useEffect(() => {
     zoomRef.current = zoom;
   }, [zoom]);
-  // sync refs between systems
-  panRef.current = pan;
-  zoomPanRef.current = pan;
 
-  // ---------------------------
-  // DRAG
-  // ---------------------------
-  const { dragging, startDrag, onDragMove, stopDrag } = useDashboardDrag(
-    setDisplays,
-    zoom,
-    pan,
-  );
-
-  // ---------------------------
-  // CONTEXT MENU
-  // ---------------------------
-  const { ctxMenu, setCtxMenu } = useDashboardContextMenu();
-
-  // ---------------------------
-  // DERIVED DATA
-  // ---------------------------
-  const overlappingCardIds = useMemo(
-    () => getOverlappingCardIds(displays),
-    [displays],
-  );
-
-  const fieldValueMap = useMemo(() => buildFieldValueMap(radios), [radios]);
-
-  // ---------------------------
-  // WORLD COORDINATES
-  // ---------------------------
-
+  // Get world coordinates from client coordinates
   const getWorldPointFromClient = useCallback(
     (clientX: number, clientY: number) => {
-      const rect = viewportRef.current?.getBoundingClientRect();
-
-      if (!rect) {
-        return { x: 0, y: 0 };
-      }
-
+      if (!viewportRef.current) return { x: 0, y: 0 };
+      const rect = viewportRef.current.getBoundingClientRect();
       return {
         x: (clientX - rect.left - pan.x) / zoom,
         y: (clientY - rect.top - pan.y) / zoom,
@@ -134,53 +102,26 @@ function Dashboard({
     [pan, zoom],
   );
 
-  // ---------------------------
-  // ADD DISPLAY
-  // ---------------------------
-
-  const createEmptyDisplay = (point: { x: number; y: number }) => {
-    const { x: clampedX, y: clampedY } = clampDisplayPosition({
-      x: point.x,
-      y: point.y,
-    });
-
-    setDisplays((prev) => {
-      const newDisplay: DigitalDisplay = {
-        digitalDisplayId: crypto.randomUUID(),
-        title: 'New display',
-        varName: "",
-        varValue: "",
-        radioId: null,
-        type: "",
-        posx: clampedX,
-        posy: clampedY,
-      };
-
-      return [...prev, newDisplay];
-    });
-  };
-
-  // ---------------------------
-  // RENDER
-  // ---------------------------
-
   return (
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div className="main-container" onClick={() => setCtxMenu(null)}>
       <DashboardGridControls
         gridSettings={gridSettings}
         setGridSettings={setGridSettings}
       />
-      <div
+
+      <DashboardViewport
         ref={viewportRef}
-        className={`dashboard-zoom-viewport dashboard-grid-viewport ${
-          panning ? "is-panning" : ""
-        }`}
-        style={buildGridCssVars(gridSettings, zoom, pan)}
+        gridSettings={gridSettings}
+        zoom={zoom}
+        pan={pan}
+        panning={!!panning}
+        
         onContextMenu={(e) => {
           e.preventDefault();
 
           if (e.ctrlKey || panning) return;
-          if ((e.target as HTMLElement).dataset.card === "true") return;
+          if ((e.target as HTMLElement).closest('[data-card="true"]')) return;
 
           const point = getWorldPointFromClient(e.clientX, e.clientY);
 
@@ -194,148 +135,56 @@ function Dashboard({
         }}
         onMouseDown={startPan}
         onMouseMove={(e) => {
-          const { x, y } = getViewportMousePos(e);
-          mousePos.current = { x, y };
+          const rect = viewportRef.current?.getBoundingClientRect();
+          if (rect) {
+            mousePos.current = {
+              x: e.clientX - rect.left,
+              y: e.clientY - rect.top,
+            };
+            zoomMouseRef.current = mousePos.current;
+          }
           onPanMove(e);
-          onDragMove(e);
         }}
-        onMouseUp={() => {
-          stopPan();
-          stopDrag();
-        }}
-        onMouseLeave={() => {
-          stopPan();
-          stopDrag();
-        }}
-        onWheel={(e) => {
-          if (!e.ctrlKey) return;
-          e.stopPropagation();
-          handleWheel(e);
-        }}
+        onMouseUp={stopPan}
+        onMouseLeave={stopPan}
+        onWheel={handleWheel}
       >
-        <div
-          className="dashboard-zoom-layer"
-          style={{
-            transform: `matrix(${zoom}, 0, 0, ${zoom}, ${pan.x}, ${pan.y})`,
-          }}
-        >
-          <div
-            className={`dashboard-canvas ${
-              displays.length === 0 ? "dashboard-canvas--empty" : ""
-            }`}
-            style={{
-              width: `${GRID_WIDTH}px`,
-              height: `${GRID_HEIGHT}px`,
-            }}
-          >
-            {displays.length === 0 ? (
-              <div className="dashboard-empty">
-                Right-click anywhere to add a digital display
-              </div>
-            ) : (
-              displays.map((display) => (
-                <div
-                  key={display.digitalDisplayId}
-                  data-card="true"
-                  className={`dashboard-draggable-card ${
-                    dragging?.digitalDisplayId === display.digitalDisplayId
-                      ? "is-dragging"
-                      : ""
-                  } ${overlappingCardIds.has(display.digitalDisplayId) ? "is-overlapping" : ""}`}
-                  style={{
-                    left: display.posx ?? 0,
-                    top: display.posy ?? 0,
-                    width: cardWidth,
-                    minHeight: cardHeight,
-                  }}
-                  onMouseDown={(e) => {
-                    if (e.button === 0) startDrag(e, display);
-                  }}
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setCtxMenu({
-                      x: e.clientX,
-                      y: e.clientY,
-                      type: "card",
-                      displayId: display.digitalDisplayId,
-                    });
-                  }}
-                >
-                  <DigitalDisplayCard
-                    display={display}
-                    value={getDisplayValue(fieldValueMap, display)}
-                    onContextMenu={(e: React.MouseEvent<HTMLDivElement>) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setCtxMenu({
-                        x: e.clientX,
-                        y: e.clientY,
-                        type: "card",
-                        displayId: display.digitalDisplayId,
-                      });
-                    }}
-                  />
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
+        <DashboardCanvas gridSettings={gridSettings} gridStyle={buildGridCssVars(gridSettings, zoom, pan)}>
+          <DashboardDisplayLayer
+            displays={displays}
+            setDisplays={setDisplays}
+            fieldValueMap={fieldValueMap}
+            gridPx={gridSettings.size}
+            zoom={zoom}
+            pan={pan}
+            onDisplayContextMenu={handleDisplayContextMenu}
+          />
+        </DashboardCanvas>
+      </DashboardViewport>
 
-      {ctxMenu && (
-        <ul
-          className="dashboard-ctx-menu"
-          style={{ top: ctxMenu.y, left: ctxMenu.x }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {ctxMenu.type === "page" && (
-            <li
-              onClick={() => {
-                createEmptyDisplay({
-                  x: ctxMenu.canvasX,
-                  y: ctxMenu.canvasY,
-                });
-                setCtxMenu(null);
-              }}
-            >
-              ＋ Add digital display
-            </li>
-          )}
-          {ctxMenu.type === "card" && (
-            <>
-              <li
-                onClick={() => {
-                  setCtxMenu(null);
-                  navigate(`/dashboard/display/${ctxMenu.displayId}`);
-                }}
-              >
-                ⚙ Parameters
-              </li>
+      <DashboardContextMenu
+        ctxMenu={ctxMenu}
+        closeMenu={() => setCtxMenu(null)}
+        onAddDisplay={(x, y) => {
+          setDisplays((prev) => [
+            ...prev,
+            createDisplayFromField({ x, y }, prev.length),
+          ]);
+        }}
+        onDeleteRequest={(id) => {
+          const display = displays.find(
+            (d) => d.digitalDisplayId === id,
+          );
 
-              <li
-                onClick={() => {
-                  const display = displays.find(
-                    (d) => d.digitalDisplayId === ctxMenu.displayId,
-                  );
-                  if (!display) return;
-                  setDisplayPendingDelete(display);
-                  setCtxMenu(null);
-                }}
-              >
-                🗑 Remove display
-              </li>
-            </>
-          )}
-        </ul>
-      )}
+          if (!display) return;
+          setDisplayPendingDelete(display);
+        }}
+      />
 
       {displayPendingDelete && (
-        <DeleteRadioModal
-          itemName={`digital display "${displayPendingDelete.title}"`}
-          title="Delete digital display?"
-          message="This will only remove the display from the dashboard. It will not remove the variable from the data structure table."
-          confirmText="Delete display"
+        <DeleteModal
+          title="Delete Display"
+          message="Are you sure you want to delete this display?"
           onCancel={() => setDisplayPendingDelete(null)}
           onConfirm={() => {
             const idToDelete = displayPendingDelete.digitalDisplayId;

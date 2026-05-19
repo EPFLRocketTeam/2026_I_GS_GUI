@@ -4,12 +4,13 @@ import {
   moveDraggedDisplay,
   resolveDroppedDisplay,
   getDraggedCardPosition,
-} from "../dashboardUtils";
+} from "../pages/dashboard/dashboardUtils";
 
 export function useDashboardDrag(
   setDisplays: any,
-  zoom: number,
-  pan: any,
+  zoom: number = 1,
+  pan: any = { x: 0, y: 0 },
+  gridPixelSize: number = 22,
 ) {
   const [dragging, setDragging] = useState<any>(null);
 
@@ -29,6 +30,7 @@ export function useDashboardDrag(
         dragging,
         x,
         y,
+        gridPixelSize,
       }),
     );
   };

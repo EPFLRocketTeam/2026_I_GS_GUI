@@ -34,13 +34,16 @@ body {
 .dashboard-draggable-card * {
   user-select: none;
 }
+
 .main-container {
   overflow: hidden;
   background-color: black;
   color: white;
   min-height: 100vh;
-  padding: 24px;
+  display: flex;
+  flex-direction: column;
 }
+
 .dashboard-topbar {
   display: flex;
   align-items: center;

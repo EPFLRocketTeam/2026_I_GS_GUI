@@ -1,0 +1,21 @@
+.dashboard-draggable-card {
+  position: absolute;
+  cursor: grab;
+  user-select: none;
+}
+
+.dashboard-draggable-card.is-dragging {
+  cursor: grabbing;
+  z-index: 50;
+}
+
+.dashboard-draggable-card * {
+  user-select: none;
+}
+
+.dashboard-display-layer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  color: rgb(0, 255, 208);
+}

@@ -5,7 +5,7 @@ import {
   Dispatch,
   SetStateAction,
 } from "react";
-import { getNextZoomPan } from "../dashboardUtils";
+import { getNextZoomPan } from "../pages/dashboard/dashboardUtils";
 
 export function useDashboardZoom(
   setPan?: Dispatch<SetStateAction<{ x: number; y: number }>>,

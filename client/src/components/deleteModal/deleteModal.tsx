@@ -1,7 +1,7 @@
 import "./deleteModal.css";
 import { getRadioUid } from "../../pages/radioConfig/radioUtils/radioIO";
 
-type DeleteRadioModalProps = {
+type DeleteModalProps = {
   readonly radio?: any;
   readonly index?: number;
   readonly itemName?: string;
@@ -13,7 +13,7 @@ type DeleteRadioModalProps = {
   readonly onCancel: () => void;
 };
 
-function DeleteRadioModal({
+function DeleteModal({
   radio,
   index,
   itemName,
@@ -23,7 +23,7 @@ function DeleteRadioModal({
   cancelText = "Cancel",
   onConfirm,
   onCancel,
-}: DeleteRadioModalProps) {
+}: DeleteModalProps) {
   const defaultName =
     itemName ?? (radio ? `Radio ${getRadioUid(radio) ?? index}` : "this item");
 
@@ -49,4 +49,4 @@ function DeleteRadioModal({
   );
 }
 
-export default DeleteRadioModal;
+export default DeleteModal;

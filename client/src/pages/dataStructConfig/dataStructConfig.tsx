@@ -10,7 +10,7 @@ import {
   dataStructReducer,
 } from "./dataStructUtils.js";
 import DataStructTable from "../../components/dataStructTable/dataStructTable.jsx";
-import { DigitalDisplay } from "../../interfaces/dashboardInterfaces/dashboardInterfaces.js";
+import { DigitalDisplay } from "../../interfaces/dashboardInterfaces.js";
 
 type Props = {
   radios: any[];

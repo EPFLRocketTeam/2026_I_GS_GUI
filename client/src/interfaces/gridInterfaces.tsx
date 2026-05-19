@@ -1,4 +1,4 @@
-import { GRID_SIZES } from "../../constants/gridConstants/gridConstants";
+import { GRID_SIZES } from "../constants/gridConstants";
 
 export type GridSizePreset = keyof typeof GRID_SIZES;
 

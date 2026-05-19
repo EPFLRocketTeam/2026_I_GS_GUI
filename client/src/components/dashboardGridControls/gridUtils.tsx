@@ -1,14 +1,5 @@
-import { GridSettings } from "../../interfaces/gridInterfaces/gridInterfaces";
-import { GRID_SIZES } from "../../constants/gridConstants/gridConstants";
-
-export const snapToGridValue = (
-  value: number,
-  gridSettings: GridSettings,
-  zoom = 1,
-): number => {
-  const gridPx = GRID_SIZES[gridSettings.size].px;
-  return Math.round((value * zoom) / gridPx) * (gridPx / zoom);
-};
+import { GridSettings } from "../../interfaces/gridInterfaces";
+import { GRID_SIZES } from "../../constants/gridConstants";
 
 export const buildGridCssVars = (
   gridSettings: GridSettings,
@@ -27,10 +18,11 @@ export const buildGridCssVars = (
     "--grid-x": `${pan.x}px`,
     "--grid-y": `${pan.y}px`,
     "--grid-line": gridSettings.visible
-      ? `rgba(255, 255, 255, ${gridSettings.opacity})`
+      ? `rgba(0, 255, 208, ${gridSettings.opacity})`
       : "transparent",
+
     "--grid-major-line": gridSettings.visible
-      ? `rgba(255, 255, 255, ${Math.min(gridSettings.opacity + 0.12, 0.35)})`
+      ? `rgba(0, 255, 208, ${Math.min(gridSettings.opacity + 0.1, 0.45)})`
       : "transparent",
   } as React.CSSProperties;
 };

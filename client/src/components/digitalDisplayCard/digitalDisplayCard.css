@@ -7,12 +7,12 @@
   flex-direction: column;
   overflow: hidden;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid blue;
   background:
     radial-gradient(
       circle at top left,
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(255, 255, 255, 0.015) 26%,
+      rgb(206, 232, 11),
+      rgb(143, 197, 224),
       transparent 52%
     ),
     linear-gradient(180deg, #1b1b1b 0%, #131313 100%);
@@ -101,7 +101,7 @@
   font-size: 10px;
   line-height: 1.25;
   text-align: center;
-  color: #8b8b8b;
+  color: #ffffff;
   background: rgba(255, 255, 255, 0.015);
 }
 

@@ -1,4 +1,4 @@
-import { GridSettings } from "../../interfaces/gridInterfaces/gridInterfaces";
+import { GridSettings } from "../interfaces/gridInterfaces";
 
 export const GRID_SIZES = {
   small: { px: 30, label: "Small" },
@@ -10,7 +10,7 @@ export const DEFAULT_GRID_SETTINGS: GridSettings = {
   visible: true,
   size: "medium",
   major: 5,
-  opacity: 0.10,
+  opacity: 0.2,
 };
 
 export const enum GRID_SETTINGS_KEYS {
@@ -19,3 +19,10 @@ export const enum GRID_SETTINGS_KEYS {
   major = "major",
   opacity = "opacity",
 }
+
+export const CARD_W = 5;
+export const CARD_H = 5;
+export const CARD_GAP = 18;
+
+export const GRID_WIDTH = 1000;
+export const GRID_HEIGHT = 540;

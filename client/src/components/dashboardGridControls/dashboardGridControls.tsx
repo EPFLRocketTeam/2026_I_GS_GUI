@@ -1,9 +1,9 @@
 import {
   GridSettings,
   GridProps,
-} from "../../interfaces/gridInterfaces/gridInterfaces";
+} from "../../interfaces/gridInterfaces";
 import "./dashboardGridControls.css";
-import { GRID_SIZES, GRID_SETTINGS_KEYS } from "../../constants/gridConstants/gridConstants";
+import { GRID_SIZES, GRID_SETTINGS_KEYS } from "../../constants/gridConstants";
 
 function DashboardGridControls({ gridSettings, setGridSettings }: Readonly<GridProps>) {
   const updateGrid = (changes: Partial<GridSettings>) => {
