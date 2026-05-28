@@ -1,18 +1,8 @@
 import { getCardWidth, getCardHeight } from "../../pages/dashboard/dashboardUtils";
 import { GRID_SIZES } from "../../constants/gridConstants";
 import DashboardDisplayFactory from "../dashboardDisplayFactory/dashboardDisplayFactory";
-import { DigitalDisplay } from "../../interfaces/dashboardInterfaces";
 import "./dashboardDisplay.css";
-
-type Props = {
-  display: DigitalDisplay;
-  startDrag: (e: React.MouseEvent, display: DigitalDisplay) => void;
-  onContextMenu?: (e: React.MouseEvent, display: DigitalDisplay) => void;
-  dragging: any; // we can improve this later
-  overlapping: boolean;
-  gridPx: string;
-  value: string | number;
-};
+import { DashboardDisplayProps } from "../../types/types";
 
 export function DashboardDisplay({
   display,
@@ -22,19 +12,17 @@ export function DashboardDisplay({
   overlapping,
   gridPx,
   value,
-}: Readonly<Props>) {
-  // Convert grid size identifier to pixel value
+}: Readonly<DashboardDisplayProps>) {
   const gridPixelSize = GRID_SIZES[gridPx as keyof typeof GRID_SIZES]?.px || GRID_SIZES.medium.px;
   const width = getCardWidth(gridPixelSize);
   const height = getCardHeight(gridPixelSize);
 
-  // Position in pixels
   const posX = display.posx ?? 0;
   const posY = display.posy ?? 0;
 
   return (
-    // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-    <div
+    <button
+      type="button"
       className={`dashboard-draggable-card ${
         dragging?.digitalDisplayId === display.digitalDisplayId
           ? "is-dragging"
@@ -63,6 +51,6 @@ export function DashboardDisplay({
           onContextMenu?.(e, display);
         }}
       />
-    </div>
+    </button>
   );
 }

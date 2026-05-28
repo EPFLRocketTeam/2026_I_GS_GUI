@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import "./dashboardContextMenu.css";
-import { DashboardContextMenuProps } from "../../types/dashboardCanvasTypes";
+import { DashboardContextMenuProps } from "../../types/types";
 import {CONTEXT_MENU_TYPES, CONTEXT_MENU_OPTIONS} from "../../constants/contextMenuConstants"
 
 function DashboardContextMenu({

@@ -1,7 +1,7 @@
 import React from "react";
 import { GRID_WIDTH, GRID_HEIGHT } from "../../constants/gridConstants";
 import "./dashboardCanvas.css";
-import { DashboardCanvasProps } from "../../types/dashboardCanvasTypes"; 
+import { DashboardCanvasProps } from "../../types/types"; 
 
 function DashboardCanvas({ children, gridSettings, gridStyle }: Readonly<DashboardCanvasProps>) {
   return (

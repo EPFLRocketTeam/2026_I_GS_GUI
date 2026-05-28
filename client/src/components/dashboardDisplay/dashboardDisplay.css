@@ -16,3 +16,22 @@
 .dashboard-display * {
   user-select: none;
 }
+
+.dashboard-draggable-card {
+  all: unset;        
+  position: absolute;  
+  display: block;      
+  cursor: grab;
+}
+
+.dashboard-draggable-card:active {
+  cursor: grabbing;
+}
+
+.dashboard-draggable-card.is-dragging {
+  opacity: 0.6;
+}
+
+.dashboard-draggable-card.is-overlapping {
+  outline: 2px solid red;
+}
