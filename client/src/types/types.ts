@@ -10,7 +10,7 @@ export type DashboardCanvasProps = {
 export type DashboardContextMenuProps = {
     ctxMenu: any;
     closeMenu: () => void;
-    onAddDisplay: (x: number, y: number) => void;  // improve typing, add boundaries
+    onAddDisplay: (x: number, y: number) => void;  // TODO: improve typing, add boundaries
     onDeleteRequest: (id: string) => void;
 }
 
@@ -22,4 +22,23 @@ export type DashboardDisplayProps = {
   overlapping: boolean;
   gridPx: string;
   value: string | number;
+};
+
+export type DashboardDisplayFactoryProps = {
+    display: DigitalDisplay;
+    value: string | number;
+    onContextMenu: (e: React.MouseEvent, display: DigitalDisplay) => void;
+}
+
+export type DashboardDisplayLayerProps = {
+  displays: DigitalDisplay[];
+  setDisplays: React.Dispatch<React.SetStateAction<any[]>>;
+  gridPx: string;
+  fieldValueMap: Map<string, string | number>;  // map of the radios connected to their variables
+  zoom?: number;
+  pan?: { x: number; y: number };
+  onDisplayContextMenu?: (
+    e: React.MouseEvent,
+    display: any,
+  ) => void;
 };
