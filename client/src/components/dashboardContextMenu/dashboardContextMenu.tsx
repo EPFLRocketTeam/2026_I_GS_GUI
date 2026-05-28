@@ -1,61 +1,68 @@
 import { useNavigate } from "react-router-dom";
 import "./dashboardContextMenu.css";
-
-type Props = {
-  ctxMenu: any;
-  closeMenu: () => void;
-  onAddDisplay: (x: number, y: number) => void;
-  onDeleteRequest: (id: string) => void;
-};
+import { DashboardContextMenuProps } from "../../types/dashboardCanvasTypes";
+import {CONTEXT_MENU_TYPES, CONTEXT_MENU_OPTIONS} from "../../constants/contextMenuConstants"
 
 function DashboardContextMenu({
   ctxMenu,
   closeMenu,
   onAddDisplay,
   onDeleteRequest,
-}: Props) {
+}: Readonly<DashboardContextMenuProps>) {
   const navigate = useNavigate();
 
   if (!ctxMenu) return null;
 
   return (
-    <ul
+    <ul>
+      <button
+      type="button"
       className="dashboard-ctx-menu"
       style={{ top: ctxMenu.y, left: ctxMenu.x }}
       onClick={(e) => e.stopPropagation()}
     >
-      {ctxMenu.type === "page" && (
-        <li
-          onClick={() => {
+      {ctxMenu.type ===  CONTEXT_MENU_TYPES.page && (
+        <li>
+          <button
+            type="button"
+            onClick={() => {
             onAddDisplay(ctxMenu.canvasX, ctxMenu.canvasY);
             closeMenu();
           }}
-        >
-          ＋ Add digital display
+          >
+          {CONTEXT_MENU_OPTIONS.addDigitalDisplay}
+          </button>
         </li>
       )}
 
-      {ctxMenu.type === "card" && (
+      {ctxMenu.type === CONTEXT_MENU_TYPES.card && (
         <>
-          <li
+          <li>
+            <button
+            type="button"
             onClick={() => {
               navigate(`/dashboard/display/${ctxMenu.displayId}`);
               closeMenu();
             }}
           >
-            ⚙ Parameters
+            {CONTEXT_MENU_OPTIONS.parameters}
+            </button>
           </li>
 
-          <li
+          <li>
+            <button
+            type="button"
             onClick={() => {
               onDeleteRequest(ctxMenu.displayId);
               closeMenu();
             }}
           >
-            🗑 Remove display
+            {CONTEXT_MENU_OPTIONS.removeDisplay}
+            </button>
           </li>
         </>
       )}
+      </button>
     </ul>
   );
 }

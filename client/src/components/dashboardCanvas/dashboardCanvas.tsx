@@ -1,13 +1,7 @@
 import React from "react";
 import { GRID_WIDTH, GRID_HEIGHT } from "../../constants/gridConstants";
 import "./dashboardCanvas.css";
-import { GridSettings } from "../../interfaces/gridInterfaces";
-
-type DashboardCanvasProps = {
-    children: React.ReactNode;
-    gridSettings: GridSettings;
-    gridStyle?: React.CSSProperties;
-};
+import { DashboardCanvasProps } from "../../types/dashboardCanvasTypes"; 
 
 function DashboardCanvas({ children, gridSettings, gridStyle }: Readonly<DashboardCanvasProps>) {
   return (

@@ -15,8 +15,17 @@
   padding: 8px 16px;
   cursor: pointer;
   font-size: 13px;
+  list-style: none;
 }
+
 
 .dashboard-ctx-menu li:hover {
   background: #2a2a2a;
+}
+
+.dashboard-ctx-menu button {
+  all: unset;
+  display: block;
+  width: 100%;
+  cursor: pointer;
 }
