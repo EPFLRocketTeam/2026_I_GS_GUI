@@ -10,10 +10,10 @@ export function DashboardDisplay({
   onContextMenu,
   dragging,
   overlapping,
-  gridPx,
+  gridSize,
   value,
 }: Readonly<DashboardDisplayProps>) {
-  const gridPixelSize = GRID_SIZES[gridPx as keyof typeof GRID_SIZES]?.px || GRID_SIZES.medium.px;
+  const gridPixelSize = gridSize || GRID_SIZES.medium.px;
   const width = getCardWidth(gridPixelSize);
   const height = getCardHeight(gridPixelSize);
 

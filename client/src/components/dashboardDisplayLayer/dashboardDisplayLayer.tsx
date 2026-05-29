@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { useDashboardDrag } from "../../hooks/useDashboardDrag";
 import { getOverlappingCardIds, getDisplayValue } from "../../pages/dashboard/dashboardUtils";
 import { DashboardDisplay } from "../dashboardDisplay/dashboardDisplay";
-import { GRID_SIZES } from "../../constants/gridConstants";
+import { DEFAULT_PAN, GRID_SIZES } from "../../constants/gridConstants";
 import "./dashboardDisplayLayer.css";
 import { DashboardDisplayLayerProps } from "../../types/types";
 
@@ -13,15 +13,15 @@ function DashboardDisplayLayer(
     gridPx,
     fieldValueMap,
     zoom = 1,
-    pan = { x: 0, y: 0 },
+    pan = DEFAULT_PAN,
     onDisplayContextMenu,
   }: Readonly<DashboardDisplayLayerProps>,
 ) {
-  const gridPixelSize = GRID_SIZES[gridPx as keyof typeof GRID_SIZES]?.px ??
-    GRID_SIZES.medium.px;
+  const gridPixelSize = gridPx ??
+    GRID_SIZES.medium;   // TODO: could be problematic for size of grid
 
   const { dragging, startDrag, onDragMove, stopDrag } =
-    useDashboardDrag(setDisplays, zoom, pan, gridPixelSize);
+    useDashboardDrag(setDisplays, gridPixelSize, pan, zoom);
 
   const overlappingCardIds = useMemo(
     () => getOverlappingCardIds(displays),
@@ -44,7 +44,7 @@ function DashboardDisplayLayer(
           overlapping={overlappingCardIds.has(
             display.digitalDisplayId,
           )}
-          gridPx={gridPx}
+          gridSize={gridPx}
           value={getDisplayValue(fieldValueMap, display)}
         />
       ))}

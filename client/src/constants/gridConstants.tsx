@@ -26,3 +26,5 @@ export const CARD_GAP = 18;
 
 export const GRID_WIDTH = 1000;
 export const GRID_HEIGHT = 540;
+
+export const DEFAULT_PAN = { x: 0, y: 0 };

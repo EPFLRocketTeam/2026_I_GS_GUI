@@ -18,7 +18,7 @@ export const buildGridCssVars = (
     "--grid-x": `${pan.x}px`,
     "--grid-y": `${pan.y}px`,
     "--grid-line": gridSettings.visible
-      ? `rgba(0, 255, 208, ${gridSettings.opacity})`
+      ? `rgba(0, 255, 208, ${gridSettings.opacity})` // css must be dynamically set since it depends on function variables
       : "transparent",
 
     "--grid-major-line": gridSettings.visible

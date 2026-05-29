@@ -5,12 +5,14 @@ import {
   resolveDroppedDisplay,
   getDraggedCardPosition,
 } from "../pages/dashboard/dashboardUtils";
+import { DigitalDisplay } from "../interfaces/dashboardInterfaces";
+import { DEFAULT_PAN } from "../constants/gridConstants";
 
 export function useDashboardDrag(
-  setDisplays: any,
+  setDisplays: React.Dispatch<React.SetStateAction<DigitalDisplay[]>>,
+  gridPixelSize: number,
+  pan: typeof DEFAULT_PAN = DEFAULT_PAN,
   zoom: number = 1,
-  pan: any = { x: 0, y: 0 },
-  gridPixelSize: number = 22,
 ) {
   const [dragging, setDragging] = useState<any>(null);
 
@@ -24,7 +26,7 @@ export function useDashboardDrag(
 
     const { x, y } = getDraggedCardPosition({ e, dragging, zoom, pan });
 
-    setDisplays((prev: any) =>
+    setDisplays((prev: DigitalDisplay[]) =>
       moveDraggedDisplay({
         displays: prev,
         dragging,
