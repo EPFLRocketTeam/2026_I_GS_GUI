@@ -1,17 +1,7 @@
 import "./deleteModal.css";
 import { getRadioUid } from "../../pages/radioConfig/radioUtils/radioIO";
-
-type DeleteModalProps = {
-  readonly radio?: any;
-  readonly index?: number;
-  readonly itemName?: string;
-  readonly title?: string;
-  readonly message?: string;
-  readonly confirmText?: string;
-  readonly cancelText?: string;
-  readonly onConfirm: () => void;
-  readonly onCancel: () => void;
-};
+import { DeleteModalProps } from "../../types/types";
+import {CONFIRM_DELETE, CANCEL_DELETE} from "../../constants/deleteModalConstants"
 
 function DeleteModal({
   radio,
@@ -19,17 +9,23 @@ function DeleteModal({
   itemName,
   title,
   message,
-  confirmText = "Delete",
-  cancelText = "Cancel",
+  confirmText = CONFIRM_DELETE,
+  cancelText = CANCEL_DELETE,
   onConfirm,
   onCancel,
-}: DeleteModalProps) {
+}: Readonly<DeleteModalProps>) {
   const defaultName =
     itemName ?? (radio ? `Radio ${getRadioUid(radio) ?? index}` : "this item");
 
   return (
-    <div className="radio-modal-overlay" onClick={onCancel}>
-      <div className="radio-modal" onClick={(e) => e.stopPropagation()}>
+    <div className="radio-modal-layer">
+    <button 
+      type = "button"
+      onClick={onCancel}
+      className="radio-modal-overlay"
+      aria-label="Close modal"
+      />
+      <div className="radio-modal">
         <div className="radio-modal-title">
           {title ?? `Delete ${defaultName}?`}
         </div>

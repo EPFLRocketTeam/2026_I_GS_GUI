@@ -1,6 +1,7 @@
 import { GridSettings } from "../interfaces/gridInterfaces";
 import { DigitalDisplay } from "../interfaces/dashboardInterfaces";
 import { CONTEXT_MENU_TYPES } from "../constants/contextMenuConstants";
+import {DeleteModalText} from "../constants/deleteModalConstants";
 
 export type DashboardCanvasProps = {
     children: React.ReactNode;
@@ -67,6 +68,19 @@ export type DashboardContextMenuState =
       y: number;
       displayId: string;
     };
+
+export type DeleteModalProps = {
+  radio: any;
+  index: number;
+  itemName: string;
+  title: string;
+  message: string;
+  confirmText: DeleteModalText;
+  cancelText: DeleteModalText;
+  onConfirm: () => void;
+  onCancel: () => void;
+};
+
 type DashboardViewportEvents = {
   onContextMenu?: (e: DivMouseEvent) => void;
   onMouseDown?: (e: DivMouseEvent) => void;

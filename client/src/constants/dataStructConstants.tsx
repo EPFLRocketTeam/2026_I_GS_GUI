@@ -25,3 +25,8 @@ export type DataStructProps = {
 }
 
 export const EMPTY_FIELD_MESSAGE = "No fields yet - add one below"
+
+export const MAX_BITS_STRUCT = 64
+export const MIN_BITS_STRUCT = 1
+
+export const DATA_STRUCT_TABLE_COLS = 6

@@ -1,6 +1,6 @@
 import "./dataStructTable.css";
 import { TYPES, dotClass } from "../../pages/dataStructConfig/dataStructUtils";
-import { DataStructProps, STRUCT_TABLE_FIELDS, EMPTY_FIELD_MESSAGE } from "../../constants/dataStructConstants";
+import { DataStructProps, STRUCT_TABLE_FIELDS, EMPTY_FIELD_MESSAGE, MAX_BITS_STRUCT, MIN_BITS_STRUCT, DATA_STRUCT_TABLE_COLS } from "../../constants/dataStructConstants";
 
 function DataStructTable({ fields, onUpdateField, onRemoveField }:
   Readonly<DataStructProps>
@@ -49,8 +49,8 @@ function DataStructTable({ fields, onUpdateField, onRemoveField }:
               <input
                 className="dsc-input dsc-bits"
                 type="number"
-                min="1"
-                max="64"
+                min={MIN_BITS_STRUCT} 
+                max={MAX_BITS_STRUCT}
                 value={f.bits}
                 onChange={(e) => onUpdateField(f.key, "bits", e.target.value)}
               />
@@ -75,7 +75,7 @@ function DataStructTable({ fields, onUpdateField, onRemoveField }:
 
         {fields.length === 0 && (
           <tr>
-            <td colSpan={6} className="dsc-empty">
+            <td colSpan={DATA_STRUCT_TABLE_COLS} className="dsc-empty">
               {EMPTY_FIELD_MESSAGE}
             </td>
           </tr>
