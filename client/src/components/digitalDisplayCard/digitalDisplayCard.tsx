@@ -1,16 +1,16 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import "./digitalDisplayCard.css";
+import { DigitalDisplayCardProps } from "../../types/types";
+import { MAX_FONT_SIZE, MIN_FONT_SIZE, BOX_PADDING } from "../../constants/digitalDisplayCardConstants";
 
-const MAX_FONT_SIZE = 32;
-const MIN_FONT_SIZE = 12;
-const BOX_PADDING = 12;
-
-function DigitalDisplayCard({ display, value, onContextMenu }) {
-  const hasVariable = Boolean(display?.variable);
+function DigitalDisplayCard({ display, value, onContextMenu }: 
+ Readonly<DigitalDisplayCardProps>
+) {
+  const hasVariable = Boolean(display?.varName);
   const displayValue = hasVariable ? (value ?? "--") : "--";
 
-  const bodyRef = useRef(null);
-  const valueRef = useRef(null);
+  const bodyRef = useRef<HTMLDivElement | null>(null);
+  const valueRef = useRef<HTMLDivElement | null>(null);
   const [fontSize, setFontSize] = useState(MAX_FONT_SIZE);
 
   useLayoutEffect(() => {
@@ -66,13 +66,15 @@ function DigitalDisplayCard({ display, value, onContextMenu }) {
       resizeObserver.disconnect();
       window.removeEventListener("resize", fitText);
     };
-  }, [displayValue, display?.suffix, display?.variable]);
+  }, [displayValue, display?.varValue]);
 
   return (
     <div
-      className={`digital-display-card ${!hasVariable ? "is-empty" : ""}`}
+      className={`digital-display-card ${hasVariable ? "" : "is-empty"}`}
+      >
+    <button
       onContextMenu={onContextMenu}
-    >
+    />
       <div className="digital-display-card-header">
         <div className="digital-display-title">
           {display.title || "Untitled display"}
@@ -86,15 +88,12 @@ function DigitalDisplayCard({ display, value, onContextMenu }) {
           style={{ fontSize: `${fontSize}px` }}
         >
           {displayValue}
-          {hasVariable && display.suffix ? (
-            <span className="digital-display-suffix">{display.suffix}</span>
-          ) : null}
         </div>
       </div>
 
       <div className="digital-display-card-footer">
-        R{display.radioUid ?? "?"} ·{" "}
-        {display.variable || "No variable selected"}
+        R{display.radioId ?? "?"} ·{" "}
+        {display.varName || "No variable selected"}
       </div>
     </div>
   );

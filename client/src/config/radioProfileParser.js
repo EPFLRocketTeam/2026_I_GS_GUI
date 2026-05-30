@@ -1,23 +1,4 @@
-const TYPE_MAP = {
-  int_8: "int8",
-  int_16: "int16",
-  int_32: "int32",
-  uint_8: "uint8",
-  uint_16: "uint16",
-  uint_32: "uint32",
-  uint8: "uint8",
-  uint16: "uint16",
-  uint32: "uint32",
-  int8: "int8",
-  int16: "int16",
-  int32: "int32",
-  float_8: "float8",
-  float_16: "float16",
-  float_32: "float32",
-  float_64: "float64",
-  bool: "bool",
-  enum: "enum",
-};
+import {TYPE_MAP } from "../constants/dataStructConstants"
 
 const RADIO_CONSTANTS = {
   DEFAULT_TX_POWER: "22",

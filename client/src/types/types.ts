@@ -81,6 +81,18 @@ export type DeleteModalProps = {
   onCancel: () => void;
 };
 
+export type DigitalDisplayCardProps = {
+  display: DigitalDisplay, 
+  value: string, 
+  onContextMenu: React.MouseEventHandler<HTMLButtonElement> 
+}
+
+export type DigitalDisplayParamsProps = {
+  displays: DigitalDisplay[];
+  setDisplays: React.Dispatch<React.SetStateAction<DigitalDisplay[]>>;
+  radios: any[]; // TODO: This should be typed according to the structure of a radio in your application.
+};
+
 type DashboardViewportEvents = {
   onContextMenu?: (e: DivMouseEvent) => void;
   onMouseDown?: (e: DivMouseEvent) => void;
