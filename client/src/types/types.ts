@@ -4,6 +4,7 @@ import { CONTEXT_MENU_TYPES } from "../constants/contextMenuConstants";
 import {DeleteModalText} from "../constants/deleteModalConstants";
 import { Radio } from "../interfaces/radioInterfaces";
 import { STATUS_BADGE } from "../constants/radioCardConstants";
+import type { ReactNode } from "react";
 
 export type DashboardCanvasProps = {
     children: React.ReactNode;
@@ -117,6 +118,19 @@ export type RadioConfigOption = {
   value: string;
 };
 
+export type RadioCardScrollerProps =   { 
+    children: ReactNode,
+    empty: boolean,
+    itemWidth: number,
+    scrollRatio: number, 
+    className: string,
+};
+
+export enum ScrollDirection {
+  left= "left",
+  right = "right"
+}
+
 type DashboardViewportEvents = {
   onContextMenu?: (e: DivMouseEvent) => void;
   onMouseDown?: (e: DivMouseEvent) => void;
@@ -128,3 +142,4 @@ type DashboardViewportEvents = {
 
 type DivMouseEvent = React.MouseEvent<HTMLDivElement>;
 type DivWheelEvent = React.WheelEvent<HTMLDivElement>;
+

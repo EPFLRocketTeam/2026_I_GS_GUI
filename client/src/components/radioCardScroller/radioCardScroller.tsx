@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type WheelEvent } from "react";
 import "./radioCardScroller.css";
+import { RadioCardScrollerProps, ScrollDirection } from "../../types/types";
+import { SCROLL_EDGE_TOLERANCE } from "../../constants/radioCardConstants";
 
 function RadioCardScroller({
   children,
@@ -7,8 +9,10 @@ function RadioCardScroller({
   itemWidth = 360,
   scrollRatio = 0.75,
   className = "",
-}) {
-  const scrollerRef = useRef(null);
+}:
+Readonly<RadioCardScrollerProps>) 
+{
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
@@ -18,8 +22,8 @@ function RadioCardScroller({
 
     const updateScrollState = () => {
       const maxScrollLeft = el.scrollWidth - el.clientWidth;
-      setCanScrollLeft(el.scrollLeft > 4);
-      setCanScrollRight(el.scrollLeft < maxScrollLeft - 4);
+      setCanScrollLeft(el.scrollLeft > SCROLL_EDGE_TOLERANCE); 
+      setCanScrollRight(el.scrollLeft < maxScrollLeft - SCROLL_EDGE_TOLERANCE);
     };
 
     updateScrollState();
@@ -32,7 +36,7 @@ function RadioCardScroller({
     };
   }, [children]);
 
-  const scrollCards = (direction) => {
+  const scrollCards = (direction: ScrollDirection) => {
     const el = scrollerRef.current;
     if (!el) return;
 
@@ -41,12 +45,12 @@ function RadioCardScroller({
       Math.floor(el.clientWidth * scrollRatio),
     );
     el.scrollBy({
-      left: direction === "left" ? -amount : amount,
+      left: direction === ScrollDirection.left ? -amount : amount,
       behavior: "smooth",
     });
   };
 
-  const handleWheel = (e) => {
+  const handleWheel = (e: WheelEvent) => {
     const el = scrollerRef.current;
     if (!el) return;
 
@@ -56,13 +60,25 @@ function RadioCardScroller({
     }
   };
 
+  const shellClassName = empty
+    ? `hcs-shell hcs-shell--empty ${className}`
+    : `hcs-shell ${className}`;
+
+  const leftArrowClassName = canScrollLeft
+    ? "hcs-arrow hcs-arrow--left"
+    : "hcs-arrow hcs-arrow--left is-hidden";
+
+  const rightArrowClassName = canScrollRight
+    ? "hcs-arrow hcs-arrow--right"
+    : "hcs-arrow hcs-arrow--right is-hidden";
+
   return (
     <div
-      className={`hcs-shell ${empty ? "hcs-shell--empty" : ""} ${className}`}
+      className={shellClassName}
     >
       <button
-        className={`hcs-arrow hcs-arrow--left ${!canScrollLeft ? "is-hidden" : ""}`}
-        onClick={() => scrollCards("left")}
+        className={leftArrowClassName}
+        onClick={() => scrollCards(ScrollDirection.left)}
         aria-label="Scroll left"
         type="button"
       >
@@ -80,13 +96,13 @@ function RadioCardScroller({
       <div className="hcs-fade hcs-fade--right" />
 
       <button
-        className={`hcs-arrow hcs-arrow--right ${!canScrollRight ? "is-hidden" : ""}`}
-        onClick={() => scrollCards("right")}
+        className={rightArrowClassName}
+        onClick={() => scrollCards(ScrollDirection.right)}
         aria-label="Scroll right"
         type="button"
       >
-        <svg className="hcs-arrow-icon" viewBox="0 0 20 20" aria-hidden="true">
-          <path d="M7.5 4.5L13 10l-5.5 5.5" />
+        <svg className="hcs-arrow-icon" viewBox="0 0 20 20" aria-hidden="true">  
+          <path d="M7.5 4.5L13 10l-5.5 5.5" /> 
         </svg>
       </button>
     </div>

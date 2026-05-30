@@ -13,3 +13,5 @@ export const CONFIG_PARAMS = "Config Parameters"
 
 export const CONFIG_DATA_STRUCT = "Config Data Structure"
 export const JUST_A_NUMBER = "number"
+
+export const SCROLL_EDGE_TOLERANCE = 4;

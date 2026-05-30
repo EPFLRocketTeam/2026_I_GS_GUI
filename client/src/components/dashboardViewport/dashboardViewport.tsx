@@ -6,7 +6,7 @@ const DashboardViewport = React.forwardRef<HTMLDivElement, DashboardViewportProp
     {
       children,
       zoom = 1,
-      pan = { x: 0, y: 0 },
+      pan = { x: 0, y: 0 },  // set default in separate variable
       panning = false,
       style,
       onContextMenu,
