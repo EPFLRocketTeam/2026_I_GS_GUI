@@ -2,6 +2,8 @@ import { GridSettings } from "../interfaces/gridInterfaces";
 import { DigitalDisplay } from "../interfaces/dashboardInterfaces";
 import { CONTEXT_MENU_TYPES } from "../constants/contextMenuConstants";
 import {DeleteModalText} from "../constants/deleteModalConstants";
+import { Radio } from "../interfaces/radioInterfaces";
+import { STATUS_BADGE } from "../constants/radioCardConstants";
 
 export type DashboardCanvasProps = {
     children: React.ReactNode;
@@ -91,6 +93,28 @@ export type DigitalDisplayParamsProps = {
   displays: DigitalDisplay[];
   setDisplays: React.Dispatch<React.SetStateAction<DigitalDisplay[]>>;
   radios: any[]; // TODO: This should be typed according to the structure of a radio in your application.
+};
+
+export type RadioCardProps = {
+  radio: Radio;
+  index: number;
+  isDuplicateUid: boolean;
+  onConfigChange?: (
+    radioIndex: number,
+    paramIndex: number,
+    value: string
+  ) => void;
+  onRemove?: (radioIndex: number) => void;
+  onConfigDataStruct?: (radioIndex: number) => void;
+};
+
+export type RadioStatus = keyof typeof STATUS_BADGE;
+
+export type RadioConfigControl = "select" | "number" | "text";
+
+export type RadioConfigOption = {
+  label: string;
+  value: string;
 };
 
 type DashboardViewportEvents = {

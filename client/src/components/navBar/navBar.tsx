@@ -1,29 +1,30 @@
 import { NavLink } from "react-router-dom";
 import "./navBar.css";
+import { DASHBOARD_LABEL, DATA_STRUCT_CONFIG, RADIO_CONFIG_LABEL, ROCKET_GUI } from "../../constants/navBarConstants";
 
 function NavBar() {
   return (
     <nav className="navbar">
-      <span className="navbar-brand">🚀 Rocket GUI</span>
+      <span className="navbar-brand">{ROCKET_GUI}</span>
       <div className="navbar-links">
         <NavLink
           to="/"
           end
           className={({ isActive }) => (isActive ? "active" : "")}
         >
-          Dashboard
+          {DASHBOARD_LABEL}
         </NavLink>
         <NavLink
           to="/radioConfig"
           className={({ isActive }) => (isActive ? "active" : "")}
         >
-          RadioConfig
+          {RADIO_CONFIG_LABEL}
         </NavLink>
         <NavLink
           to="/dataStructConfig"
           className={({ isActive }) => (isActive ? "active" : "")}
         >
-          DataStructConfig
+          {DATA_STRUCT_CONFIG}
         </NavLink>
       </div>
     </nav>

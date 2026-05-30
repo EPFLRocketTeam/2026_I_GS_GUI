@@ -1,32 +1,26 @@
 import "./radioCard.css";
 import { getRadioUid } from "../../pages/radioConfig/radioUtils/radioIO";
-
-const STATUS_BADGE = {
-  online: { label: "online", cls: "badge-online" },
-  syncing: { label: "syncing", cls: "badge-syncing" },
-  offline: { label: "offline", cls: "badge-offline" },
-  waiting: { label: "waiting", cls: "badge-syncing" },
-};
+import {RadioCardProps} from "../../types/types"
+import { CONFIG_DATA_STRUCT, CONFIG_PARAMS, DELETE_LABEL, RADIO_LABEL, SAME_ID_WARNING, STATUS_BADGE } from "../../constants/radioCardConstants";
 
 function RadioCard({
   radio,
   index,
   onConfigChange,
-  onStructChange,
-  onStructParse,
   onRemove,
   isDuplicateUid,
   onConfigDataStruct,
-}) {
+}: Readonly<RadioCardProps>
+) {
   const badge = STATUS_BADGE[radio.status] ?? STATUS_BADGE.offline;
   const uid = getRadioUid(radio) ?? "—";
 
   return (
     <div className="radio-card">
-      {isDuplicateUid && <div className="warn-inline">same id used twice</div>}
+      {isDuplicateUid && <div className="warn-inline">{SAME_ID_WARNING}</div>}
       <div className="card-header">
         <div className="card-title-row">
-          <span className="card-title">Radio {uid}</span>
+          <span className="card-title">{RADIO_LABEL} {uid}</span>
         </div>
 
         <div className="card-header-actions">
@@ -38,11 +32,11 @@ function RadioCard({
               onRemove?.(index);
             }}
           >
-            Delete
+            {DELETE_LABEL}
           </button>
         </div>
       </div>
-      <div className="section-title">Config Parameters</div>
+      <div className="section-title">{CONFIG_PARAMS}</div>
       {(radio.configParams ?? []).map((param, pIdx) => (
         <div className="param-block" key={param.key + pIdx}>
           <div className="name-value-row">
@@ -87,7 +81,7 @@ function RadioCard({
         </div>
       ))}
       <button className="btn" onClick={() => onConfigDataStruct?.(index)}>
-        Config Data Structure
+        {CONFIG_DATA_STRUCT}
       </button>
     </div>
   );
