@@ -1,7 +1,6 @@
 import { GridSettings } from "../interfaces/gridInterfaces";
 import { DigitalDisplay } from "../interfaces/dashboardInterfaces";
 import { CONTEXT_MENU_TYPES } from "../constants/contextMenuConstants";
-import { GRID_SIZES } from "../constants/gridConstants";
 
 export type DashboardCanvasProps = {
     children: React.ReactNode;
@@ -68,7 +67,6 @@ export type DashboardContextMenuState =
       y: number;
       displayId: string;
     };
-
 type DashboardViewportEvents = {
   onContextMenu?: (e: DivMouseEvent) => void;
   onMouseDown?: (e: DivMouseEvent) => void;

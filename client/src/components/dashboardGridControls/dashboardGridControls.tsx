@@ -29,11 +29,11 @@ function DashboardGridControls({ gridSettings, setGridSettings }: Readonly<GridP
           checked={gridSettings.visible}
           onChange={(e) => updateGrid({ visible: e.target.checked })}
         />
-        {GRID_SETTINGS_KEYS.grid}{" "}
+        {GRID_SETTINGS_KEYS.grid}
       </label>
 
       <label>
-        {GRID_SETTINGS_KEYS.size}{" "}
+        {GRID_SETTINGS_KEYS.size}
         <select
           value={gridSettings.size}
           onChange={(e) =>

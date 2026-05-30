@@ -1,16 +1,19 @@
 import "./dataStructTable.css";
 import { TYPES, dotClass } from "../../pages/dataStructConfig/dataStructUtils";
+import { DataStructProps, STRUCT_TABLE_FIELDS, EMPTY_FIELD_MESSAGE } from "../../constants/dataStructConstants";
 
-function DataStructTable({ fields, onUpdateField, onRemoveField }) {
+function DataStructTable({ fields, onUpdateField, onRemoveField }:
+  Readonly<DataStructProps>
+) {
   return (
     <table className="dsc-table">
       <thead>
         <tr>
-          <th className="col-num">#</th>
-          <th className="col-name">Field name</th>
-          <th className="col-type">Type</th>
-          <th className="col-bits">Bits</th>
-          <th className="col-comment">Comment</th>
+          <th className="col-num">{STRUCT_TABLE_FIELDS.nbr}</th>
+          <th className="col-name">{STRUCT_TABLE_FIELDS.fieldName}</th>
+          <th className="col-type">{STRUCT_TABLE_FIELDS.type}</th>
+          <th className="col-bits">{STRUCT_TABLE_FIELDS.bits}</th>
+          <th className="col-comment">{STRUCT_TABLE_FIELDS.comment}</th>
           <th className="col-del" />
         </tr>
       </thead>
@@ -73,7 +76,7 @@ function DataStructTable({ fields, onUpdateField, onRemoveField }) {
         {fields.length === 0 && (
           <tr>
             <td colSpan={6} className="dsc-empty">
-              No fields yet — add one below
+              {EMPTY_FIELD_MESSAGE}
             </td>
           </tr>
         )}
