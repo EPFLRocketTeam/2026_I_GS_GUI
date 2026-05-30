@@ -1,5 +1,6 @@
 import { CARD_GAP, CARD_W, CARD_H, GRID_HEIGHT, GRID_WIDTH } from "../../constants/gridConstants";
 import { DigitalDisplay } from "../../interfaces/dashboardInterfaces";
+import { Radio } from "../../interfaces/radioInterfaces";
 export const getCardWidth = (gridPx: number) =>
   CARD_W * gridPx;
 
@@ -138,7 +139,7 @@ export const createDisplayFromField = ({fieldInfo, count = 0}:
   posy: fieldInfo.posy ?? GRID_HEIGHT / 2 - CARD_H / 2 + Math.floor(count / 3) * CARD_H,
 });
 
-export const buildFieldValueMap = (radios: ) => {
+export const buildFieldValueMap = (radios: Radio[] ) => {
   const map = new Map();
   radios.forEach((radio) => {
     (radio.structFields ?? []).forEach((field) => {

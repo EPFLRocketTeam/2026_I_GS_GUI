@@ -42,7 +42,7 @@ function Dashboard({
 
   const { ctxMenu, setCtxMenu } = useDashboardContextMenu();
 
-  const handleDisplayContextMenu = useCallback(
+  const handleDisplayContextMenu = useCallback(    //TOD0: Move handler to separate file
     (e: React.MouseEvent, display: DigitalDisplay) => {
       e.preventDefault();
       e.stopPropagation();
@@ -166,11 +166,24 @@ function Dashboard({
         ctxMenu={ctxMenu}
         closeMenu={() => setCtxMenu(null)}
         onAddDisplay={(x, y) => {
-          setDisplays((prev) => [
+        setDisplays((prev) => {
+          if (!viewportRef.current) {
+            return prev;
+          }
+
+          return [
             ...prev,
-            createDisplayFromField({ x, y }, prev.length),
-          ]);
-        }}
+            createDisplayFromField({
+              fieldInfo: {
+                ...
+                posx: x,
+                posy: y,
+              },
+              count: prev.length,
+            }),
+          ];
+        });
+      }}
         onDeleteRequest={(id) => {
           const display = displays.find(
             (d) => d.digitalDisplayId === id,

@@ -38,7 +38,7 @@ export type DashboardDisplayFactoryProps = {
 export type DashboardDisplayLayerProps = {
   displays: DigitalDisplay[];
   setDisplays: React.Dispatch<React.SetStateAction<DigitalDisplay[]>>;
-  gridPx: number;
+  gridPx: GridSettings["size"];
   fieldValueMap: Map<string, string | number>;  // map of the radios connected to their variables
   zoom?: number;
   pan?: { x: number; y: number };
