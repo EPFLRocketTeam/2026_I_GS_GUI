@@ -21,7 +21,7 @@ const DashboardViewport = React.forwardRef<HTMLDivElement, DashboardViewportProp
     return (
       <div className="dashboard-viewport-wrapper">
       {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}  
-      <div  // this part should be interactive, no easy way to remove SONARQUBE warning
+      <div  // Note: this part should be interactive, no easy way to remove SONARQUBE warning
         ref={ref}
         className={`dashboard-viewport dashboard-zoom-viewport ${
           panning ? "is-panning" : ""

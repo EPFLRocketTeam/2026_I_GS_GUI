@@ -13,7 +13,7 @@ export interface RadioConfigParam {
 };
 
 export interface Radio {
-  id: string | number;
+  id: string | number;  //TODO: shouldn't be null
   status: RadioStatus;
   configParams?: RadioConfigParam[];
 };

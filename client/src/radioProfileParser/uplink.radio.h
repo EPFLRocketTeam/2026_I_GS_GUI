@@ -8,3 +8,12 @@
 #define UPLINK_CRC DEFAULT_CRC (bool)
 #define UPLINK_INVERSE_IQ false (bool)
 #define OPERATING_MODE RADIO_TYPE_EMITTER (enum)
+
+
+#define DEFAULT_TX_POWER 14 (uint8)
+#define DEFAULT_BW 125 (uint8)
+#define DEFAULT_SF 7 (uint8)
+#define DEFAULT_CR true (bool)
+#define DEFAULT_PREAMBLE_LENGTH 8 (uint16)
+#define DEFAULT_CRC true (bool)
+#define DEFAULT_OPERATING_MODE RADIO_TYPE_EMITTER (enum)

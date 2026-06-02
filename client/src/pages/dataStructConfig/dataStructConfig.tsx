@@ -9,8 +9,9 @@ import {
   createInitialState,
   dataStructReducer,
 } from "./dataStructUtils.js";
-import DataStructTable from "../../components/dataStructTable/dataStructTable.jsx";
+import DataStructTable from "../../components/dataStructTable/dataStructTable";
 import { DigitalDisplay } from "../../interfaces/dashboardInterfaces.js";
+import { StructField } from "../../constants/dataStructConstants";
 
 type Props = {
   radios: any[];
@@ -140,32 +141,29 @@ function DataStructConfig({
   }
 
   const updateFieldAndLinkedDisplays = (
-    key: string,
-    prop: string,
+    key: StructField["key"],
+    field: keyof Omit<StructField, "key">,
     value: string,
   ) => {
-    const oldField = fields.find((f: { key: string }) => f.key === key);
+    dispatch({
+      type: "UPDATE_FIELD",
+      key,
+      field,
+      value,
+    });
 
-    if (
-      prop === "name" &&
-      oldField?.name &&
-      oldField.name !== value &&
-      setDisplays
-    ) {
+    if (field === "name") {
       setDisplays((prev) =>
-        prev.map((display: DigitalDisplay) =>
-          display.radioId === selectedId && display.varName === oldField.name
+        prev.map((display) =>
+          display.varName === value
             ? {
                 ...display,
-                varValue: value,
-                title: display.title === oldField.name ? value : display.title,
+                varName: value,
               }
             : display,
         ),
       );
     }
-
-    dispatch({ type: "UPDATE_FIELD", key, prop, value });
   };
 
   return (
@@ -232,10 +230,10 @@ function DataStructConfig({
 
         <DataStructTable
           fields={fields}
-          onUpdateField={(key: string, prop: string, value: string) => {
-            updateFieldAndLinkedDisplays(key, prop, value);
+          onUpdateField={(key, field, value) => {
+            updateFieldAndLinkedDisplays(key, field, value);
           }}
-          onRemoveField={(key: string) => {
+          onRemoveField={(key) => {
             dispatch({ type: "REMOVE_FIELD", key });
           }}
         />

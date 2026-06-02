@@ -284,8 +284,8 @@ export function dataStructReducer(state, action) {
           ...state.fieldsByRadio,
           [state.selectedId]: current.map((f) => {
             if (f.key !== action.key) return f;
-            const updated = { ...f, [action.prop]: action.value };
-            if (action.prop === "type") {
+            const updated = { ...f, [action.field]: action.value };
+            if (action.field === "type") {
               updated.bits = TYPE_BITS[action.value] ?? f.bits;
             }
             return updated;

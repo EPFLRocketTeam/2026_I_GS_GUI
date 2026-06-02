@@ -166,30 +166,30 @@ function Dashboard({
         ctxMenu={ctxMenu}
         closeMenu={() => setCtxMenu(null)}
         onAddDisplay={(x, y) => {
-        setDisplays((prev) => {
-          if (!viewportRef.current) {
-            return prev;
-          }
-
-          return [
+          setDisplays((prev) => [
             ...prev,
             createDisplayFromField({
               fieldInfo: {
-                ...
-                posx: x,
-                posy: y,
-              },
+              digitalDisplayId: "add-id", // TODO: Should be replaced by a designator while the id is generated in the backend
+              title: `Display ${prev.length + 1}`,
+              varName: "",
+              varValue: "--",
+              radioId: null,   //TODO: Radio Id should be the same type everywhere
+              type: "",
+              posx: x,
+              posy: y,
+            },
               count: prev.length,
             }),
-          ];
-        });
-      }}
+          ]);
+        }}
         onDeleteRequest={(id) => {
           const display = displays.find(
-            (d) => d.digitalDisplayId === id,
+            (display) => display.digitalDisplayId === id,
           );
 
           if (!display) return;
+
           setDisplayPendingDelete(display);
         }}
       />

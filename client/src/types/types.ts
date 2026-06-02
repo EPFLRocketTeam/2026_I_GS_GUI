@@ -72,17 +72,20 @@ export type DashboardContextMenuState =
       displayId: string;
     };
 
-export type DeleteModalProps = {
-  radio: any;
-  index: number;
-  itemName: string;
-  title: string;
-  message: string;
-  confirmText: DeleteModalText;
-  cancelText: DeleteModalText;
+export interface DeleteModalProps {
+  radio?: unknown;
+  index?: number;
+  itemName?: string;
+
+  title?: string;
+  message?: string;
+
+  confirmText?: string;
+  cancelText?: string;
+
   onConfirm: () => void;
   onCancel: () => void;
-};
+}
 
 export type DigitalDisplayCardProps = {
   display: DigitalDisplay, 
@@ -139,6 +142,12 @@ type DashboardViewportEvents = {
   onMouseLeave?: (e: DivMouseEvent) => void;
   onWheel?: (e: DivWheelEvent) => void;
 };
+
+export type FieldValueMap = Map<string, string>;
+
+export type RadioUidGetter = (radio: Radio) => string | number | null | undefined;
+
+export type RadioConfigParamFromRadio = NonNullable<Radio["configParams"]>[number];
 
 type DivMouseEvent = React.MouseEvent<HTMLDivElement>;
 type DivWheelEvent = React.WheelEvent<HTMLDivElement>;

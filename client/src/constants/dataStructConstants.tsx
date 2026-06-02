@@ -14,6 +14,7 @@ export type StructField = {
   comment: string;
 };
 
+
 export type DataStructProps = {
     fields: StructField[], 
     onUpdateField: (

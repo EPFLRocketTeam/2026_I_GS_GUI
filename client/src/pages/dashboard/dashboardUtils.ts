@@ -1,6 +1,8 @@
 import { CARD_GAP, CARD_W, CARD_H, GRID_HEIGHT, GRID_WIDTH } from "../../constants/gridConstants";
 import { DigitalDisplay } from "../../interfaces/dashboardInterfaces";
 import { Radio } from "../../interfaces/radioInterfaces";
+import { FieldValueMap, RadioConfigParamFromRadio, RadioUidGetter } from "../../types/types";
+
 export const getCardWidth = (gridPx: number) =>
   CARD_W * gridPx;
 
@@ -13,7 +15,8 @@ export const clampDisplayPosition = ({x, y, maxX, maxY} :
   y: Math.max(0, Math.min(y, maxY)),
 }); 
 
-export const cardsOverlap = (a: DigitalDisplay, b: DigitalDisplay) => {
+export const cardsOverlap = (a: Pick<DigitalDisplay, "posx" | "posy">,
+  b: Pick<DigitalDisplay, "posx" | "posy">,) => {
   return !(
     a.posx + CARD_W + CARD_GAP <= b.posx ||
     b.posx + CARD_W + CARD_GAP <= a.posx ||
@@ -37,68 +40,109 @@ export const hasCardOverlap = (moving: DigitalDisplay, displays: DigitalDisplay[
   });
 };
 
-export const createDragState = ({ e, display, zoom, pan }: 
-  { e: React.MouseEvent, display: DigitalDisplay, zoom: number, pan: DigitalDisplay}
-) => {
-  if (e.button !== 0) return null;
 
-  const viewport = e.currentTarget.closest(".dashboard-zoom-viewport");
-  if (!viewport) return null;
-
-  const rect = viewport.getBoundingClientRect();
-  const mouseWorldX = (e.clientX - rect.left - pan.posx) / zoom;
-  const mouseWorldY = (e.clientY - rect.top - pan.posy) / zoom;
-
-  const id = display.digitalDisplayId ?? display.digitalDisplayId;
-  const digitalDisplayId = display.digitalDisplayId ?? null;
-  const startX = display.posx ?? display.posx ?? 0;
-  const startY = display.posy ?? display.posy ?? 0;
-
-  return {
-    id,
-    digitalDisplayId,
-    startX,
-    startY,
-    offsetX: mouseWorldX - startX,
-    offsetY: mouseWorldY - startY,
-  };
+type Point = {
+  x: number;
+  y: number;
 };
 
-export const getDraggedCardPosition = ({ e, dragging, zoom, pan }:
-  {e: React.MouseEvent, dragging: DigitalDisplay, zoom: number, pan: DigitalDisplay}
-) => {
-  const viewport = e.currentTarget.closest(".dashboard-zoom-viewport");
+export type DisplayDragState = {
+  digitalDisplayId: string;
+  offsetX: number;
+  offsetY: number;
+};
+
+const getViewportRectFromEvent = (e: React.MouseEvent | MouseEvent) => {
+  const target = e.target as HTMLElement | null;
+
+  const viewport =
+    target?.closest(".dashboard-zoom-viewport") ??
+    document.querySelector(".dashboard-zoom-viewport");
+
   if (!viewport) {
     throw new Error("Viewport not found");
   }
-  const rect = viewport.getBoundingClientRect();
-  const mouseWorldX = (e.clientX - rect.left - pan.posx) / zoom;
-  const mouseWorldY = (e.clientY - rect.top - pan.posy) / zoom;
+
+  return viewport.getBoundingClientRect();
+};
+
+export const createDragState = ({
+  e,
+  display,
+  zoom,
+  pan,
+}: {
+  e: React.MouseEvent;
+  display: DigitalDisplay;
+  zoom: number;
+  pan: Point;
+}): DisplayDragState | null => {
+  if (e.button !== 0) return null;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  const rect = getViewportRectFromEvent(e);
+
+  const mouseWorldX = (e.clientX - rect.left - pan.x) / zoom;
+  const mouseWorldY = (e.clientY - rect.top - pan.y) / zoom;
 
   return {
-    x: mouseWorldX - dragging.posx,
-    y: mouseWorldY - dragging.posy,
+    digitalDisplayId: display.digitalDisplayId,
+    offsetX: mouseWorldX - display.posx,
+    offsetY: mouseWorldY - display.posy,
   };
 };
 
-export const moveDraggedDisplay = ({ displays, dragging, x, y }: 
-  {displays: DigitalDisplay[], dragging: DigitalDisplay, x: number, y: number}) => {
+export const getDraggedCardPosition = ({
+  e,
+  dragging,
+  zoom,
+  pan,
+}: {
+  e: React.MouseEvent | MouseEvent;
+  dragging: DisplayDragState;
+  zoom: number;
+  pan: Point;
+}) => {
+  const rect = getViewportRectFromEvent(e);
+
+  const mouseWorldX = (e.clientX - rect.left - pan.x) / zoom;
+  const mouseWorldY = (e.clientY - rect.top - pan.y) / zoom;
+
+  return {
+    x: mouseWorldX - dragging.offsetX,
+    y: mouseWorldY - dragging.offsetY,
+  };
+};
+
+export const moveDraggedDisplay = ({
+  displays,
+  dragging,
+  x,
+  y,
+}: {
+  displays: DigitalDisplay[];
+  dragging: DisplayDragState;
+  x: number;
+  y: number;
+}): DigitalDisplay[] => {
   const clamped = clampDisplayPosition({
     x,
     y,
-    maxX: GRID_WIDTH - 100,  // TODO: fix magic number
-    maxY: GRID_HEIGHT - 100,
+    maxX: GRID_WIDTH - CARD_W,
+    maxY: GRID_HEIGHT - CARD_H,
   });
-  return displays.map((display) => {
-    const id = display.digitalDisplayId ?? display.digitalDisplayId;
-    if (id === dragging.digitalDisplayId) {
-      if (display.digitalDisplayId) {
-        return { ...display, posx: clamped.x, posy: clamped.y };
-      }
-      return { ...display, x: clamped.x, y: clamped.y };
-    }
-    return display;
-  });
+
+  return displays.map((display) =>
+    display.digitalDisplayId === dragging.digitalDisplayId
+      ? {
+          ...display,
+          posx: clamped.x,
+          posy: clamped.y,
+        }
+      : display,
+  );
 };
 
 export const resolveDroppedDisplay = ({ displays }: {displays: DigitalDisplay[]}) => displays;
@@ -139,58 +183,108 @@ export const createDisplayFromField = ({fieldInfo, count = 0}:
   posy: fieldInfo.posy ?? GRID_HEIGHT / 2 - CARD_H / 2 + Math.floor(count / 3) * CARD_H,
 });
 
-export const buildFieldValueMap = (radios: Radio[] ) => {
-  const map = new Map();
+export interface AvailableVariable {
+  radioId: DigitalDisplay["radioId"];
+  radioUid: string | number;
+  name: string;
+  varName: string;
+  label: string;
+  value: string;
+  type: RadioConfigParamFromRadio["control"];
+  control: RadioConfigParamFromRadio["control"];
+  options?: RadioConfigParamFromRadio["options"];
+  min?: RadioConfigParamFromRadio["min"];
+  max?: RadioConfigParamFromRadio["max"];
+  maxLength?: RadioConfigParamFromRadio["maxLength"];
+}
+
+const toDisplayRadioId = (id: Radio["id"]): DigitalDisplay["radioId"] => {
+  if (typeof id === "number") return id;
+
+  const parsedId = Number(id);
+
+  return Number.isFinite(parsedId) ? parsedId : null;
+};
+
+export const buildFieldValueMap = (radios: Radio[]): FieldValueMap => {
+  const map: FieldValueMap = new Map();
+
   radios.forEach((radio) => {
-    (radio.structFields ?? []).forEach((field) => {
-      map.set(`${radio.id}::${field.name}`, field.value ?? "--");
+    const radioId = toDisplayRadioId(radio.id);
+
+    if (radioId === null) return;
+
+    (radio.configParams ?? []).forEach((param) => {
+      if (!param.key?.trim()) return;
+
+      map.set(`${radioId}::${param.key}`, param.value?.trim() || "--");
     });
   });
+
   return map;
 };
 
-export const buildAvailableVariables = (radios, getRadioUid) =>
+export const buildAvailableVariables = (
+  radios: Radio[],
+  getRadioUid?: RadioUidGetter,
+): AvailableVariable[] =>
   radios.flatMap((radio) => {
-    const radioUid = getRadioUid(radio) ?? radio.id;
-    return (radio.structFields ?? [])
-      .filter((field) => field?.name?.trim())
-      .map((field) => ({
-        radioId: radio.id,
+    const radioId = toDisplayRadioId(radio.id);
+    const radioUid = getRadioUid?.(radio) ?? radio.id;
+
+    if (radioId === null) return [];
+
+    return (radio.configParams ?? [])
+      .filter((param) => param.key?.trim())
+      .map((param) => ({
+        radioId,
         radioUid,
-        name: field.name,
-        type: field.type,
-        address: field.address,
-        bits: field.bits,
-        comment: field.comment,
+        name: param.key,
+        varName: param.key,
+        label: param.label,
+        value: param.value,
+        type: param.control,
+        control: param.control,
+        options: param.options,
+        min: param.min,
+        max: param.max,
+        maxLength: param.maxLength,
       }));
   });
 
-export const getDisplayValue = (fieldValueMap, display) => {
-  const value = fieldValueMap.get(`${display.radioId}::${display.variable}`);
-  return value !== undefined && value !== "" ? value : "--";
+export const getDisplayValue = (
+  fieldValueMap: FieldValueMap,
+  display: DigitalDisplay,
+): string => {
+  if (display.radioId === null || !display.varName?.trim()) {
+    return "--";
+  }
+
+  const value = fieldValueMap.get(`${display.radioId}::${display.varName}`);
+
+  return value !== undefined && value.trim() !== "" ? value : "--";
 };
 
-export const getOverlappingCardIds = (displays) => {
-  const overlappingIds = new Set();
+export const getOverlappingCardIds = (
+  displays: DigitalDisplay[],
+): Set<DigitalDisplay["digitalDisplayId"]> => {
+  const overlappingIds = new Set<DigitalDisplay["digitalDisplayId"]>();
 
   for (let i = 0; i < displays.length; i++) {
     for (let j = i + 1; j < displays.length; j++) {
       const a = displays[i];
       const b = displays[j];
 
-      const ax = a.posx ?? a.x ?? 0;
-      const ay = a.posy ?? a.y ?? 0;
-      const bx = b.posx ?? b.x ?? 0;
-      const by = b.posy ?? b.y ?? 0;
-
-      if (cardsOverlap({ x: ax, y: ay }, { x: bx, y: by })) {
-        overlappingIds.add(a.digitalDisplayId ?? a.id);
-        overlappingIds.add(b.digitalDisplayId ?? b.id);
+      if (cardsOverlap(a, b)) {
+        overlappingIds.add(a.digitalDisplayId);
+        overlappingIds.add(b.digitalDisplayId);
       }
     }
   }
 
   return overlappingIds;
 };
+
+
 
 
