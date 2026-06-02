@@ -1,5 +1,5 @@
-import { parseRadioProfile } from "../../../config/radioProfileParser";
-import { RADIO_PROFILE_FILES } from "../../../config/radioProfiles";
+import { parseRadioProfile } from "../../../radioProfileParser/radioProfileParser";
+import { RADIO_PROFILE_FILES } from "../../../radioProfileParser/radioProfiles";
 
 console.log("RADIO_PROFILE_FILES:", RADIO_PROFILE_FILES);
 

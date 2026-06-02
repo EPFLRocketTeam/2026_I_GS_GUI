@@ -9,7 +9,7 @@ export enum STRUCT_TABLE_FIELDS {
 export type StructField = {
   key: number;  // represents the index of the location of the field in the data table (usually 1,2,3..)
   name: string;
-  type: TYPE_MAP;  //TODO: replace by enum types in dataStruct
+  type: typeof TYPE_MAP[keyof typeof TYPE_MAP];
   bits: number | string;
   comment: string;
 };
@@ -31,7 +31,7 @@ export const MIN_BITS_STRUCT = 1
 
 export const DATA_STRUCT_TABLE_COLS = 6
 
-export type TYPE_MAP = {
+export const TYPE_MAP = {
   int_8: "int8",
   int_16: "int16",
   int_32: "int32",

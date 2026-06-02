@@ -9,10 +9,9 @@ function useRadioSocket(url) {
   const reconnectTimeout = useRef(null);
 
   useEffect(() => {
-    let closed = false; // ✅ track if cleanup already ran
-
+    let closed = false;
     const connectWebSocket = () => {
-      if (closed) return; // ✅ don't reconnect if unmounted
+      if (closed) return;
 
       try {
         ws.current = new WebSocket(url);
